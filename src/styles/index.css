@@ -1,0 +1,307 @@
+@import 'tailwindcss';
+
+/*
+  ContextLens design tokens.
+
+  Two visual worlds live in this app and must stay distinguishable:
+
+  1. The simulated demo PLATFORM (feeds, posts, comments) -> neutral greys,
+     photographic media, tight information density.
+  2. The ASSISTANCE LAYER (context assistant, reaction chips, transparency
+     surfaces) -> teal "assist" family, rounded panels, lens iconography.
+
+  Semantic values live as plain CSS custom properties so they can be swapped
+  per colour scheme, and are re-exported through `@theme inline` so Tailwind
+  generates utilities (bg-surface, text-muted, border-assist, ...) from them.
+*/
+
+:root {
+  color-scheme: light;
+
+  /* platform surfaces */
+  --cl-canvas: #f4f6f8;
+  --cl-surface: #ffffff;
+  --cl-surface-2: #eef1f5;
+  --cl-surface-3: #e3e8ee;
+  --cl-border: #d6dce4;
+  /*
+    `border-strong` outlines form controls, so it has to clear the 3:1
+    non-text contrast requirement against both surface and canvas.
+    #7d8b9b = 3.48:1 on white, 3.21:1 on the canvas grey.
+  */
+  --cl-border-strong: #7d8b9b;
+
+  /* text */
+  --cl-text: #121822;
+  --cl-text-muted: #55606f;
+  /* 5.18:1 on surface, 4.78:1 on canvas - clears AA for small text. */
+  --cl-text-faint: #646e7a;
+  --cl-text-inverse: #ffffff;
+
+  /* assistance layer */
+  --cl-assist: #0d6e80;
+  --cl-assist-strong: #0a5361;
+  --cl-assist-tint: #e8f7fa;
+  --cl-assist-tint-2: #d2eef4;
+  --cl-assist-border: #93cddb;
+  --cl-assist-on: #ffffff;
+
+  /* tone / status families - always paired with an icon and a text label */
+  --cl-info: #1d4ed8;
+  --cl-info-tint: #e8eeff;
+  --cl-positive: #146c43;
+  --cl-positive-tint: #e6f4ec;
+  --cl-caution: #8a5300;
+  --cl-caution-tint: #fdf1dc;
+  --cl-alert: #a4243d;
+  --cl-alert-tint: #fdebef;
+  --cl-neutral: #4a5563;
+  --cl-neutral-tint: #eef1f5;
+
+  /* simulation marker - everything fake in this prototype uses this */
+  --cl-sim: #6b3fa0;
+  --cl-sim-tint: #f3edfb;
+  --cl-sim-border: #c9b1e6;
+
+  --cl-focus: #0b4f5e;
+  --cl-shadow: 15 24 34;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --cl-canvas: #0a0e13;
+    --cl-surface: #141b23;
+    --cl-surface-2: #1c252f;
+    --cl-surface-3: #26313d;
+    --cl-border: #2c3944;
+    /* 4.09:1 on surface, 4.57:1 on canvas. */
+    --cl-border-strong: #6d7d8b;
+
+    --cl-text: #e9eef3;
+    --cl-text-muted: #a3b1bf;
+    --cl-text-faint: #8593a1;
+    --cl-text-inverse: #0a0e13;
+
+    --cl-assist: #5ed4e6;
+    --cl-assist-strong: #96e6f2;
+    --cl-assist-tint: #0d2b33;
+    --cl-assist-tint-2: #12414c;
+    --cl-assist-border: #1f6577;
+    --cl-assist-on: #062028;
+
+    --cl-info: #9db6ff;
+    --cl-info-tint: #17203a;
+    --cl-positive: #79d3a3;
+    --cl-positive-tint: #10281d;
+    --cl-caution: #e8bd72;
+    --cl-caution-tint: #2e2313;
+    --cl-alert: #f2a0b0;
+    --cl-alert-tint: #33161e;
+    --cl-neutral: #a9b6c3;
+    --cl-neutral-tint: #1c252f;
+
+    --cl-sim: #c9aef0;
+    --cl-sim-tint: #221a33;
+    --cl-sim-border: #4d3a72;
+
+    --cl-focus: #8fe3f2;
+    --cl-shadow: 0 0 0;
+  }
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --cl-canvas: #0a0e13;
+  --cl-surface: #141b23;
+  --cl-surface-2: #1c252f;
+  --cl-surface-3: #26313d;
+  --cl-border: #2c3944;
+  /* 4.09:1 on surface, 4.57:1 on canvas. */
+  --cl-border-strong: #6d7d8b;
+
+  --cl-text: #e9eef3;
+  --cl-text-muted: #a3b1bf;
+  --cl-text-faint: #8593a1;
+  --cl-text-inverse: #0a0e13;
+
+  --cl-assist: #5ed4e6;
+  --cl-assist-strong: #96e6f2;
+  --cl-assist-tint: #0d2b33;
+  --cl-assist-tint-2: #12414c;
+  --cl-assist-border: #1f6577;
+  --cl-assist-on: #062028;
+
+  --cl-info: #9db6ff;
+  --cl-info-tint: #17203a;
+  --cl-positive: #79d3a3;
+  --cl-positive-tint: #10281d;
+  --cl-caution: #e8bd72;
+  --cl-caution-tint: #2e2313;
+  --cl-alert: #f2a0b0;
+  --cl-alert-tint: #33161e;
+  --cl-neutral: #a9b6c3;
+  --cl-neutral-tint: #1c252f;
+
+  --cl-sim: #c9aef0;
+  --cl-sim-tint: #221a33;
+  --cl-sim-border: #4d3a72;
+
+  --cl-focus: #8fe3f2;
+  --cl-shadow: 0 0 0;
+}
+
+@theme inline {
+  --color-canvas: var(--cl-canvas);
+  --color-surface: var(--cl-surface);
+  --color-surface-2: var(--cl-surface-2);
+  --color-surface-3: var(--cl-surface-3);
+  --color-line: var(--cl-border);
+  --color-line-strong: var(--cl-border-strong);
+
+  --color-ink: var(--cl-text);
+  --color-muted: var(--cl-text-muted);
+  --color-faint: var(--cl-text-faint);
+  --color-inverse: var(--cl-text-inverse);
+
+  --color-assist: var(--cl-assist);
+  --color-assist-strong: var(--cl-assist-strong);
+  --color-assist-tint: var(--cl-assist-tint);
+  --color-assist-tint-2: var(--cl-assist-tint-2);
+  --color-assist-line: var(--cl-assist-border);
+  --color-assist-on: var(--cl-assist-on);
+
+  --color-info: var(--cl-info);
+  --color-info-tint: var(--cl-info-tint);
+  --color-positive: var(--cl-positive);
+  --color-positive-tint: var(--cl-positive-tint);
+  --color-caution: var(--cl-caution);
+  --color-caution-tint: var(--cl-caution-tint);
+  --color-alert: var(--cl-alert);
+  --color-alert-tint: var(--cl-alert-tint);
+  --color-neutral-ink: var(--cl-neutral);
+  --color-neutral-tint: var(--cl-neutral-tint);
+
+  --color-sim: var(--cl-sim);
+  --color-sim-tint: var(--cl-sim-tint);
+  --color-sim-line: var(--cl-sim-border);
+
+  --color-focus: var(--cl-focus);
+
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+
+  --radius-panel: 1rem;
+  --radius-sheet: 1.25rem;
+}
+
+@layer base {
+  * {
+    /* Keep borders visible in both schemes by default. */
+    border-color: var(--cl-border);
+  }
+
+  html {
+    /* Respect the user's browser font-size setting: everything scales from rem. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--cl-canvas);
+    color: var(--cl-text);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  /*
+    Visible focus for keyboard users on every interactive element.
+    `:focus-visible` keeps mouse clicks quiet without hiding the ring from
+    keyboard and switch-device users.
+  */
+  :focus-visible {
+    outline: 3px solid var(--cl-focus);
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+
+  /* Anything that scrolls must be reachable by keyboard. */
+  [tabindex='0']:focus-visible {
+    outline: 3px solid var(--cl-focus);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  ::placeholder {
+    color: var(--cl-text-faint);
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  /* Hidden visually, still announced by screen readers. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /*
+    Hatched backdrop used behind simulated media so a test person can never
+    mistake a placeholder for real footage.
+  */
+  .sim-hatch {
+    background-image: repeating-linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--cl-sim) 14%, transparent) 0 2px,
+      transparent 2px 11px
+    );
+  }
+
+  .panel-shadow {
+    box-shadow:
+      0 1px 2px rgb(var(--cl-shadow) / 0.06),
+      0 8px 24px -12px rgb(var(--cl-shadow) / 0.14);
+  }
+}
+
+/*
+  Motion is decorative in this prototype. When the OS asks for reduced motion
+  we drop transitions and animations entirely rather than merely shortening
+  them.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -11,6 +11,16 @@
 - **Keine Plattformintegration.** Kein Bezug zu Instagram, TikTok, Reddit oder
   YouTube. Alle Beiträge, Konten, Communities, Likes und Kommentarzahlen sind
   erfunden.
+- **Die simulierte App „Momento" ist eine Attrappe.** Übernommen sind die
+  Konventionen der Gattung (Wortmarke, Stories, randlose Medien, Tab-Leiste),
+  keine Marke. Von ihren Bedienelementen funktionieren nur der Ansichtswechsel,
+  „Gefällt mir", „Speichern" und die Wege in einen Beitrag; Suche, Erstellen,
+  Reels, Profil, Aktivität und Direktnachrichten melden beim Antippen, dass es
+  sie im Prototyp nicht gibt.
+- **Das Telefon ist ein Bild, kein Gerät.** Der Rahmen simuliert weder ein
+  Betriebssystem noch eine echte Installation. Es gibt keinen App-Store, keine
+  Berechtigungsdialoge des Systems und keinen Wechsel zwischen Apps außer über
+  den Startbildschirm.
 - **Community-Daten sind erfunden** und beruhen auf keiner Erhebung. Sie sind so
   gewählt, dass sich Schätzung und Selbstauskunft sichtbar unterscheiden — genau
   das ist der zu testende Effekt, nicht ein gemessener.
@@ -34,6 +44,9 @@
 | `localStorage` | Daten hängen an Browser **und** Gerät. Ein Wechsel des Browsers oder ein privates Fenster verliert alles. Im privaten Modus kann das Schreiben fehlschlagen — die App läuft dann nur im Speicher weiter |
 | Medienfarben schemafest | Die Farbverläufe der Platzhalter kommen aus den Daten und reagieren nicht auf den Dunkelmodus |
 | `Button variant="primary"` | Definiert, aber derzeit nirgends verwendet |
+| Breakpoints im Geräterahmen | Tailwind-Breakpoints beziehen sich auf das **Browserfenster**, nicht auf die Telefonbreite. Innerhalb des Rahmens gilt auf einem großen Monitor also `sm:`/`md:`. Deshalb wurde jedes mehrspaltige Layout entfernt statt nur ausgeblendet; wer neue Seiten ergänzt, darf `sm:grid-cols-*` nicht wieder einführen (Container Queries wären die saubere Lösung, sind aber nicht umgesetzt) |
+| Geräterahmen erst ab 1024 px | Zwischen etwa 640 px und 1024 px läuft die App ohne Rahmen über die volle Fensterbreite. Das ist nutzbar, sieht aber weder nach Telefon noch nach Desktop-Anwendung aus |
+| Uhrzeit im Geräte-Chrome | Zeigt die echte Systemzeit und aktualisiert sich alle 30 Sekunden; sie ist Kulisse und für Aufzeichnungen von Testsitzungen nicht fixierbar |
 
 ## 3. Inhaltlich
 

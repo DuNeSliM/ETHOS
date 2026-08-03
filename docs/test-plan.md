@@ -12,7 +12,7 @@
 
 ## 2. Automatisierte Tests
 
-Stand: **89 Tests in 5 Dateien, alle grün.** Ausführung: `npm test`.
+Stand: **99 Tests in 5 Dateien, alle grün.** Ausführung: `npm test`.
 
 | Bereich | Datei | Was geprüft wird | Tests |
 |---|---|---|---|
@@ -20,7 +20,8 @@ Stand: **89 Tests in 5 Dateien, alle grün.** Ausführung: `npm test`.
 | Datenintegrität | `src/data/data.test.ts` | ≥ 8 Beiträge, ≥ 4 je Modus, eindeutige IDs, Analyse für jeden Beitrag, Mediendbeschreibungen vorhanden, Videodauern gesetzt, `hasAnalysis` stimmt mit den Daten überein, jede Analyse nennt Grenzen und Alternativen, **jede Erklärung ist sprachlich abgeschwächt**, **keine verbotenen Absolutformulierungen**, nur `v-lowcontext` ohne Indikatoren, Community-Verteilungen ergeben je 100 %, nur bekannte Reaktionsschlüssel, Selbstauskünfte ≤ Gesamtteilnehmende, kein `unclear` bei Selbstauskünften, Warnhinweise vorhanden, Verläufe lückenlos und passend zur Laufzeit, Verlauf `v-emotional` entspricht der Auftragsvorgabe | 22 |
 | Context Assistant | `src/features/context-assistant/ContextAssistant.test.tsx` | nichts sichtbar vor dem Öffnen, Dialog mit korrektem Namen, Unsicherheit und Grenzen sichtbar, „Interpretation, keine Tatsache", Indikatoren hinter „Warum …?" inkl. `aria-expanded`, alternative Lesarten, Feedback-Bestätigung, Ragebait als Möglichkeit, ehrliches „zu wenig Kontext", benannte Einstellung bei zurückgehaltenem Hinweis, kein Affordance ohne Daten, Fokusfalle/Escape/Fokusrückgabe, Öffnen nur per Tastatur | 13 |
 | Eigene Reaktion | `src/features/reactions/OwnReactionControl.test.tsx` | nichts ohne Einwilligung, nichts im pausierten Zustand, Ausdrucksbeschreibung statt Emotionswort, zwei getrennte Zeilen, Korrektur ohne Verlust der Schätzung, Entfernen der eigenen Angabe, alle neun Optionen, Hinweis „keine echte Kamera" | 8 |
-| Smoke / End-to-End | `src/app/smoke.test.tsx` | Einwilligungs-Standardwerte, Landing, Onboarding bis zum Einwilligungsschritt, beide Feeds, Feed-Umschalter, StatusBar, Detailseite mit Reihenfolge, Community-Quellenumschalter inkl. Zahlenwechsel, Repräsentativitätswarnung, Verlauf mit/ohne Einwilligung, Datenschutz-Dashboard, Löschbestätigung, Schalterkopplung in den Einstellungen, Pausieren, drei Szenarien, Szenario bis zur gespeicherten Bewertung, Leerzustand der Übersicht, Einzellöschung, unbekannte Route | 23 |
+| Smoke / End-to-End | `src/app/smoke.test.tsx` | Einwilligungs-Standardwerte, Landing, Onboarding bis zum Einwilligungsschritt, beide Feeds, Feed-Umschalter, StatusBar, Detailseite mit Reihenfolge, Community-Quellenumschalter inkl. Zahlenwechsel, Repräsentativitätswarnung, Verlauf mit/ohne Einwilligung, Datenschutz-Dashboard, Löschbestätigung, Schalterkopplung in den Einstellungen, Pausieren, drei Szenarien, Szenario bis zur gespeicherten Bewertung, Leerzustand der Übersicht, Einzellöschung, unbekannte Route | 26 |
+| Telefon und Erweiterung | `src/app/smoke.test.tsx` (zwei eigene Blöcke) | Einrichtung endet auf dem Startbildschirm statt im Feed; Plattform und ContextLens sind zwei getrennte App-Symbole; Kulissensymbole sind keine Bedienelemente; das Widget nennt den Zustand der Erweiterung; über der fremden App sind Plattform-Chrome **und** Assistenzknopf gleichzeitig sichtbar; Pausieren über das Overlay-Panel verändert die Statusleiste; ein Bedienelement ohne Funktion meldet sich per `role="status"`; „pausiert" und „Analyse aus" werden nicht vermischt | 7 |
 
 ## 3. Manuelle Testfälle
 
@@ -73,6 +74,15 @@ Status durchgängig **OFFEN** — vor jedem Meilenstein durchzugehen.
 | M-43 | — | Fensterbreite 320 px | Untere Navigation lesbar, keine Überlappungen |
 | M-44 | — | Betriebssystem auf „Bewegung reduzieren" | Keine Animationen |
 | M-45 | — | Seite neu laden | Einstellungen und Verlauf bleiben erhalten |
+| M-46 | Desktop ≥ 1280 px | `/phone` öffnen | Gerät mittig, Beschriftung links daneben, Statusleiste mit Uhrzeit und Teal-Pille |
+| M-47 | Desktop | Im Feed nach unten scrollen | Nur die Telefonfläche scrollt; Kopfzeile bleibt oben, Tab-Leiste unten **im Rahmen** – nichts klebt am Fensterrand |
+| M-48 | Desktop | „Kontext erklären" öffnen | Das Sheet liegt innerhalb des Telefons, verdunkelt nur dessen Fläche und ist bis zum Schließen bedienbar |
+| M-49 | Fensterbreite < 1024 px | Dieselben Wege gehen | Kein Rahmen, Ansicht bildschirmfüllend, identische Funktionen |
+| M-50 | — | Startbildschirm: Kulissensymbole antippen und mit Tab ansteuern | Keine Reaktion, kein Fokusstopp – sie sind keine Bedienelemente |
+| M-51 | — | In der simulierten App „Suche" antippen | Meldung „gibt es in diesem Prototyp nicht", App bleibt bedienbar |
+| M-52 | — | Schwebenden Knopf öffnen, „Assistenzschicht aktiv" ausschalten | Leiste zeigt „Assistent pausiert", Knopf wird grau, Teal-Pille im Geräte-Chrome verschwindet |
+| M-53 | wie M-52 | Über das Panel zur Übersicht wechseln und zurück | Wechsel zwischen den beiden Apps ist erkennbar (Farbwelt, Kopfzeile, Tab-Leiste) |
+| M-54 | — | Startbildschirm → ContextLens-Symbol, danach Logo in der Kopfzeile antippen | Führt in die ContextLens-App und wieder zurück auf den Startbildschirm |
 
 ## 4. Durchführung der Nutzertests
 

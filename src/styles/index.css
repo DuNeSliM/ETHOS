@@ -3,12 +3,17 @@
 /*
   ContextLens design tokens.
 
-  Two visual worlds live in this app and must stay distinguishable:
+  Three visual worlds live in this app and must stay distinguishable:
 
-  1. The simulated demo PLATFORM (feeds, posts, comments) -> neutral greys,
-     photographic media, tight information density.
-  2. The ASSISTANCE LAYER (context assistant, reaction chips, transparency
-     surfaces) -> teal "assist" family, rounded panels, lens iconography.
+  1. The simulated DEVICE (phone frame, OS status bar, home screen) -> dark
+     hardware chrome, wallpaper gradient. It is scenery around the demo.
+  2. The simulated PLATFORM (feeds, posts, comments) -> the photo-sharing skin
+     below, applied through `.platform-skin`: white/black surfaces, hairline
+     borders, tight information density.
+  3. The ASSISTANCE LAYER (context assistant, reaction chips, transparency
+     surfaces) -> teal "assist" family, rounded panels, lens iconography. Its
+     tokens are deliberately NOT overridden by the platform skin, so the
+     assistance layer keeps one identity in every context.
 
   Semantic values live as plain CSS custom properties so they can be swapped
   per colour scheme, and are re-exported through `@theme inline` so Tailwind
@@ -153,6 +158,69 @@
   --cl-shadow: 0 0 0;
 }
 
+/*
+  ------------------------------------------------------------------
+  Platform skin (the simulated photo-sharing app)
+  ------------------------------------------------------------------
+
+  Scoped override of the *platform* half of the token set. Everything inside
+  `.platform-skin` renders in the flat white/black, hairline-bordered style
+  that photo-sharing feeds have converged on, while the assistance tokens
+  (`--cl-assist-*`, `--cl-sim-*`) stay untouched so the ContextLens layer
+  keeps looking like a guest in someone else's app.
+
+  Contrast, computed against the skin's own surfaces:
+    light  text #000 21:1 · muted #545454 7.59:1 · faint #6b6b6b 5.33:1
+           border-strong #767676 4.54:1
+    dark   text #fafafa 20.2:1 · muted #b3b3b3 10.0:1 · faint #a1a1a1 8.1:1
+           border-strong #8a8a8a 5.98:1
+  All clear WCAG AA; `#8e8e8e`, the shade this genre usually uses for
+  secondary text, does not (3.0:1) and is therefore not used.
+*/
+.platform-skin {
+  --cl-canvas: #ffffff;
+  --cl-surface: #ffffff;
+  --cl-surface-2: #fafafa;
+  --cl-surface-3: #efefef;
+  --cl-border: #dbdbdb;
+  --cl-border-strong: #767676;
+
+  --cl-text: #000000;
+  --cl-text-muted: #545454;
+  --cl-text-faint: #6b6b6b;
+  --cl-text-inverse: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .platform-skin {
+    --cl-canvas: #000000;
+    --cl-surface: #000000;
+    --cl-surface-2: #121212;
+    --cl-surface-3: #1f1f1f;
+    --cl-border: #2e2e2e;
+    --cl-border-strong: #8a8a8a;
+
+    --cl-text: #fafafa;
+    --cl-text-muted: #b3b3b3;
+    --cl-text-faint: #a1a1a1;
+    --cl-text-inverse: #000000;
+  }
+}
+
+[data-theme='dark'] .platform-skin {
+  --cl-canvas: #000000;
+  --cl-surface: #000000;
+  --cl-surface-2: #121212;
+  --cl-surface-3: #1f1f1f;
+  --cl-border: #2e2e2e;
+  --cl-border-strong: #8a8a8a;
+
+  --cl-text: #fafafa;
+  --cl-text-muted: #b3b3b3;
+  --cl-text-faint: #a1a1a1;
+  --cl-text-inverse: #000000;
+}
+
 @theme inline {
   --color-canvas: var(--cl-canvas);
   --color-surface: var(--cl-surface);
@@ -287,6 +355,69 @@
     box-shadow:
       0 1px 2px rgb(var(--cl-shadow) / 0.06),
       0 8px 24px -12px rgb(var(--cl-shadow) / 0.14);
+  }
+
+  /*
+    Full-height screens. Inside the simulated device the "viewport" is the
+    phone screen, not the browser window, so `100dvh` would be far too tall -
+    see the override in the device block below.
+  */
+  .app-min-h {
+    min-height: 100dvh;
+  }
+
+  /*
+    Wordmark and story rings of the simulated platform. Warm-to-violet ramps
+    are the visual shorthand of this app genre; this is our own ramp, not a
+    copy of a specific product's brand gradient.
+  */
+  .platform-gradient {
+    background-image: linear-gradient(
+      45deg,
+      #f8c14b 0%,
+      #ef5a5a 32%,
+      #e0407f 62%,
+      #7b3fe4 100%
+    );
+  }
+}
+
+/*
+  ------------------------------------------------------------------
+  Simulated device
+  ------------------------------------------------------------------
+
+  Below `lg` the frame is not drawn at all: on a phone the browser already is
+  the phone, and a bezel around a bezel only wastes space. Everything here is
+  therefore desktop-only presentation.
+*/
+@media (min-width: 1024px) {
+  .device-screen {
+    /*
+      A transform makes this element the containing block for `position: fixed`
+      descendants. Without it, the app's bottom bars and sheets would pin
+      themselves to the browser window and escape the phone.
+    */
+    transform: translateZ(0);
+  }
+
+  .device-screen .app-min-h {
+    min-height: 100%;
+  }
+
+  .device-stage {
+    background:
+      radial-gradient(
+        90rem 60rem at 20% -10%,
+        rgb(13 110 128 / 0.35),
+        transparent 60%
+      ),
+      radial-gradient(
+        70rem 50rem at 95% 110%,
+        rgb(123 63 228 / 0.28),
+        transparent 60%
+      ),
+      #070b11;
   }
 }
 

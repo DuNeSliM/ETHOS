@@ -6,7 +6,7 @@ Nachvollziehbarkeit für die Studienarbeit.
 
 - **Werkzeug:** Claude Code (CLI)
 - **Modell:** Claude Opus 5 (`claude-opus-5`)
-- **Datum der Sitzung:** 30.07.2026
+- **Datum der Sitzungen:** 30.07.2026 und 31.07.2026
 - **Branch:** `feat/contextlens-prototype`
 - **Rollenverteilung:** Der Hauptchat agierte als Product Owner, technischer
   Lead und Integrator. Spezialisierte Subagents wurden für Dokumentation und
@@ -223,6 +223,49 @@ Kernanweisungen:
 
 ---
 
+### P-008 — Produktrahmung: simuliertes Telefon und Plattform-Optik
+
+**Ausführender:** Main · **Übernommen:** ja · **Sitzung:** 31.07.2026
+
+Wortlaut der Nutzerin/des Nutzers:
+
+> „read the docs and then also we should copy the instagram desing as well its
+> our selling point for the prof and also just a demo, though we should make the
+> demo less demo and more like a real product so yeah maybe we should simulate a
+> phone and an app on the phone that activates our plugin and we have a more
+> mobile friendly design :d"
+
+**Auslegung im Hauptchat.** Aus dem Auftrag wurden vier Arbeitspakete abgeleitet:
+
+1. Ein simuliertes Telefon als Rahmen der gesamten Demo, inklusive
+   Startbildschirm, von dem aus die Erweiterung und die fremde App getrennt
+   erreichbar sind.
+2. Die simulierte Plattform bekommt die Optik ihrer Gattung: eigene Wortmarke,
+   Stories-Ringe, randlose Beiträge, Tab-Leiste, schwarz-auf-weiß-Farbwelt.
+3. ContextLens erscheint über dieser App nur noch als Erweiterung – Statusleiste
+   und schwebender Knopf – und hat daneben eine eigene App.
+4. Das Layout wird durchgehend telefonorientiert; mehrspaltige Desktop-Layouts
+   werden entfernt statt ausgeblendet.
+
+**Bewusste Abweichung vom Wortlaut.** „Copy the Instagram design" wurde als
+*Gattung*, nicht als *Marke* umgesetzt: übernommen sind Aufbau und Konventionen,
+nicht Name, Logo, Ikonografie oder Markenfarbverlauf. Die simulierte App heißt
+`Momento`, der Farbverlauf ist eine eigene Rampe, und jede Feed-Ansicht trägt
+sichtbar den Hinweis, dass Konten und Zahlen erfunden sind. Begründung in
+`docs/decisions.md`, E-015. Ebenfalls nicht übernommen wurde die reine
+Icon-Tab-Leiste dieser Gattung: Beschriftungen bleiben sichtbar, und der
+Sekundär-Grauton `#8e8e8e` wurde durch einen kontraststarken ersetzt.
+
+**Ergebnis.** `src/features/device/`, `src/features/social-app/`,
+`src/features/plugin/`, `src/pages/PhoneHomePage.tsx`, Plattform-Skin und
+Geräteregeln in `src/styles/index.css`, zwei getrennte Shells in der
+Routentabelle. Sieben neue Tests (99 statt 92), Build und Testsuite grün.
+Dokumentation nachgezogen in `decisions.md` (E-014 bis E-016), `design-system.md`,
+`screen-specification.md`, `accessibility-review.md`, `test-plan.md`,
+`known-limitations.md`, `progress.md` und `README.md`.
+
+---
+
 ## 3. Korrekturen nach dem Agent-Review
 
 Aus dem Bericht von Agent 2 und den eigenen Prüfungen des Hauptchats wurden
@@ -253,4 +296,8 @@ Farbverläufe der Medienplatzhalter, ungenutzte Button-Variante — siehe
 - Die Datenschutzaussagen sind im Code überprüfbar: die Suche nach Netzwerk- und
   Bildaufnahme-APIs liefert null Treffer im ausführbaren Code. Belege in
   `docs/privacy-review.md`, Abschnitt 1.
-- Alle 89 Tests sind grün, `npm run build` läuft fehlerfrei.
+- Alle 99 Tests sind grün, `npm run build` läuft fehlerfrei.
+- Die Aussagen zur Produktrahmung sind ebenfalls testgestützt: dass der
+  Startbildschirm zwei getrennte Apps anbietet, dass Kulissensymbole keine
+  Bedienelemente sind und dass ein funktionsloses Bedienelement der simulierten
+  App das auch sagt, prüft `src/app/smoke.test.tsx`.

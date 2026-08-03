@@ -40,7 +40,7 @@ export function PostDetailPage() {
   // the full-page 404 - nesting that would duplicate the header and nav.
   if (!post) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl px-3 pt-3">
         <Panel variant="muted" className="p-5">
           <h1 className="text-xl font-bold tracking-tight text-ink">
             Dieser Beitrag existiert nicht
@@ -64,7 +64,9 @@ export function PostDetailPage() {
   const backTo = post.mode === 'visual' ? '/feed/visual' : '/feed/discussion';
 
   return (
-    <div className="mx-auto max-w-2xl">
+    // Padding lives here rather than in the shell: the feed above is
+    // deliberately edge to edge, a detail page is not.
+    <div className="mx-auto max-w-2xl px-3 pt-3">
       <Link to={backTo}>
         <Button variant="ghost" size="sm">
           <ArrowLeft aria-hidden="true" className="size-4" />

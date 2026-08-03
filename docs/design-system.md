@@ -28,14 +28,23 @@ den Quelldateien und sind dort umgesetzt.
 
 ---
 
-## 2. Die zwei visuellen Welten
+## 2. Die drei visuellen Welten
 
 Der Kommentarkopf von `src/styles/index.css` benennt sie explizit:
 
-1. **Simulierte PLATTFORM** (Feeds, Beiträge, Kommentare) → neutrale Grautöne,
-   „fotografische" Medien-Platzhalter, dichte Informationsanordnung.
-2. **ASSISTENZSCHICHT** (Kontextassistent, Reaktions-Chips, Transparenzflächen) →
+1. **Simuliertes GERÄT** (Rahmen, Betriebssystem-Statusleiste, Startbildschirm)
+   → dunkles Hardware-Chrome, Hintergrundverlauf. Kulisse um die Demo herum,
+   die niemandem der beiden Produkte gehört.
+2. **Simulierte PLATTFORM** (Feeds, Beiträge, Kommentare) → Schwarz auf Weiß,
+   Haarlinien statt Rahmen, „fotografische" Medien-Platzhalter, dichte
+   Informationsanordnung. Umgesetzt als Token-Überschreibung `.platform-skin`,
+   siehe 3.1a.
+3. **ASSISTENZSCHICHT** (Kontextassistent, Reaktions-Chips, Transparenzflächen) →
    Teal-`assist`-Familie, gerundete Panels, Linsen-Ikonografie.
+
+Die Assist-Tokens werden von `.platform-skin` **absichtlich nicht** überschrieben.
+Deshalb sieht die Assistenzschicht in der fremden App genauso aus wie in ihrer
+eigenen – sie ist dort erkennbar zu Gast.
 
 ### Wie die Trennung technisch hergestellt wird
 
@@ -46,7 +55,9 @@ Der Kommentarkopf von `src/styles/index.css` benennt sie explizit:
 | **Teal-Oberkante am Sheet** | Jedes Sheet trägt oben eine 6 px hohe Leiste `h-1.5 w-full bg-assist` mit `aria-hidden`. | `src/components/Sheet.tsx` Z. 145 |
 | **Panel-Rahmen** | `Panel variant="assist"` = `bg-assist-tint border-assist-line`; Plattformkarten benutzen `border-line bg-surface`. | `src/components/primitives.tsx` |
 | **Linsen-Ikonografie** | Das Logo ist ein aus Tokens gezeichnetes SVG (Außenring + Fokuspunkt) auf `bg-assist`, kein Bild. | `src/components/Logo.tsx` |
-| **Chrome gehört zur Assistenz** | Header, Navigation, StatusBar sind bewusst in der Assistenz-Sprache gestaltet; der `<Outlet />`-Inhalt darunter „sieht aus wie ein anderes Produkt". | Kommentar in `src/app/AppShell.tsx` |
+| **Zwei getrennte Apps** | Plattform-Chrome (`SocialAppShell`) und ContextLens-Chrome (`AppShell`) sind zwei Shells auf demselben Telefon. Keine enthält die andere; beide sind vom Startbildschirm aus erreichbar. | `src/app/App.tsx` (Routentabelle), `src/features/social-app/SocialAppShell.tsx` |
+| **Sichtbare Präsenz über der App** | Über der Plattform liegen genau zwei Assistenz-Elemente: `PluginStatusStrip` (schmale Leiste unter der App-Kopfzeile) und `PluginOverlay` (schwebender Knopf). Beide in Assist-Farben, während die App darunter schwarz auf weiß bleibt. | `src/features/plugin/PluginOverlay.tsx` |
+| **Chrome gehört zur Assistenz** | In der ContextLens-App sind Header, Navigation und StatusBar in der Assistenz-Sprache gestaltet. | Kommentar in `src/app/AppShell.tsx` |
 | **Assist-Auslöser sind erkennbar** | Der „Kontext erklären"-Button ist immer `border-assist-line bg-assist-tint text-assist-strong` mit `Sparkles`-Icon. | `ContextAssistantButton.tsx` |
 | **Aktive Navigation in Teal** | Aktive Nav-Items: `bg-assist-tint text-assist-strong` (Desktop) bzw. `text-assist-strong` + Teal-Unterstrich (Mobile). | `AppShell.tsx` |
 
@@ -72,6 +83,33 @@ Farbschema komplett getauscht werden, ohne eine einzige Utility-Klasse anzufasse
 | `--cl-surface-3` | `--color-surface-3` | `bg-surface-3` | `#e3e8ee` | `#26313d` |
 | `--cl-border` | `--color-line` | `border-line` | `#d6dce4` | `#2c3944` |
 | `--cl-border-strong` | `--color-line-strong` | `border-line-strong` | `#b6c0cc` | `#43535f` |
+
+### 3.1a Plattform-Skin (`.platform-skin`)
+
+Innerhalb der simulierten Foto-App werden genau die Plattform-Tokens
+überschrieben – Assist-, Ton- und Simulationsfamilien bleiben unverändert.
+Gesetzt wird die Klasse an genau einer Stelle: am Bildschirmelement des Geräts
+in `src/features/device/DeviceFrame.tsx`, abhängig von der Route.
+
+| CSS-Variable | Hell | Dunkel | Kontrast gegen die eigene Fläche |
+| --- | --- | --- | --- |
+| `--cl-canvas` / `--cl-surface` | `#ffffff` | `#000000` | – |
+| `--cl-surface-2` | `#fafafa` | `#121212` | – |
+| `--cl-surface-3` | `#efefef` | `#1f1f1f` | – |
+| `--cl-border` | `#dbdbdb` | `#2e2e2e` | dekorative Trennlinie |
+| `--cl-border-strong` | `#767676` | `#8a8a8a` | 4,54 : 1 / 5,98 : 1 |
+| `--cl-text` | `#000000` | `#fafafa` | 21 : 1 / 20,2 : 1 |
+| `--cl-text-muted` | `#545454` | `#b3b3b3` | 7,59 : 1 / 10,0 : 1 |
+| `--cl-text-faint` | `#6b6b6b` | `#a1a1a1` | 5,33 : 1 / 8,1 : 1 |
+
+Der Grauton, den diese App-Gattung üblicherweise für Sekundärtext benutzt
+(`#8e8e8e`), erreicht nur 3,0 : 1 und wird deshalb **nicht** verwendet. Die
+Ähnlichkeit endet dort, wo sie die Lesbarkeit kosten würde.
+
+Zusätzlich: `.platform-gradient` (Utility in `src/styles/index.css`) ist die
+Farbrampe der Plattform – Wortmarke und Story-Ringe. Eine eigene Rampe von
+`#f8c14b` über `#e0407f` nach `#7b3fe4`, keine Marken-Kopie (siehe
+`docs/decisions.md`, E-015).
 
 ### 3.2 Text (`ink` / `muted` / `faint` / `inverse`)
 
@@ -359,7 +397,9 @@ text-faint`, `dd` = `text-sm font-medium text-ink`.
 
 ### 6.7 `Sheet` — `src/components/Sheet.tsx`
 
-**Zweck:** Zugänglicher Dialog. Mobil Bottom-Sheet, ab `sm` zentriertes Panel.
+**Zweck:** Zugänglicher Dialog, immer als Bottom-Sheet. Die App läuft
+ausschließlich auf Telefonbreite – entweder auf einem echten Gerät oder im
+simulierten Rahmen –, deshalb gibt es kein zweites, breites Layout mehr.
 Bewusst handgebaut statt `<dialog>`, damit sich das Fokusverhalten im Browser und
 in jsdom identisch verhält (die Tests prüfen es).
 
@@ -383,8 +423,8 @@ ARIA und Verhalten:
 | Fokus zurück | Cleanup-Effekt fokussiert das zuvor aktive Element |
 | Escape | schließt und stoppt die Propagation |
 | Backdrop | `bg-black/45`, `aria-hidden="true"`, Klick schließt |
-| Scroll-Lock | `document.body.style.overflow = 'hidden'`, alter Wert wird wiederhergestellt |
-| Höhe | `max-h-[90dvh]`, Inhalt `overflow-y-auto` |
+| Scroll-Lock | `overflow: hidden` auf `document.body` **und** auf `#app-viewport` (im Geräterahmen scrollt der Telefonbildschirm, nicht das Dokument); alte Werte werden wiederhergestellt |
+| Höhe | `max-h-[90%]` – prozentual, nicht `dvh`: im Geräterahmen ist der Telefonbildschirm der umgebende Block |
 | Assistenz-Marke | 6 px `bg-assist`-Oberkante, `aria-hidden` |
 | Schließen-Button | Icon **und** Text „Schließen" |
 
@@ -636,15 +676,21 @@ erst zu bedienen.
 | `/feed/visual` | Visual Feed | Kurzvideos und Bilder | `Images` |
 | `/feed/discussion` | Discussion Feed | Textbeiträge und Threads | `MessagesSquare` |
 
+Seit der Umstellung auf die Telefonansicht ein **Segmented Control** in der
+Kopfzeile der simulierten App, nicht mehr zwei große Kacheln im Inhaltsbereich:
+
 | Zustand | Darstellung |
 | --- | --- |
-| aktiv | `border-assist bg-assist-tint`, Icon und Label in `text-assist-strong`, zusätzlich das Wort **„aktiv"** als Text rechts |
-| inaktiv | `border-line bg-surface`, Icon `text-muted`, Label `text-ink` |
-| hover | `hover:bg-surface-2` |
+| aktiv | gefüllte Pille `bg-surface font-bold text-ink panel-shadow`, Icon mit `strokeWidth 2.5`, dazu `aria-current="page"` von `NavLink` |
+| inaktiv | transparent, `font-medium text-muted`, `hover:text-ink` |
 | focus | globaler Ring |
 
-Wrapper: `<nav aria-label="Ansicht wechseln">` mit `<ul>`, Tabs `flex-1` – auf jedem
-Viewport zwei gleich breite Spalten.
+Der aktive Zustand ist damit dreifach markiert (Fläche, Schriftschnitt, ARIA) und
+nie allein durch Farbe. Jeder Tab trägt zusätzlich einen `sr-only`-Zusatz mit dem
+Hinweistext („Kurzvideos und Bilder"), der auf dem Telefon keinen Platz mehr hat.
+
+Wrapper: `<nav aria-label="Ansicht wechseln">` mit `<ul>`, Tabs `flex-1` – zwei
+gleich breite Spalten.
 
 ### 6.18 `OwnReactionControl` — `src/features/reactions/OwnReactionControl.tsx`
 
@@ -761,25 +807,103 @@ Dieser Verlauf beweist nichts über dein Empfinden."
 
 ### 6.22 `AppShell` — `src/app/AppShell.tsx`
 
-**Zweck:** Gemeinsames Chrome aller Bildschirme innerhalb der Demo. Das Chrome gehört
-zur **Assistenzschicht**, nicht zur simulierten Plattform.
+**Zweck:** Chrome der **ContextLens-App**. Auf dem simulierten Telefon laufen zwei
+Apps; diese ist die, in der die Assistenzschicht verwaltet wird (Übersicht,
+Datenschutz, Einstellungen, Research Mode). Durchgehend in der Assist-Familie.
 
 | Bereich | Umsetzung |
 | --- | --- |
 | Skip-Link | `<a href="#main" class="sr-only-focusable …">Direkt zum Inhalt springen</a>`, `z-50`, `bg-assist text-assist-on` – nur bei Fokus sichtbar |
-| Header | `sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur`, innen `max-w-6xl` |
-| Logo | links, `Logo` als Link nach `/` |
-| Desktop-Nav | `hidden md:block`, `<nav aria-label="Hauptnavigation">`, aktiv = `bg-assist-tint text-assist-strong`, inaktiv = `text-muted hover:bg-surface-2 hover:text-ink` |
-| Theme-Button | `aria-pressed={isDark}`, Icon `Sun`/`Moon` **plus** Text „Helles Design" / „Dunkles Design" |
+| Header | `sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur`, innen `max-w-[34rem]` |
+| Logo | links, `Logo` als Link auf den Startbildschirm `/phone` |
+| Theme-Button | `aria-pressed={isDark}`, Icon `Sun`/`Moon` **plus** Text „Hell" / „Dunkel" |
 | Statusleiste | `StatusBar` |
 | Research-Banner | `ResearchBanner` (nur bei laufendem Szenario) |
-| `<main id="main">` | `max-w-6xl px-4 pb-28 pt-4 md:pb-12` |
-| Mobile-Nav | `fixed bottom-0 … md:hidden`, `bg-surface/98 backdrop-blur`; fünf gleich breite Einträge mit **sichtbarem Textlabel** unter dem Icon; aktiv zusätzlich durch einen Teal-Balken (`h-0.5 w-6 bg-assist`) markiert |
-| Scroll-Reset | `window.scrollTo({ top: 0 })` bei jedem `location.pathname`-Wechsel |
+| `<main id="main">` | `flex-1 pb-24`, innen `max-w-[34rem] px-3 pt-4` |
+| Tab-Leiste | `fixed inset-x-0 bottom-0` mit `border-t border-assist-line`; fünf gleich breite Einträge mit **sichtbarem Textlabel** unter dem Icon; aktiv zusätzlich durch einen Teal-Balken (`h-0.5 w-6 bg-assist`) markiert |
+| Scroll-Reset | `scrollAppToTop()` bei jedem `location.pathname`-Wechsel – innerhalb des Geräterahmens scrollt der Telefonbildschirm, nicht das Fenster |
 
-Navigationsziele (identisch für Desktop und Mobile): `/feed/visual` (Feed),
+Es gibt nur noch **eine** Navigation, nicht mehr eine für Desktop und eine für
+Mobil: Das Layout ist telefonorientiert und ändert sich zwischen den Breakpoints
+nicht mehr. Ziele: `/feed/visual` (Feed – führt zurück in die simulierte App),
 `/overview` (Übersicht), `/privacy` (Datenschutz), `/settings` (Einstellungen),
-`/research` (Research Mode).
+`/research` (Research).
+
+### 6.22a `DeviceLayout` — `src/features/device/DeviceFrame.tsx`
+
+**Zweck:** Das simulierte Telefon, in dem die gesamte Demo läuft. Begründung in
+`docs/decisions.md`, E-014.
+
+| Bereich | Umsetzung |
+| --- | --- |
+| Bühne | `.device-stage`: unter `lg` neutral, ab `lg` dunkler Radialverlauf, zentriertes Flex-Layout |
+| Gehäuse | ab `lg` `rounded-[3.1rem] bg-[#0d1117] p-[0.7rem] ring-1 ring-white/12` plus drei dekorative Tasten (`aria-hidden`) |
+| Bildschirm | `.device-screen`, ab `lg` `h-[min(50rem,84dvh)] w-[24.5rem] rounded-[2.5rem] overflow-hidden` |
+| Skin | trägt `platform-skin`, solange eine Route unter `/feed` oder `/post` aktiv ist – das OS-Chrome folgt der Vordergrund-App, wie auf einem echten Gerät |
+| Scrollfläche | `#app-viewport`, ab `lg` `flex-1 overflow-y-auto overscroll-contain` |
+| Beschriftung | `DeviceCaption`, nur ab `xl`: drei Sätze für die Vorführung |
+
+Zwei CSS-Regeln tragen das Konstrukt (`src/styles/index.css`, Block „Simuliertes
+Gerät"):
+
+- `.device-screen { transform: translateZ(0) }` ab `lg` – dadurch löst
+  `position: fixed` gegen den Telefonbildschirm auf statt gegen das Browserfenster.
+  Ohne diese Regel würden Tab-Leisten und Sheets aus dem Rahmen fallen.
+- `.device-screen .app-min-h { min-height: 100% }` – die Utility `.app-min-h`
+  bedeutet außerhalb des Rahmens `100dvh` und innerhalb „so hoch wie der
+  Telefonbildschirm".
+
+Unter `lg` rendert die Komponente nichts als ihre Kinder: Auf einem echten Telefon
+ist der Browser bereits das Gerät.
+
+### 6.22b `DeviceStatusBar` — `src/features/device/DeviceStatusBar.tsx`
+
+Betriebssystem-Statusleiste: Uhrzeit (echte Systemzeit, Aktualisierung alle 30 s),
+Dynamic Island als Attrappe, gezeichnete Symbole für Empfang, WLAN und Akku.
+
+Ein Element ist **nicht** Kulisse: die kleine Teal-Pille mit dem Linsensymbol.
+Sie erscheint genau dann, wenn `contentAnalysis && !assistantPaused` gilt, und
+trägt einen `sr-only`-Text („ContextLens ist als Systemerweiterung aktiv"). So
+meldet sich eine systemweite Erweiterung auf einem echten Telefon.
+
+### 6.22c `SocialAppShell` — `src/features/social-app/SocialAppShell.tsx`
+
+**Zweck:** Chrome der simulierten Plattform. Enthält **nichts** von ContextLens
+außer den beiden ausdrücklich gekennzeichneten Assistenz-Elementen.
+
+| Bereich | Umsetzung |
+| --- | --- |
+| Kopfzeile | `sticky top-0 z-30 bg-surface/95 backdrop-blur`, Wortmarke links, Herz- und Senden-Symbol rechts |
+| Wortmarke | `PlatformWordmark`: `.platform-gradient` als `bg-clip-text`, kursive Serifenschrift, daneben die Auszeichnung **„simuliert"** in `text-sim`; in `forced-colors` fällt der Verlauf auf `text-ink` zurück |
+| Ansichtswechsel | `FeedModeSwitch`, nur im Feed – eine Detailseite liegt eine Ebene tiefer und trägt ihren eigenen Rückweg |
+| Assistenzleiste | `PluginStatusStrip` |
+| Inhalt | `<main id="main" class="flex-1 pb-24">`, innen `max-w-[30rem]` |
+| Schwebender Knopf | `PluginOverlay` |
+| Tab-Leiste | `PlatformTabBar` |
+| Meldung | `role="status"`-Pille für Bedienelemente, die es im Prototyp nicht gibt |
+
+### 6.22d `PlatformTabBar` — `src/features/social-app/PlatformTabBar.tsx`
+
+Fünf Einträge, davon führt nur „Start" irgendwohin. Die anderen vier heißen
+zugänglich „Suche (im Prototyp ohne Funktion)" usw. und melden beim Antippen eine
+Statusmeldung, statt stillschweigend nichts zu tun. Labels bleiben sichtbar,
+obwohl die Gattung üblicherweise eine reine Icon-Leiste zeigt – ein Symbol allein
+ist keine Beschriftung, und diese Ähnlichkeit ist den Verzicht nicht wert.
+
+### 6.22e `PluginOverlay` und `PluginStatusStrip` — `src/features/plugin/PluginOverlay.tsx`
+
+Die Präsenz der Assistenzschicht über einer fremden App (`docs/decisions.md`,
+E-016).
+
+| Element | Umsetzung |
+| --- | --- |
+| Schwebender Knopf | `fixed bottom-20 right-3 z-40`; aktiv `bg-assist text-assist-on`, pausiert `bg-surface text-muted` mit `border-line-strong`. Beschriftung „ContextLens" als Text, nicht nur als Symbol |
+| Panel | `Sheet` mit Status-Chips, Hauptschalter „Assistenzschicht aktiv" (`Toggle` auf `assistantPaused`), vier Verweisen in die ContextLens-App und einem Absatz, der die Grenze der Erweiterung benennt |
+| Statusleiste | `border-b border-assist-line bg-assist-tint`, drei Fakten (Analyse, Kamera, Speicherung) als je eigenes Element, dazu ein Knopf „Pausieren" / „Fortsetzen" |
+
+Wortlaut und Zustand sind identisch mit `StatusBar` in der ContextLens-App; die
+Leiste ist eine Kurzfassung, keine zweite Wahrheit. Für Screenreader steht
+zusätzlich ein ausformulierter `sr-only`-Satz je Zustand darunter.
 
 ### 6.23 `ResearchBanner` — `src/features/research-mode/ResearchBanner.tsx`
 

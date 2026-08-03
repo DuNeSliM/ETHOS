@@ -9,54 +9,94 @@ Begleitdokument: `docs/design-system.md` (Tokens, Komponenten, Varianten).
 
 ## 0. Routentabelle und globales Layoutgerüst
 
-| Route | Seite | Datei | Innerhalb `AppShell`? |
+Die Demo läuft in einem simulierten Telefon. Drei Ebenen, und die Verschachtelung
+ist die Produktaussage (siehe `docs/decisions.md`, E-014):
+
+| Route | Seite | Datei | Ebene |
 | --- | --- | --- | --- |
-| `/` | Landing | `src/pages/LandingPage.tsx` | nein |
-| `/how-it-works` | So funktioniert es | `src/pages/HowItWorksPage.tsx` | nein |
-| `/onboarding` | Onboarding + Einwilligung | `src/pages/OnboardingPage.tsx` | nein |
-| `/feed` | – | Redirect (`<Navigate to="/feed/visual" replace />`) | ja |
-| `/feed/visual` | Visual Feed | `src/pages/VisualFeedPage.tsx` | ja |
-| `/feed/discussion` | Discussion Feed | `src/pages/DiscussionFeedPage.tsx` | ja |
-| `/post/:postId` | Beitragsdetail | `src/pages/PostDetailPage.tsx` | ja |
-| `/overview` | Persönliche Übersicht | `src/pages/OverviewPage.tsx` | ja |
-| `/settings` | Einwilligung und Einstellungen | `src/pages/SettingsPage.tsx` | ja |
-| `/privacy` | Datenschutz-Dashboard | `src/pages/PrivacyPage.tsx` | ja |
-| `/research` | Research Mode | `src/pages/ResearchModePage.tsx` | ja |
-| `*` | 404 | `src/pages/NotFoundPage.tsx` | nein |
+| `/` | Landing | `src/pages/LandingPage.tsx` | Projektseite, außerhalb des Geräts |
+| `/how-it-works` | So funktioniert es | `src/pages/HowItWorksPage.tsx` | Projektseite, außerhalb des Geräts |
+| `/onboarding` | Einrichtung + Einwilligung | `src/pages/OnboardingPage.tsx` | im Gerät, vor beiden Apps |
+| `/phone` | Startbildschirm | `src/pages/PhoneHomePage.tsx` | im Gerät, Betriebssystem |
+| `/feed` | – | Redirect (`<Navigate to="/feed/visual" replace />`) | `SocialAppShell` |
+| `/feed/visual` | Visual Feed | `src/pages/VisualFeedPage.tsx` | `SocialAppShell` |
+| `/feed/discussion` | Discussion Feed | `src/pages/DiscussionFeedPage.tsx` | `SocialAppShell` |
+| `/post/:postId` | Beitragsdetail | `src/pages/PostDetailPage.tsx` | `SocialAppShell` |
+| `/overview` | Persönliche Übersicht | `src/pages/OverviewPage.tsx` | `AppShell` (ContextLens) |
+| `/settings` | Einwilligung und Einstellungen | `src/pages/SettingsPage.tsx` | `AppShell` (ContextLens) |
+| `/privacy` | Datenschutz-Dashboard | `src/pages/PrivacyPage.tsx` | `AppShell` (ContextLens) |
+| `/research` | Research Mode | `src/pages/ResearchModePage.tsx` | `AppShell` (ContextLens) |
+| `*` | 404 | `src/pages/NotFoundPage.tsx` | außerhalb des Geräts |
 
-Landing und Onboarding liegen bewusst **außerhalb** der Shell, damit sie die volle
-Breite nutzen können. Alles, wozwischen eine Testperson während einer Sitzung
-navigiert, liegt **innerhalb** der Shell und zeigt daher immer die Statusleiste
-(was ist aktiv, was ist simuliert, wo liegen Daten).
+Landing und „So funktioniert es" sind eine Website **über** das Konzept und liegen
+außerhalb des Geräterahmens. Alles, wozwischen eine Testperson während einer
+Sitzung navigiert, liegt im Rahmen. Dort gibt es zwei Apps: die simulierte
+Plattform und ContextLens. Keine enthält die andere.
 
-### Das Shell-Gerüst
+### Das Gerätegerüst (`DeviceLayout`)
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│ [Skip-Link: „Direkt zum Inhalt springen" – nur bei Fokus]     │
-├──────────────────────────────────────────────────────────────┤ ← sticky, z-30
-│ ◎ ContextLens          [Feed][Übersicht][Datenschutz]   [🌙]  │   max-w-6xl
-│   Prototyp · sim.        [Einstellungen][Research]            │   md: Nav sichtbar
-├──────────────────────────────────────────────────────────────┤
-│ StatusBar: (Inhaltsanalyse aktiv)(Kamera aus)(nur lokal)  →   │   bg-surface-2
-├──────────────────────────────────────────────────────────────┤
-│ ResearchBanner (nur bei laufendem Szenario, sim-violett)      │
-└──────────────────────────────────────────────────────────────┘
-  <main id="main"> max-w-6xl px-4 pt-4 pb-28 md:pb-12
-  … Seiteninhalt, meist nochmals mx-auto max-w-2xl …
-
-┌──────────────────────────────────────────────────────────────┐ ← fixed bottom,
-│  [▤ Feed] [☰ Übersicht] [🛡 Datenschutz] [⚙ Einst.] [◉ Res.]  │   md:hidden, z-30
-└──────────────────────────────────────────────────────────────┘
+        ┌─────────────────────────────┐ ← lg: Gehäuse, rounded-[3.1rem]
+        │  09:41   ▬▬▬▬   ◎  ▮▮ ⌁ ▰▰  │   DeviceStatusBar (hidden unter lg)
+        │ ┌─────────────────────────┐ │   ◎ = Teal-Pille „ContextLens aktiv"
+        │ │                         │ │
+        │ │   #app-viewport         │ │   ← die einzige Scrollfläche
+        │ │   (Startbildschirm      │ │     lg:overflow-y-auto
+        │ │    oder eine der        │ │
+        │ │    beiden Apps)         │ │
+        │ │                         │ │
+        │ └─────────────────────────┘ │
+        │          ▁▁▁▁▁▁▁            │   Home-Indikator
+        └─────────────────────────────┘
 ```
 
 | Breakpoint | Verhalten |
 | --- | --- |
-| `< 768 px` (mobil) | Top-Nav ausgeblendet (`hidden md:block`), Bottom-Nav sichtbar; `<main>` hat `pb-28` als Reserve für die Leiste; Theme-Button wird durch `ml-auto` rechts geparkt |
-| `≥ 768 px` (`md`) | Top-Nav sichtbar, Bottom-Nav `md:hidden`; `<main>` nur `pb-12`; Theme-Button rückt per `md:ml-0` neben die Nav |
-| `≥ 640 px` (`sm`) | betrifft vor allem Rasterspalten (`sm:grid-cols-2`, `sm:grid-cols-3`) und das `Sheet` (Bottom-Sheet → zentrierter Dialog) |
+| `< 1024 px` | Kein Rahmen. `DeviceLayout` rendert nur seine Kinder, die Seite scrollt normal, Statusleiste und Home-Indikator sind ausgeblendet – auf einem echten Telefon ist der Browser bereits das Gerät. |
+| `≥ 1024 px` (`lg`) | Gehäuse, Betriebssystem-Chrome und fester Bildschirm (`h-[min(50rem,84dvh)] w-[24.5rem]`). Der Bildschirm ist Scrollcontainer **und** Bezugsrahmen für `position: fixed`. |
+| `≥ 1280 px` (`xl`) | Zusätzlich die Vorführungs-Beschriftung links neben dem Gerät. |
 
-Bei jedem Routenwechsel scrollt die Shell an den Seitenanfang.
+### Das Gerüst der simulierten App (`SocialAppShell`)
+
+```
+┌──────────────────────────────────────┐ ← sticky, z-30
+│ Momento  simuliert          ♡    ➤   │   Wortmarke mit Farbverlauf
+│ [ Visual Feed ][ Discussion Feed ]   │   Segmented Control (nur im Feed)
+├──────────────────────────────────────┤
+│ ◎ Inhaltsanalyse aktiv · Kamera aus  │   PluginStatusStrip – ASSISTENZ,
+│   · nur lokal          [⏸ Pausieren] │   bg-assist-tint
+├──────────────────────────────────────┤
+│  <main id="main"> max-w-[30rem]      │
+│  … Feed, randlos …                   │
+│                        ┌───────────┐ │
+│                        │◎ ContextL.│ │   PluginOverlay, fixed, z-40
+│                        └───────────┘ │
+├──────────────────────────────────────┤ ← fixed bottom, z-30
+│  [⌂ Start][⌕ Suche][+][▶ Reels][◍]   │   nur „Start" führt irgendwohin
+└──────────────────────────────────────┘
+```
+
+### Das Gerüst der ContextLens-App (`AppShell`)
+
+```
+┌──────────────────────────────────────┐ ← sticky, z-30
+│ ◎ ContextLens                [🌙 …]  │   Logo führt auf /phone
+│   Prototyp · simulierte Daten        │
+├──────────────────────────────────────┤
+│ StatusBar: (Inhaltsanalyse aktiv)    │   bg-surface-2
+│            (Kamera aus)(nur lokal) → │
+├──────────────────────────────────────┤
+│ ResearchBanner (nur bei Szenario)    │
+│  <main id="main"> max-w-[34rem] px-3 │
+├──────────────────────────────────────┤ ← fixed bottom, z-30
+│ [▤ Feed][☰ Übers.][🛡][⚙][◉ Res.]    │   border-assist-line
+└──────────────────────────────────────┘
+```
+
+Es gibt kein zweites, breites Layout mehr: Das Design ist telefonorientiert und
+ändert sich zwischen den Breakpoints nicht. Bei jedem Routenwechsel scrollt die
+jeweilige Shell über `scrollAppToTop()` an den Anfang – im Rahmen scrollt der
+Telefonbildschirm, außerhalb das Fenster.
 
 ---
 
@@ -181,6 +221,58 @@ Checkboxen mit `role="switch"` (siehe `Toggle`).
 
 ---
 
+## 3a. Startbildschirm des Telefons — `/phone`
+
+**Zweck:** Zeigen, dass Plattform und Assistenz zwei getrennte Programme sind,
+bevor der Feed überhaupt geöffnet ist. Erster Bildschirm nach der Einrichtung.
+
+```
+┌──────────────────────────────────────┐
+│           Freitag, 31. Juli          │  Systemdatum
+│ ┌──────────────────────────────────┐ │
+│ │ ◎ ContextLens                    │ │  Widget, bg-black/35 + blur
+│ │   Systemerweiterung · simuliert  │ │
+│ │ ▤ Aktiv. Erklärt Beiträge auf    │ │  Zustand aus den Einstellungen
+│ │   Antippen.                      │ │
+│ │ Kamera aus. Keine Erfassung.     │ │
+│ │ [ Momento öffnen ] [ Erweiterung │ │
+│ │                      verwalten ] │ │
+│ └──────────────────────────────────┘ │
+│                                      │
+│  ▣      ◎      ▤      ✉             │  Momento · ContextLens ·
+│ Momento CtxLens Kamera Nachr.        │  dann nur noch Kulisse
+│  ♪      ◈      ✎      ☁             │
+│ Musik  Karten Notizen Wetter         │
+│                                      │
+│ ┌──────────────────────────────────┐ │  Dock
+│ │  ☎    ▦    ♪    ▣               │ │
+│ └──────────────────────────────────┘ │
+│   Demo verlassen und zur Projektseite│
+└──────────────────────────────────────┘
+```
+
+| Aspekt | Beschreibung |
+| --- | --- |
+| Hintergrund | Verlauf `#10203f → #2a1a4d → #6f2f6a → #b0525a`, Weiß darauf |
+| Interaktiv | genau drei Ziele: `Momento` (auch im Dock), `ContextLens` → `/overview`, sowie die zwei Knöpfe im Widget (`/feed/visual`, `/settings`) und der Ausstiegslink nach `/` |
+| Kulisse | sechs weitere Symbole plus drei im Dock: `aria-hidden`, nicht fokussierbar, keine Buttons – dieselbe Regel wie beim Stories-Streifen |
+| Widget | spiegelt `contentAnalysis`, `assistantPaused` und `simulatedCameraCapture`; nennt bei ausgeschalteter Kamera ausdrücklich „Kamera aus. Keine Reaktionserfassung." |
+
+**Barrierefreiheit:** `<h2 class="sr-only">Apps auf diesem simulierten Telefon</h2>`
+gliedert das Raster; ein `sr-only`-Satz erklärt, dass alle übrigen Symbole
+dekorativ sind. Beschriftungen der Dock-Symbole sind `sr-only`, weil sie visuell
+entfallen.
+
+**Zustände**
+
+| Zustand | Bedingung | Darstellung |
+| --- | --- | --- |
+| Aktiv | `contentAnalysis && !assistantPaused` | „Aktiv. Erklärt Beiträge auf Antippen." mit `ScanText`-Icon |
+| Pausiert | `assistantPaused` | „Pausiert. Es werden keine Hinweise angezeigt." mit `Pause`-Icon |
+| Kamera an | `simulatedCameraCapture` | „Simulierte Reaktionserfassung ist eingeschaltet." |
+
+---
+
 ## 4. Visual Feed — `/feed/visual`
 
 **Zweck:** Kurzvideos und Bilder mit Bildunterschrift – der Fall, in dem Mimik und
@@ -189,19 +281,13 @@ Tonfall mitspielen. Datenquelle: `getPostsForMode('visual')`, derzeit **5** Beit
 
 | Aspekt | Beschreibung |
 | --- | --- |
-| Layout Desktop | Innerhalb der Shell nochmals `mx-auto max-w-2xl` – eine zentrierte Lesespalte, kein Mehrspaltenlayout. Der `max-w-6xl`-Rahmen der Shell wirkt nur auf Header und StatusBar. |
-| Layout Mobil | Dieselbe Spalte, ab 320 px nutzbar; kein separates Mobil-Design. Der `FeedModeSwitch` bleibt zweispaltig (`flex-1`). |
+| Layout | Eine Spalte, `max-w-[30rem]`, ab 320 px nutzbar. Kopfzeile, Ansichtswechsel, Assistenzleiste und Tab-Leiste liefert `SocialAppShell`; die Seite selbst besteht nur aus Inhalt. |
+| Überschrift | `<h1 class="sr-only">Visual Feed</h1>` – ein Foto-Feed trägt keinen Seitentitel, und ein erfundener wäre das Erste, was die Illusion bricht. Sichtbar bleibt stattdessen der violette Simulationshinweis. |
 
 ```
 ┌─── max-w-[30rem] ─────────────────────────────────┐
-│ ┌─────────────────┐ ┌─────────────────┐           │  FeedModeSwitch
-│ │ ▣ Visual Feed   │ │ ▤ Discussion    │           │  aktiver Tab:
-│ │   aktiv         │ │   Feed          │           │  border-assist
-│ │ Kurzvideos …    │ │ Textbeiträge …  │           │  bg-assist-tint
-│ └─────────────────┘ └─────────────────┘           │
-│                                                    │
-│ Visual Feed  (🧪 Erfundene Beiträge)               │  H1 + SimulatedBadge
-│ Diese Beiträge, Konten und Zahlen sind erfunden. … │
+│ Simulierter Feed von Momento · Beiträge, Konten    │  sim-Streifen,
+│ und Zahlen sind erfunden                           │  immer sichtbar
 │                                                    │
 │ ⊕   ◉    ◉    ◉    ◉    ◉                          │  StoriesRow
 │ Dein jonas mira elif noa  klartext                 │  aria-hidden, Kulisse
@@ -233,11 +319,12 @@ Tonfall mitspielen. Datenquelle: `getPostsForMode('visual')`, derzeit **5** Beit
 └────────────────────────────────────────────────────┘
 ```
 
-Auf Telefonen laufen Karten und Stories randlos bis an den Bildschirmrand
-(`-mx-4 sm:mx-0` auf dem Container, `border-y` plus `sm:rounded-… sm:border-x`
-auf der Karte). Ab `sm` sind es abgerundete, gerahmte Karten.
+Karten laufen randlos bis an den Bildschirmrand und stehen ohne Abstand
+untereinander; getrennt werden sie allein durch die Haarlinie `border-b border-line`
+– so, wie es diese Gattung seit jeher macht. Der Verlaufsring der Stories kommt aus
+`.platform-gradient`.
 
-**Verwendete Komponenten:** `FeedModeSwitch`, `SimulatedBadge`, `StoriesRow`,
+**Verwendete Komponenten:** `StoriesRow`,
 `VisualPostCard` → (`MediaPlaceholder`, `OwnReactionControl`,
 `ContextAssistantButton` → `Sheet` → `AssistantCardBody`).
 
@@ -269,13 +356,14 @@ derzeit **4** Beiträge (`d-sarcasm`, `d-irony`, `d-aggressive-headline`,
 
 | Aspekt | Beschreibung |
 | --- | --- |
-| Layout | Identisch zum Visual Feed: `mx-auto max-w-2xl`, `FeedModeSwitch` oben, `space-y-5`-Liste. |
+| Layout | Wie der Visual Feed innerhalb von `SocialAppShell`, aber `px-3` und `space-y-3`: Textbeiträge stehen als abgesetzte Karten, nicht randlos. |
+| Überschrift | `<h1 class="sr-only">Discussion Feed</h1>`, sichtbar bleibt der Simulationsstreifen |
 | Unterschied zur Karte | Kein Medium, dafür Community-Zeile, Headline und Kommentarbaum |
 
 ```
-┌─── max-w-2xl ─────────────────────────────────────┐
-│ [ ▣ Visual Feed ] [ ▤ Discussion Feed   aktiv ]   │
-│ Discussion Feed  (🧪 Erfundene Beiträge)           │
+┌─── max-w-[30rem] ─────────────────────────────────┐
+│ Simulierte Diskussionen in Momento · Beiträge und  │  sim-Streifen
+│ Konten sind erfunden                               │
 │ Hier fehlen Tonfall und Mimik – Ironie ist …      │
 │ ┌────────────────────────────────────────────────┐ │
 │ │ r/community · @handle · vor 5 Std.             │ │
@@ -428,22 +516,23 @@ Eingangswerten ohnehin nicht vertretbar.
 
 | Aspekt | Beschreibung |
 | --- | --- |
-| Layout Desktop | `mx-auto max-w-2xl`; die drei Zähler als `sm:grid-cols-3`, der Schätzung/Angabe-Vergleich als `sm:grid-cols-2` |
-| Layout Mobil | Alle Raster kollabieren auf eine Spalte |
+| Layout | `mx-auto max-w-2xl` innerhalb der ContextLens-App, alles einspaltig. Die drei Zähler stehen als Zeilen (Zahl links, Beschriftung rechts) untereinander – ein dreispaltiges Raster ließe auf Telefonbreite je Beschriftung drei Wörter übrig. |
 
 ```
 ┌─── max-w-2xl ─────────────────────────────────────┐
 │ Persönliche Übersicht  (🧪 Schätzungen simuliert) │
 │ Hier stehen nur Zählungen – keine Bewertung …     │
 │ (⚠ Speicherung ist ausgeschaltet …)   ← bedingt   │
-│ ┌────────┐ ┌────────┐ ┌────────┐                  │
-│ │   7    │ │   3    │ │   5    │                  │  sm:grid-cols-3
-│ │Beiträge│ │eigene  │ │Mal     │                  │
-│ │angeseh.│ │Angaben │ │geöffnet│                  │
-│ └────────┘ └────────┘ └────────┘                  │
+│ ┌───────────────────────────────────────────────┐ │
+│ │  7   Beiträge angesehen                       │ │  je eine Zeile
+│ │  3   eigene Angaben gemacht                   │ │
+│ │  5   Mal „Kontext erklären" geöffnet          │ │
+│ └───────────────────────────────────────────────┘ │
 │ ┌─ Automatische Schätzung und deine Angabe ─────┐ │
-│ │ ▎Schätzung passte  │ ▎Schätzung wich ab       │ │  DefinitionRow
-│ │  2 von 3           │  1 von 3                 │ │  assist / self
+│ │ ▎Schätzung passte zu deiner Angabe            │ │  DefinitionRow
+│ │  2 von 3                                      │ │  tone assist
+│ │ ▎Schätzung wich ab                            │ │
+│ │  1 von 3                                      │ │  tone self
 │ │ ℹ Eine Abweichung bedeutet nicht, dass du …   │ │
 │ └───────────────────────────────────────────────┘ │
 │ ┌─ Häufige Inhaltskategorien ───────────────────┐ │

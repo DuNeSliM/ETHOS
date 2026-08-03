@@ -74,6 +74,99 @@ describe('onboarding', () => {
   });
 });
 
+describe('simulated phone', () => {
+  it('ends the setup on the home screen, not inside the feed', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppRoutes />, { route: '/onboarding' });
+
+    for (let step = 0; step < 4; step += 1) {
+      await user.click(screen.getByRole('button', { name: /^weiter$/i }));
+    }
+    await user.click(
+      screen.getByRole('button', { name: /aktivieren und telefon öffnen/i }),
+    );
+
+    expect(
+      screen.getByRole('heading', { name: /apps auf diesem simulierten telefon/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('offers the platform and ContextLens as two separate apps', () => {
+    renderWithProviders(<AppRoutes />, { route: '/phone' });
+
+    expect(
+      screen.getAllByRole('link', { name: /momento/i }).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole('link', { name: /^contextlens$/i }),
+    ).toBeInTheDocument();
+
+    // Wallpaper icons are scenery, not dead controls in the keyboard path.
+    expect(screen.queryByRole('link', { name: /wetter/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /wetter/i })).not.toBeInTheDocument();
+  });
+
+  it('states what the extension is currently doing on the home screen', () => {
+    renderWithProviders(<AppRoutes />, { route: '/phone' });
+
+    expect(screen.getByText(/erklärt beiträge auf antippen/i)).toBeInTheDocument();
+    expect(screen.getByText(/kamera aus\. keine reaktionserfassung/i)).toBeInTheDocument();
+  });
+});
+
+describe('assistance layer over a foreign app', () => {
+  it('marks the feed as someone else’s app and keeps the extension visible', () => {
+    renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
+
+    // Platform chrome.
+    expect(screen.getByRole('link', { name: /^start/i })).toBeInTheDocument();
+    // Assistance layer, on top of it.
+    expect(
+      screen.getByRole('button', { name: /contextlens öffnen/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/beiträge, konten und zahlen sind erfunden/i),
+    ).toBeInTheDocument();
+  });
+
+  it('pauses the whole layer from the overlay panel', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
+
+    expect(screen.getByText(/^inhaltsanalyse aktiv$/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /contextlens öffnen/i }));
+    await user.click(screen.getByRole('switch', { name: /assistenzschicht aktiv/i }));
+
+    expect(screen.getAllByText(/pausiert/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/^inhaltsanalyse aktiv$/i)).not.toBeInTheDocument();
+  });
+
+  it('never reports the analysis as running when it is switched off', () => {
+    // "Paused" and "analysis off" are different states. The strip over the
+    // foreign app is the only status a participant sees while browsing, so it
+    // must not collapse the two.
+    seedSettings({ contentAnalysis: false });
+    renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
+
+    expect(screen.getByText(/^inhaltsanalyse aus$/i)).toBeInTheDocument();
+    expect(screen.queryByText(/assistent pausiert/i)).not.toBeInTheDocument();
+  });
+
+  it('says so when a platform control does not exist in the prototype', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
+
+    await user.click(
+      screen.getByRole('button', { name: /suche \(im prototyp ohne funktion\)/i }),
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      /gibt es in diesem prototyp nicht/i,
+    );
+  });
+});
+
 describe('visual feed', () => {
   it('lists the example posts with assistant buttons', () => {
     renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
@@ -318,9 +411,11 @@ describe('personal overview', () => {
     const user = userEvent.setup();
     renderWithProviders(<AppRoutes />, { route: '/feed/discussion' });
 
-    // Visiting the feed logs the posts. The nav is rendered twice (desktop
-    // sidebar and mobile bar), so take the first match.
-    await user.click(screen.getAllByRole('link', { name: /^übersicht$/i })[0]);
+    // Visiting the feed logs the posts. The ContextLens app is not part of the
+    // simulated platform, so it is reached through the floating extension
+    // button that sits over it.
+    await user.click(screen.getByRole('button', { name: /contextlens öffnen/i }));
+    await user.click(screen.getByRole('link', { name: /persönliche übersicht/i }));
 
     expect(
       screen.getByRole('heading', { name: /persönliche übersicht/i }),

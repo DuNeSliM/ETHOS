@@ -17,52 +17,45 @@ const MODES = [
 ] as const;
 
 /**
- * Switch between the two simulated content views.
+ * Switch between the two simulated content views, styled as the segmented
+ * control such apps put under their header.
  *
  * A visible pair of tabs rather than a single toggle, so the second mode is
  * discoverable without interacting first - test participants should not have to
  * guess that a discussion feed exists.
+ *
+ * The active tab is marked three times over: a filled pill, a heavier weight
+ * and `aria-current`. Never by colour alone.
  */
 export function FeedModeSwitch() {
   return (
     <nav aria-label="Ansicht wechseln">
-      <ul className="flex gap-2">
+      <ul className="flex gap-1 rounded-full bg-surface-2 p-1">
         {MODES.map(({ to, label, hint, icon: Icon }) => (
           <li key={to} className="flex-1">
             <NavLink
               to={to}
               className={({ isActive }) => `
-                flex h-full flex-col gap-0.5 rounded-xl border px-3 py-2.5
-                transition-colors
+                flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5
+                text-sm transition-colors
                 ${
                   isActive
-                    ? 'border-assist bg-assist-tint'
-                    : 'border-line bg-surface hover:bg-surface-2'
+                    ? 'bg-surface font-bold text-ink panel-shadow'
+                    : 'font-medium text-muted hover:text-ink'
                 }
               `}
             >
               {({ isActive }) => (
                 <>
-                  <span className="flex items-center gap-2">
-                    <Icon
-                      aria-hidden="true"
-                      className={`size-4 ${isActive ? 'text-assist-strong' : 'text-muted'}`}
-                    />
-                    <span
-                      className={`text-sm font-semibold ${
-                        isActive ? 'text-assist-strong' : 'text-ink'
-                      }`}
-                    >
-                      {label}
-                    </span>
-                    {/* Text marker so the active tab is not colour-only. */}
-                    {isActive ? (
-                      <span className="ml-auto text-[0.625rem] font-bold uppercase tracking-wide text-assist-strong">
-                        aktiv
-                      </span>
-                    ) : null}
+                  <Icon
+                    aria-hidden="true"
+                    className="size-4 shrink-0"
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
+                  <span className="truncate">{label}</span>
+                  <span className="sr-only">
+                    {isActive ? ` – aktive Ansicht. ${hint}.` : ` – ${hint}.`}
                   </span>
-                  <span className="text-xs text-muted">{hint}</span>
                 </>
               )}
             </NavLink>

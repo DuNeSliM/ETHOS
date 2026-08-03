@@ -22,7 +22,7 @@ export function StatusBar() {
 
   return (
     <div className="border-t border-line bg-surface-2">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-1.5 px-4 py-1.5">
+      <div className="mx-auto flex max-w-[34rem] flex-wrap items-center gap-1.5 px-3 py-1.5">
         <span className="sr-only">Aktueller Status der Assistenzfunktionen:</span>
 
         {settings.assistantPaused ? (

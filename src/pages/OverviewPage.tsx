@@ -114,31 +114,31 @@ export function OverviewPage() {
         </Chip>
       ) : null}
 
-      {/* ---- counters ----------------------------------------------- */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        <Panel className="p-3.5">
-          <p className="text-2xl font-bold tabular-nums text-ink">
+      {/*
+        Counters as stacked rows rather than a three-column grid: the app is
+        laid out for a phone screen, where three columns would leave each
+        label three words wide.
+      */}
+      <div className="mt-6 grid gap-2">
+        <Panel className="flex items-baseline gap-3 p-3">
+          <p className="w-10 shrink-0 text-2xl font-bold tabular-nums text-ink">
             {history.length}
           </p>
-          <p className="mt-0.5 text-sm text-muted">
+          <p className="text-sm text-muted">
             {history.length === 1 ? 'Beitrag' : 'Beiträge'} angesehen
           </p>
         </Panel>
-        <Panel className="p-3.5">
-          <p className="text-2xl font-bold tabular-nums text-ink">
+        <Panel className="flex items-baseline gap-3 p-3">
+          <p className="w-10 shrink-0 text-2xl font-bold tabular-nums text-ink">
             {selfReportCount}
           </p>
-          <p className="mt-0.5 text-sm text-muted">
-            eigene Angaben gemacht
-          </p>
+          <p className="text-sm text-muted">eigene Angaben gemacht</p>
         </Panel>
-        <Panel className="p-3.5">
-          <p className="text-2xl font-bold tabular-nums text-ink">
+        <Panel className="flex items-baseline gap-3 p-3">
+          <p className="w-10 shrink-0 text-2xl font-bold tabular-nums text-ink">
             {history.filter((entry) => entry.openedAssistant).length}
           </p>
-          <p className="mt-0.5 text-sm text-muted">
-            Mal „Kontext erklären“ geöffnet
-          </p>
+          <p className="text-sm text-muted">Mal „Kontext erklären“ geöffnet</p>
         </Panel>
       </div>
 
@@ -156,7 +156,7 @@ export function OverviewPage() {
           </p>
         ) : (
           <>
-            <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+            <dl className="mt-3 grid gap-3">
               <DefinitionRow term={COMPARISON_LABEL.aligned} tone="assist">
                 {comparison.aligned} von {comparableTotal}
               </DefinitionRow>
@@ -263,7 +263,7 @@ export function OverviewPage() {
                   </div>
 
                   {reaction ? (
-                    <dl className="mt-3 grid gap-2.5 border-t border-line pt-3 sm:grid-cols-2">
+                    <dl className="mt-3 grid gap-2.5 border-t border-line pt-3">
                       <DefinitionRow
                         term="Automatisch geschätzter Ausdruck"
                         tone="assist"

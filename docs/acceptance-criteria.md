@@ -23,7 +23,7 @@ Stand: alle 89 automatisierten Tests grün, `npm run build` erfolgreich.
 | 11 | Datenschutzeinstellungen funktionieren | ERFÜLLT | `/settings`, Gating in `mockEngine`; Tests |
 | 12 | Alle lokalen Daten löschbar | ERFÜLLT | Einzeln, gesamt und Demo-Reset |
 | 13 | Research Mode mit drei Szenarien | ERFÜLLT | `scenarios.ts`; End-to-End-Test |
-| 14 | Mobil und Desktop nutzbar | TEILWEISE | Responsiv umgesetzt; manuelle Geräteprüfung offen |
+| 14 | Mobil und Desktop nutzbar | TEILWEISE | Telefonorientiertes Layout ab 320 px; auf dem Desktop im simulierten Geräterahmen. Manuelle Geräteprüfung offen |
 | 15 | `npm run build` erfolgreich | ERFÜLLT | Verifiziert |
 | 16 | Keine echte KI / externe API nötig | ERFÜLLT | Sweep ohne Treffer, siehe `privacy-review.md` |
 | 17 | Simulierte Daten deutlich gekennzeichnet | ERFÜLLT | `SimulatedBadge`, StatusBar, Platzhaltertexte |
@@ -187,6 +187,6 @@ ausgeschriebene Endpunkte. — ERFÜLLT (Test)
 | Kriterium | Status |
 |---|---|
 | `npm run build` erfolgreich | ERFÜLLT |
-| `npm test` grün (89 Tests) | ERFÜLLT |
+| `npm test` grün (99 Tests) | ERFÜLLT |
 | TypeScript strict ohne Fehler | ERFÜLLT |
 | Playwright-E2E-Smoke-Test | OFFEN (optionales Stretch Goal) |

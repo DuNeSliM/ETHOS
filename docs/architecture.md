@@ -22,18 +22,21 @@ simuliert.
 
 ```
 src/
-  app/            Shell, Routing, globaler Zustand
+  app/            ContextLens-App-Chrome, Routing, globaler Zustand
   components/     Geteilte, domänenfreie UI-Bausteine
   data/           Handgeschriebene Beispieldaten (Posts, Analysen, Community, Verläufe)
   features/
     analytics/    Community-Diagramm, Reaktionsverlauf, Vergleichslogik
     context-assistant/  Assistenzbutton, Assistenzkarte, Variantenzuordnung
+    device/       Simuliertes Telefon: Rahmen, Bühne, OS-Statusleiste
     feed/         Beitragskarten, Medienplatzhalter, Feed-Umschalter
+    plugin/       Präsenz der Assistenz über der fremden App
     reactions/    Eigene Reaktion, Kamera-Vorschau
     research-mode/ Szenarien, Sitzungszustand, Banner
     simulation/   Mock-Engine
+    social-app/   Chrome und Identität der simulierten Plattform
   hooks/          Wiederverwendbare Hooks
-  lib/            Reine Hilfsfunktionen (Speicher, Labels)
+  lib/            Reine Hilfsfunktionen (Speicher, Labels, Viewport)
   pages/          Screens; komponieren Features, enthalten wenig eigene Logik
   styles/         Design-Tokens und Basis-Styles
   test/           Testaufbau und Hilfsfunktionen
@@ -152,11 +155,31 @@ Besonderheiten:
 
 ## 6. Routing
 
-`src/app/App.tsx`. Landing, „So funktioniert es" und Onboarding liegen
-**außerhalb** der Shell (volle Breite, kein Ablenkungsrahmen). Alles, was während
-eines Tests besucht wird, liegt **innerhalb** von `<AppShell>` und zeigt damit
-immer die StatusBar. `/feed` leitet auf `/feed/visual` um, `*` auf eine
-Wiederherstellungsseite. Beim Routenwechsel wird nach oben gescrollt.
+`src/app/App.tsx`, drei ineinanderliegende Ebenen:
+
+```
+/                    Landing                 ─┐ Projektseite,
+/how-it-works        So funktioniert es      ─┘ volle Breite
+<DeviceLayout>                                 simuliertes Telefon
+  /onboarding        Einrichtung + Einwilligung
+  /phone             Startbildschirm
+  <SocialAppShell>   simulierte Plattform
+    /feed/visual  /feed/discussion  /post/:postId
+  <AppShell>         ContextLens-App
+    /overview  /settings  /privacy  /research
+*                    Wiederherstellungsseite
+```
+
+Die Verschachtelung ist inhaltlich, nicht kosmetisch: `SocialAppShell` und
+`AppShell` sind zwei Apps auf demselben Gerät, und keine enthält die andere.
+Beide zeigen den Zustand der Assistenzschicht permanent an — in der
+ContextLens-App über `StatusBar`, über der Plattform über `PluginStatusStrip`,
+mit identischem Wortlaut.
+
+`/feed` leitet auf `/feed/visual` um, `*` auf eine Wiederherstellungsseite. Beim
+Routenwechsel scrollt die jeweilige Shell über `scrollAppToTop()`
+(`src/lib/viewport.ts`) an den Anfang: Innerhalb des Geräterahmens ist der
+Telefonbildschirm (`#app-viewport`) die Scrollfläche, außerhalb das Fenster.
 
 ## 7. Lokale Speicherung
 
@@ -187,7 +210,7 @@ synchronisiert, tabübergreifend über das `storage`-Event.
 `offsetWidth`/`offsetHeight` (Recharts misst sonst 0×0 und rendert nichts) und
 `ResizeObserver`. Nach jedem Test wird aufgeräumt und `localStorage` geleert.
 
-Testabdeckung: 89 Tests in fünf Dateien, siehe `docs/test-plan.md`.
+Testabdeckung: 99 Tests in fünf Dateien, siehe `docs/test-plan.md`.
 
 ## 9. Erweiterungspunkte
 

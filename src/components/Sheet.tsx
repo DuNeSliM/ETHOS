@@ -7,6 +7,8 @@ import {
   type ReactNode,
 } from 'react';
 
+import { getAppViewport } from '@/lib/viewport';
+
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -24,8 +26,12 @@ type SheetProps = {
 };
 
 /**
- * Accessible dialog that renders as a bottom sheet on small screens and a
- * centred panel on wide ones.
+ * Accessible dialog, always a bottom sheet.
+ *
+ * The whole app now lives on a phone-sized screen - either a real one or the
+ * simulated device frame - so there is no wide layout left to design for, and
+ * a sheet that slides up from the bottom edge is what that form factor
+ * expects.
  *
  * Implemented by hand rather than with the native `<dialog>` element so the
  * focus behaviour is identical in the browser and in jsdom, where the tests
@@ -100,20 +106,29 @@ export function Sheet({
     return () => document.removeEventListener('keydown', onKeyDown, true);
   }, [open, onClose, focusables]);
 
-  // Keep the page behind the sheet from scrolling.
+  // Keep the page behind the sheet from scrolling. Inside the simulated device
+  // the scroll container is the phone screen rather than the document, so both
+  // have to be locked.
   useEffect(() => {
     if (!open) return;
-    const previous = document.body.style.overflow;
+
+    const viewport = getAppViewport();
+    const previousBody = document.body.style.overflow;
+    const previousViewport = viewport?.style.overflow;
+
     document.body.style.overflow = 'hidden';
+    if (viewport) viewport.style.overflow = 'hidden';
+
     return () => {
-      document.body.style.overflow = previous;
+      document.body.style.overflow = previousBody;
+      if (viewport) viewport.style.overflow = previousViewport ?? '';
     };
   }, [open]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/*
         Backdrop. `aria-hidden` because the dialog below carries the accessible
         name; the click target is duplicated by the explicit close button.
@@ -131,11 +146,12 @@ export function Sheet({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
+        // `max-h` in percent, not `dvh`: inside the device frame the sheet's
+        // containing block is the phone screen, and 90dvh would overflow it.
         className="
-          relative flex max-h-[90dvh] w-full flex-col overflow-hidden
+          relative flex max-h-[90%] w-full max-w-[34rem] flex-col overflow-hidden
           rounded-t-[var(--radius-sheet)] border border-assist-line
           bg-surface panel-shadow
-          sm:max-w-2xl sm:rounded-[var(--radius-sheet)]
         "
       >
         {/*
@@ -144,7 +160,7 @@ export function Sheet({
         */}
         <div aria-hidden="true" className="h-1.5 w-full shrink-0 bg-assist" />
 
-        <div className="flex items-start gap-3 border-b border-line px-4 py-3 sm:px-6 sm:py-4">
+        <div className="flex items-start gap-3 border-b border-line px-4 py-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2
@@ -176,12 +192,12 @@ export function Sheet({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
           {children}
         </div>
 
         {footer ? (
-          <div className="shrink-0 border-t border-line bg-surface-2 px-4 py-3 sm:px-6">
+          <div className="shrink-0 border-t border-line bg-surface-2 px-4 py-3">
             {footer}
           </div>
         ) : null}

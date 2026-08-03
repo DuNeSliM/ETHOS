@@ -98,7 +98,7 @@ export function LandingPage() {
             size="lg"
             // Skip the intro for a returning participant, but never skip the
             // consent screen that follows it.
-            onClick={() => navigate(onboardingDone ? '/feed/visual' : '/onboarding')}
+            onClick={() => navigate(onboardingDone ? '/phone' : '/onboarding')}
           >
             Demo starten
             <ArrowRight aria-hidden="true" className="size-4" />
@@ -113,8 +113,10 @@ export function LandingPage() {
         </div>
 
         <p className="mt-3 text-sm text-faint">
-          Die Nutzung ist vollständig freiwillig. Du kannst die Demo jederzeit
-          pausieren und alle lokal gespeicherten Daten löschen.
+          Die Demo läuft auf einem simulierten Telefon: Startbildschirm, eine
+          erfundene Foto-App und ContextLens als Erweiterung darüber. Die
+          Nutzung ist vollständig freiwillig – du kannst jederzeit pausieren und
+          alle lokal gespeicherten Daten löschen.
         </p>
 
         <h2 className="mt-14 text-xl font-bold tracking-tight text-ink">

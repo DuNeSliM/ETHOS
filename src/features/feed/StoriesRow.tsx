@@ -16,7 +16,7 @@ export function StoriesRow() {
   const authors = getPostsForMode('visual');
 
   return (
-    <section className="border-b border-line bg-surface py-3 sm:rounded-[var(--radius-panel)] sm:border sm:px-1">
+    <section className="border-b border-line bg-surface py-3">
       <p className="sr-only">
         Dekorativer Bereich: simulierte Kurzbeiträge anderer Konten. Er hat in
         diesem Prototyp keine Funktion.
@@ -41,12 +41,8 @@ export function StoriesRow() {
             key={post.id}
             className="flex w-16 shrink-0 flex-col items-center gap-1"
           >
-            <span
-              className="flex size-16 items-center justify-center rounded-full p-[2.5px]"
-              style={{
-                background: `linear-gradient(135deg, ${post.media?.palette[0] ?? '#9aa6ae'}, ${post.media?.palette[1] ?? '#6b7681'})`,
-              }}
-            >
+            {/* The unread ring: the one piece of colour this strip carries. */}
+            <span className="platform-gradient flex size-16 items-center justify-center rounded-full p-[2.5px]">
               <span className="flex size-full items-center justify-center rounded-full bg-surface p-[2px]">
                 <span className="flex size-full items-center justify-center rounded-full bg-surface-2 text-xs font-bold text-muted">
                   {post.author

@@ -1,48 +1,45 @@
 import { getPostsForMode } from '@/data/posts';
-import { FeedModeSwitch } from '@/features/feed/FeedModeSwitch';
 import { StoriesRow } from '@/features/feed/StoriesRow';
 import { VisualPostCard } from '@/features/feed/VisualPostCard';
-import { SimulatedBadge } from '@/components/primitives';
+import { PLATFORM_NAME } from '@/features/social-app/platform';
 
 /**
  * Visual feed: short videos and images with captions.
  *
- * The column is capped at the width a photo-sharing feed conventionally uses
- * (~30rem) and centred, so the layout works from a 320px phone up to a wide
- * desktop without a separate mobile design. Cards run edge to edge on small
- * screens and gain rounded corners from `sm` upward.
+ * The page is only the content column - header, view switch, status strip and
+ * tab bar belong to `SocialAppShell`, because they are chrome of the simulated
+ * platform rather than of this screen.
+ *
+ * The heading is present but visually hidden: a photo feed does not carry a
+ * page title, and inventing one would be the first thing that breaks the
+ * illusion. Screen reader users still get it, and the simulation notice below
+ * it is visible to everyone.
  */
 export function VisualFeedPage() {
   const posts = getPostsForMode('visual');
 
   return (
-    <div className="mx-auto max-w-[30rem]">
-      <FeedModeSwitch />
+    <div>
+      <h1 className="sr-only">Visual Feed</h1>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <h1 className="text-xl font-bold tracking-tight text-ink">Visual Feed</h1>
-        <SimulatedBadge label="Erfundene Beiträge" />
-      </div>
-      <p className="mt-1 text-sm text-muted">
-        Diese Beiträge, Konten und Zahlen sind erfunden. Tippe an einem Beitrag
-        auf „Kontext erklären“, um die Einschätzung der Assistenzschicht zu
-        sehen.
+      <p className="border-b border-sim-line bg-sim-tint px-3 py-1.5 text-center text-[0.6875rem] font-semibold text-sim">
+        Simulierter Feed von {PLATFORM_NAME} · Beiträge, Konten und Zahlen sind
+        erfunden
       </p>
 
-      {/* Full-bleed on phones, contained from `sm` upward. */}
-      <div className="-mx-4 mt-4 sm:mx-0">
-        <StoriesRow />
+      <StoriesRow />
 
-        <ul className="mt-4 space-y-4 sm:space-y-5">
-          {posts.map((post) => (
-            <li key={post.id}>
-              <VisualPostCard post={post} />
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* No gaps between posts: the hairline under each card is the divider,
+          the way this genre has always done it. */}
+      <ul>
+        {posts.map((post) => (
+          <li key={post.id}>
+            <VisualPostCard post={post} />
+          </li>
+        ))}
+      </ul>
 
-      <p className="mt-8 text-center text-sm text-faint">
+      <p className="px-4 py-8 text-center text-sm text-faint">
         Ende des simulierten Feeds. Es gibt {posts.length} Beispielbeiträge in
         dieser Ansicht.
       </p>

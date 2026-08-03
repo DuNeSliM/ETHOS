@@ -2,6 +2,9 @@
 
 **UX-Forschungsprototyp für eine freiwillige Assistenzschicht in sozialen Medien.**
 
+Die Demo läuft auf einem **simulierten Telefon**: Startbildschirm, darauf eine
+erfundene Foto-App und ContextLens als Erweiterung, die über ihr liegt.
+
 ContextLens erklärt auf Anfrage, was in einem Beitrag mitschwingen könnte:
 Sarkasmus, Ironie, emotionale Untertöne, Tonfall, mögliche Absichten und stark
 zuspitzende oder auf Empörung ausgerichtete Formulierungen. Es richtet sich vor
@@ -26,7 +29,7 @@ npm run dev      # http://localhost:5173
 | `npm run dev` | Entwicklungsserver |
 | `npm run build` | Produktionsbuild (`tsc -b && vite build`) |
 | `npm run preview` | Produktionsbuild lokal ansehen |
-| `npm test` | Testsuite (89 Tests) |
+| `npm test` | Testsuite (99 Tests) |
 | `npm run test:watch` | Tests im Watch-Modus |
 
 Voraussetzung: Node.js 20 oder neuer.
@@ -48,22 +51,38 @@ Formulierungen bleiben durchgehend abgeschwächt („wahrscheinlich",
 „möglicherweise", „Analyse nicht eindeutig"). Jede Karte nennt, was sie **nicht**
 wissen kann. Diese Sprachregeln sind als automatisierte Tests kodiert.
 
+## Die drei Ebenen der Demo
+
+| Ebene | Was es ist |
+|---|---|
+| **Gerät** | Ein simuliertes Telefon mit Startbildschirm. Ab 1024 px wird der Rahmen gezeichnet, darunter läuft dieselbe Ansicht bildschirmfüllend – auf einem echten Telefon ist der Browser bereits das Gerät. |
+| **Plattform** | `Momento`, eine erfundene Foto-App. Übernommen sind die Konventionen der Gattung, nichts Markenspezifisches. Konten, Zahlen und Beiträge sind erfunden. |
+| **Assistenzschicht** | ContextLens. Über der fremden App als schmale Statusleiste und schwebender Knopf; daneben als eigene App für Übersicht, Datenschutz, Einstellungen und Research Mode. |
+
+Dass die Assistenz **nicht** zur Plattform gehört, ist die zentrale Aussage des
+Prototyps – deshalb ist sie sichtbar gebaut statt nur behauptet.
+
 ## Rundgang durch die Demo
 
 1. **Startseite** → „Demo starten"
-2. **Onboarding**, 4 Infoschritte + 1 Einwilligungsschritt. Die Kameraerfassung
+2. **Einrichtung**, 4 Infoschritte + 1 Einwilligungsschritt. Die Kameraerfassung
    ist aus und bleibt es, bis sie ausdrücklich eingeschaltet wird.
-3. **Visual Feed** – an einem Beitrag „Kontext erklären" antippen.
+3. **Startbildschirm des Telefons.** Das Widget zeigt, was die Erweiterung
+   gerade tut. Zwei Symbole führen weiter: die Foto-App und ContextLens.
+4. **Visual Feed** – an einem Beitrag „Kontext erklären" antippen.
    Empfehlung: der Beitrag über die Zugverspätung (Sarkasmus, Sicherheit mittel)
    und der kurze Clip ohne Kontext (die App gibt bewusst keine Einschätzung ab).
-4. **Discussion Feed** – hier fehlen Tonfall und Mimik; der Beitrag zum Fahrplan
+5. **Discussion Feed** – hier fehlen Tonfall und Mimik; der Beitrag zum Fahrplan
    zeigt Ironie mit **niedriger** Sicherheit.
-5. **Einstellungen** – „Simulierte eigene Reaktionserfassung" einschalten.
+6. **Schwebender ContextLens-Knopf** – Hauptschalter und Wege in die
+   ContextLens-App. Einmal pausieren und wieder einschalten zeigt sofort, was
+   zur Assistenz gehört und was zur Plattform.
+7. **Einstellungen** – „Simulierte eigene Reaktionserfassung" einschalten.
    An den Beiträgen erscheint nun ein dezenter Chip.
-6. **Detailansicht** eines Videos – Reaktionsverlauf und Community-Reaktionen.
+8. **Detailansicht** eines Videos – Reaktionsverlauf und Community-Reaktionen.
    Den Umschalter zwischen „Automatische Schätzungen" und „Aktive
    Selbstauskünfte" ausprobieren: Diagramm **und** Teilnehmerzahl ändern sich.
-7. **Research Mode** – drei geführte Testszenarien mit Bewertung und Export.
+9. **Research Mode** – drei geführte Testszenarien mit Bewertung und Export.
 
 Ein Hinweis für Vorführungen: Bei einem Beitrag schätzt das System absichtlich
 falsch („sichtbares Lächeln" bei einem Beitrag, der die meisten Menschen ärgert).
@@ -73,16 +92,19 @@ Das ist kein Fehler, sondern der Prüffall für die Korrekturfunktion.
 
 ```
 src/
-  app/           Shell, Routing, globaler Zustand
+  app/           ContextLens-App-Chrome, Routing, globaler Zustand
   components/    Geteilte UI-Bausteine
   data/          Handgeschriebene Beispieldaten
   features/
     analytics/          Community-Diagramm, Reaktionsverlauf
     context-assistant/  Assistenzbutton und -karte
-    feed/               Beitragskarten, Medienplatzhalter
+    device/             Simuliertes Telefon: Rahmen und OS-Statusleiste
+    feed/               Beitragskarten, Medienplatzhalter, Stories
+    plugin/             Präsenz der Assistenz über der fremden App
     reactions/          Eigene Reaktion, Kamera-Vorschau
     research-mode/      Szenarien und Sitzungszustand
     simulation/         Mock-Engine
+    social-app/         Chrome der simulierten Plattform
   hooks/  lib/  pages/  styles/  test/  types/
 docs/            Dokumentation (siehe unten)
 ```
@@ -127,7 +149,9 @@ Nachweisbar im Code (Belege in `docs/privacy-review.md`):
 
 Dies ist ein Konzeptprototyp für Nutzertests, kein Produkt. Die Analysen sind
 geschrieben, nicht berechnet; die Community-Zahlen sind erfunden; es gibt neun
-Beispielbeiträge. Vollständige Liste in
+Beispielbeiträge. Die simulierte Foto-App ist eine Attrappe: Suche, Erstellen,
+Reels, Profil und Direktnachrichten sagen beim Antippen, dass es sie im
+Prototyp nicht gibt. Vollständige Liste in
 [`docs/known-limitations.md`](docs/known-limitations.md).
 
 ---

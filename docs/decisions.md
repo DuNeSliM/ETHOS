@@ -201,3 +201,80 @@ Design-Tokens, Typen und der Mock-Engine gegenseitig überschrieben.
 
 **Konsequenz.** Vier von fünf Subagents brachen wegen eines Sitzungslimits ab;
 deren Dokumente wurden im Hauptchat fertiggestellt. Siehe `AGENTS.md`.
+
+---
+
+## E-014: Die Demo läuft auf einem simulierten Telefon
+
+**Kontext.** Bis dahin lief der Prototyp als normale Website: eine Kopfzeile mit
+ContextLens-Logo, darunter der Feed. Damit war die zentrale Produktaussage – die
+Assistenz liegt **über einer fremden App** – nur behauptet, nicht sichtbar. Eine
+Testperson konnte den Feed für einen Teil von ContextLens halten, und für die
+Vorführung sah alles nach „Demo" statt nach Produkt aus.
+
+**Entscheidung.** Die gesamte Demo läuft in einem simulierten Telefon
+(`features/device/`): Geräterahmen, Betriebssystem-Statusleiste,
+Startbildschirm mit App-Symbolen, darauf zwei getrennte Apps – die simulierte
+Plattform und ContextLens.
+
+**Begründung.** Das Verhältnis der drei Beteiligten (Gerät, Plattform,
+Assistenzschicht) wird dadurch ohne Erklärtext erfahrbar. Für die Nutzertests
+ist das entscheidend: Die Frage „Wem gehört dieser Hinweis?" ist eine der
+Forschungsfragen und lässt sich nur beantworten, wenn die Grenze sichtbar ist.
+
+**Konsequenz.**
+- Ab `lg` (1024 px) wird der Rahmen gezeichnet, darunter läuft die Ansicht
+  bildschirmfüllend – auf einem echten Telefon ist der Browser bereits das Gerät.
+- Die Bildschirmfläche ist der Scrollcontainer, nicht das Fenster. `AppShell`
+  und `SocialAppShell` scrollen deshalb über `lib/viewport.ts` und nicht über
+  `window.scrollTo`.
+- `position: fixed` löst innerhalb des Rahmens gegen den Telefonbildschirm auf.
+  Das erzwingt die `transform`-Regel in `.device-screen` (siehe
+  `docs/design-system.md`).
+- Das Layout ist ab sofort ausschließlich telefonorientiert. Mehrspaltige
+  Desktop-Layouts wurden entfernt, nicht nur ausgeblendet. Zur verbleibenden
+  Grenze siehe `docs/known-limitations.md`.
+
+---
+
+## E-015: Eine erfundene Plattform statt einer nachgebauten Marke
+
+**Kontext.** Der Wiedererkennungswert einer Foto-Sharing-Oberfläche ist für die
+Demo wertvoll: Wer den Feed sofort einordnen kann, richtet seine Aufmerksamkeit
+auf die Assistenzschicht statt auf eine unbekannte Bedienlogik.
+
+**Entscheidung.** Übernommen werden **Konventionen der Gattung** – Wortmarke mit
+Farbverlauf, Stories-Streifen, randlose 4∶5-Medien, Aktionszeile, Tab-Leiste.
+Nicht übernommen wird irgendetwas Markenspezifisches. Die Plattform heißt
+`Momento` (`features/social-app/platform.ts`), Konten, Zahlen und Beiträge sind
+erfunden, der Farbverlauf ist eine eigene Rampe.
+
+**Begründung.** Der Erkennungsgewinn stammt aus der Struktur, nicht aus dem
+Logo. Ein nachgebautes Markenzeichen brächte rechtliche Fragen und würde
+außerdem suggerieren, es gäbe eine Kooperation oder eine echte Integration.
+
+**Konsequenz.** Jede Feed-Ansicht trägt einen sichtbaren Hinweis, dass es sich
+um eine erfundene App handelt. Der Name liegt in einer Konstante und ist für
+eine andere Studienrahmung an einer Stelle austauschbar.
+
+---
+
+## E-016: Die Assistenzschicht bekommt eine eigene, dauerhaft sichtbare Präsenz
+
+**Kontext.** Wenn ContextLens nur noch aus Elementen innerhalb der Beiträge
+besteht, verschwimmt es mit der Plattform – genau das Missverständnis, das E-014
+auflösen soll.
+
+**Entscheidung.** Über der Plattform liegen zwei Elemente, die eindeutig zur
+Assistenzschicht gehören: eine schmale Statusleiste unter der App-Kopfzeile und
+ein schwebender Knopf („ContextLens öffnen"), der ein Panel mit Status,
+Hauptschalter und Verweisen in die ContextLens-App öffnet.
+
+**Begründung.** Der Knopf allein beantwortet die Frage „Läuft die Kamera
+gerade?" nicht, denn dafür müsste man ihn erst öffnen. Die Statusleiste allein
+bietet keinen Weg in die Verwaltung. Zusammen decken sie beides ab, und beide
+tragen die Assist-Farbfamilie, während die Plattform schwarz auf weiß bleibt.
+
+**Konsequenz.** Das Panel ist ausschließlich eine Abkürzung. Jede Funktion
+darin ist auch über die ContextLens-App erreichbar; wer den Knopf nie findet,
+verliert keine Funktion.

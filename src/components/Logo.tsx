@@ -7,7 +7,18 @@ import { Link } from 'react-router-dom';
  * and paired with a permanent "Prototyp" tag - participants should never lose
  * track of the fact that they are looking at a research build.
  */
-export function Logo({ asLink = true }: { asLink?: boolean }) {
+export function Logo({
+  asLink = true,
+  /**
+   * Where the wordmark leads. Defaults to the phone's home screen: inside the
+   * demo the logo is the way back out of the ContextLens app, not the way out
+   * of the demo.
+   */
+  to = '/phone',
+}: {
+  asLink?: boolean;
+  to?: string;
+}) {
   const content = (
     <>
       <span
@@ -40,7 +51,7 @@ export function Logo({ asLink = true }: { asLink?: boolean }) {
 
   return (
     <Link
-      to="/"
+      to={to}
       className="flex items-center gap-2 rounded-lg py-0.5 pr-2 hover:opacity-80"
     >
       {content}

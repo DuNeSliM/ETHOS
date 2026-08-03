@@ -53,7 +53,7 @@ export function VisualPostCard({ post }: { post: Post }) {
   const isLongCaption = post.body.length > 120;
 
   return (
-    <article className="overflow-hidden border-y border-line bg-surface sm:rounded-[var(--radius-panel)] sm:border-x">
+    <article className="border-b border-line bg-surface">
       {/* ---- author row ---------------------------------------------- */}
       <header className="flex items-center gap-3 px-3 py-2.5">
         {/*

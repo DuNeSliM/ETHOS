@@ -19,6 +19,7 @@ stellt sicher, dass der manuelle Export vor der Abgabe vollständig erfolgt.
 | P-004 | Agent 2 | `exports/P-004-agent2.md` | [ ] | Vollständiger Verlauf, erfolgreich abgeschlossen |
 | P-006 | Agent 6 | `exports/P-006-agent6.md` | [ ] | Nur Teilverlauf — Abbruch |
 | P-007 | Agent 7 | `exports/P-007-agent7.md` | [ ] | Nur Teilverlauf — Abbruch |
+| P-008 | Main (zweite Sitzung) | `exports/P-008-produktrahmung.md` | [ ] | Eigener Verlauf vom 31.07.2026: Telefonrahmen, Plattform-Optik, Assistenz als Erweiterung |
 
 P-005 hat keinen eigenen Verlauf: die Simulationsarbeit lief als Arbeitsphase im
 Hauptchat und ist in `P-001-master.md` enthalten.

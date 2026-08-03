@@ -1,7 +1,9 @@
 # Accessibility-Review
 
 **Methode.** Manuelles Code-Audit gegen WCAG 2.1 AA, ergänzt um rechnerisch
-ermittelte Kontrastwerte für alle Farbtoken in beiden Farbschemata.
+ermittelte Kontrastwerte für alle Farbtoken in beiden Farbschemata. Seit der
+Umstellung auf die Telefonansicht gehören dazu auch die überschriebenen Tokens
+des Plattform-Skins.
 
 **Ausdrücklich nicht durchgeführt:**
 
@@ -78,6 +80,28 @@ verwendet nun dieselbe Grundfarbe wie `neutral` und wird durch eine
 **diagonale Schraffur** unterschieden statt durch Helligkeit. Das ist auch für
 Menschen mit Farbfehlsichtigkeit die bessere Lösung.
 
+### Plattform-Skin (simulierte Foto-App)
+
+Innerhalb von `.platform-skin` gelten eigene Flächen- und Textfarben (siehe
+`docs/design-system.md`, 3.1a). Berechnet gegen die jeweilige eigene Fläche
+(`#ffffff` hell, `#000000` dunkel):
+
+| Token | Hell | Dunkel |
+|---|---|---|
+| `--cl-text` | 21,00 | 20,20 |
+| `--cl-text-muted` | 7,59 | 10,00 |
+| `--cl-text-faint` | 5,33 | 8,10 |
+| `--cl-border-strong` | 4,54 | 5,98 |
+
+Der Sekundärgrauton, den diese App-Gattung üblicherweise verwendet (`#8e8e8e`,
+3,0:1), wurde bewusst **nicht** übernommen. Die Nachahmung endet dort, wo sie
+Lesbarkeit kosten würde.
+
+Die Assist-Tokens bleiben im Skin unverändert; die dort ausgewiesenen Werte
+gelten also auch innerhalb der simulierten App, mit einer Ausnahme:
+`text-assist-strong` auf `bg-assist-tint` in der Assistenzleiste – dieses Paar
+stammt vollständig aus der Assist-Familie und ist oben bereits ausgewiesen.
+
 ---
 
 ## 2. Befunde
@@ -93,6 +117,10 @@ Menschen mit Farbfehlsichtigkeit die bessere Lösung.
 | A-07 | `components/Sheet.tsx` | niedrig | — | Der Fokus-Filter nutzt `offsetParent !== null`. In jsdom ist das immer `null`, die Tests prüfen daher einen anderen Zweig als der Browser. | Kein Nutzerproblem. In `known-limitations.md` vermerkt. |
 | A-08 | `features/feed/MediaPlaceholder.tsx` | niedrig | 1.4.3 | Die Farbverläufe der Platzhalter stammen aus den Daten und reagieren nicht auf den Dunkelmodus. Der Text darauf liegt jedoch auf `bg-black/55`. | Akzeptiert. |
 | A-09 | — | offen | 4.1.2 | Kein Test mit echtem Screenreader. | **offen** |
+| A-10 | `features/social-app/PlatformTabBar.tsx` | niedrig | 2.5.3 / 3.2.4 | Vier der fünf Einträge der simulierten Tab-Leiste haben keine Funktion. Ein stiller Nicht-Effekt wäre für Screenreader- und Tastaturnutzende nicht erklärbar. | Gelöst: zugänglicher Name „Suche (im Prototyp ohne Funktion)" – sichtbarer Text steht am Anfang des Namens (2.5.3 erfüllt) –, beim Auslösen eine Meldung in einer `role="status"`-Region. |
+| A-11 | `pages/PhoneHomePage.tsx` | niedrig | 1.3.1 | Neun Symbole des Startbildschirms sind Kulisse. | Gelöst wie beim Stories-Streifen: `aria-hidden`, nicht fokussierbar, dazu ein `sr-only`-Satz, der die Kulisse benennt. Nur die drei benutzbaren Ziele liegen im Tastaturpfad. |
+| A-12 | `features/social-app/PlatformWordmark.tsx` | niedrig | 1.4.1 | Die Wortmarke ist Text mit `bg-clip-text` und `text-transparent`; in `forced-colors`-Modi würde sie verschwinden. | Gelöst: `forced-colors:bg-none forced-colors:text-ink`. |
+| A-13 | `features/plugin/PluginOverlay.tsx` | niedrig | 1.4.1 / 1.3.1 | Die Assistenzleiste kürzt drei Statusangaben in eine Zeile. | Gelöst: jede Angabe ist ein eigenes Element mit unverändertem Wortlaut, darunter steht derselbe Zustand als ausformulierter `sr-only`-Satz. Der Zustand des schwebenden Knopfes wird zusätzlich über Beschriftung und Rahmen getragen, nicht nur über die Farbe. |
 
 Nach den Korrekturen sind keine Befunde der Schwere hoch oder mittel offen.
 
@@ -167,6 +195,10 @@ Fachbegriffe werden erklärt. Das ist für die Zielgruppe besonders relevant.
 |---|---|
 | Landing | Tab-Reihenfolge folgt der Leserichtung; beide Hauptaktionen erreichbar |
 | Onboarding | Fortschritt wird als Text angesagt; „Zurück" ist im ersten Schritt korrekt deaktiviert |
+| Startbildschirm | Drei Ziele im Tastaturpfad (simulierte App, ContextLens, Ausstiegslink) plus die zwei Widget-Knöpfe; die neun Kulissensymbole werden übersprungen |
+| Geräterahmen | Bringt selbst kein Bedienelement mit; Gehäuse, Tasten und Home-Indikator sind `aria-hidden`. Die Statusleiste trägt nur einen `sr-only`-Text zum Zustand der Erweiterung |
+| Simulierte App | Kopfzeile → Ansichtswechsel → Assistenzleiste (inkl. „Pausieren") → Feed → schwebender Knopf → Tab-Leiste. Die vier funktionslosen Tabs sind erreichbar und sagen beim Auslösen, dass es sie nicht gibt |
+| Assistenz-Panel | Wie jedes `Sheet`: Fokus hinein, Fokusfalle, Escape, Fokusrückgabe. Enthält Hauptschalter und vier Verweise in die ContextLens-App |
 | Visual Feed | Pro Beitrag: Abspielen → Scrubber → „Kontext erklären" → Detail-Link; Reaktions-Chip nur bei aktiver Erfassung |
 | Discussion Feed | Beitrag, dann Kommentare; kompakte Assistenzbuttons an Kommentaren erreichbar |
 | Post-Detail | Feste Reihenfolge Inhalt → Analyse → Verlauf → Community; Quellen-Umschalter als `role="radiogroup"` |

@@ -22,7 +22,7 @@ export function ResearchBanner() {
 
   return (
     <div className="border-t border-sim-line bg-sim-tint">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-1.5">
+      <div className="mx-auto flex max-w-[34rem] flex-wrap items-center gap-x-3 gap-y-1 px-3 py-1.5">
         <span className="inline-flex items-center gap-1.5 text-xs font-bold text-sim">
           <FlaskConical aria-hidden="true" className="size-3.5" />
           Research Mode: Aufgabe läuft

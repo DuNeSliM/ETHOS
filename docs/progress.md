@@ -1,7 +1,7 @@
 # Fortschritt
 
-Stand: 30.07.2026 · Branch `feat/contextlens-prototype`
-**Build:** erfolgreich · **Tests:** 92 / 92 grün
+Stand: 31.07.2026 · Branch `feat/contextlens-prototype`
+**Build:** erfolgreich · **Tests:** 99 / 99 grün
 
 ## Phasenübersicht
 
@@ -13,6 +13,7 @@ Stand: 30.07.2026 · Branch `feat/contextlens-prototype`
 | 4 | Transparency and Analytics: Community, Verlauf, persönliche Übersicht, Speicherung, Löschen | **abgeschlossen** |
 | 5 | Research Mode: drei Aufgaben, Bewertung, lokale Speicherung, JSON-/CSV-Export | **abgeschlossen** |
 | 6 | Polish and QA: Responsive, Tastatur, Kontraste, Texte, Build, Tests, Leerzustände, Reset | **abgeschlossen** |
+| 7 | Produktrahmung: simuliertes Telefon, Startbildschirm, eigenständige Plattform-App, Assistenz als Erweiterung darüber | **abgeschlossen** |
 
 ## Was funktioniert
 
@@ -51,8 +52,20 @@ Stand: 30.07.2026 · Branch `feat/contextlens-prototype`
 - Vier Bewertungsfragen (1–5) mit ausgeschriebenen Skalenenden plus Freitext
 - Lokale Speicherung, Export als JSON und CSV
 
+**Produktrahmung (Phase 7)**
+- Simuliertes Telefon ab 1024 px: Gehäuse, Betriebssystem-Statusleiste mit echter
+  Uhrzeit, Home-Indikator; darunter läuft dieselbe Ansicht bildschirmfüllend
+- Startbildschirm mit ContextLens-Widget, zwei benutzbaren App-Symbolen und
+  Kulissensymbolen ohne Funktion
+- Simulierte Foto-App „Momento" mit eigener Wortmarke, Segmented Control,
+  Tab-Leiste und eigener Farbwelt (`.platform-skin`, schwarz auf weiß)
+- ContextLens erscheint dort nur als Erweiterung: Statusleiste unter der
+  Kopfzeile und schwebender Knopf mit Panel (Hauptschalter plus Verweise)
+- Bedienelemente der Plattform, die es im Prototyp nicht gibt, sagen das beim
+  Antippen, statt stumm zu bleiben
+
 **Querschnitt**
-- Hell-/Dunkelmodus, responsive von 320 px bis Desktop
+- Hell-/Dunkelmodus, telefonorientiertes Layout von 320 px aufwärts
 - Tastaturbedienung, Fokusfalle im Dialog, Skip-Link
 - Kein Status wird nur über Farbe kommuniziert
 - StatusBar zeigt durchgehend Analyse-, Kamera- und Speicherstatus
@@ -70,7 +83,11 @@ Stand: 30.07.2026 · Branch `feat/contextlens-prototype`
 | Review-Korrekturen | 8 Befunde behoben, siehe `AGENTS.md` Abschnitt 3 |
 | Kontrastprüfung | Alle Textpaare erreichen AA; zwei Token korrigiert |
 | Visual Feed überarbeitet | Struktur einer Foto-Sharing-Oberfläche: Stories-Streifen, randlose 4∶5-Medien, Aktionszeile, Handle-Caption. Nur Struktur übernommen, keine Marke |
-| Abschlussprüfung | Build erfolgreich, 92/92 Tests grün |
+| Visual Feed überarbeitet (2. Durchgang) | Feed randlos, Trennung nur durch Haarlinie, Story-Ringe aus der Plattformrampe |
+| Telefonrahmen ergänzt | `features/device/`, `#app-viewport` als Scrollfläche, `transform`-Regel für `position: fixed` |
+| Apps getrennt | Zwei Shells statt einer: `SocialAppShell` (Plattform) und `AppShell` (ContextLens) |
+| Mehrspaltige Desktop-Layouts entfernt | `sm:grid-cols-*` in der Übersicht und das breite Sheet-Layout ersetzt – Begründung in `docs/known-limitations.md` |
+| Abschlussprüfung | Build erfolgreich, 99/99 Tests grün |
 
 ## Offene Punkte
 

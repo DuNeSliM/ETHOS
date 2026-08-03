@@ -88,27 +88,36 @@ export function OnboardingPage() {
 
   function finish() {
     setOnboardingDone(true);
-    navigate('/feed/visual');
+    navigate('/phone');
   }
 
   return (
-    <div className="min-h-dvh bg-canvas">
+    <div className="app-min-h bg-canvas">
       <header className="border-b border-line bg-surface">
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 px-4 py-3">
           <Logo asLink={false} />
           <Link
-            to="/feed/visual"
+            to="/phone"
             onClick={() => setOnboardingDone(true)}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-surface-2 hover:text-ink"
+            className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-muted hover:bg-surface-2 hover:text-ink"
           >
             Überspringen
           </Link>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-8">
+      <main className="mx-auto max-w-2xl px-4 py-6">
+        {/*
+          Framed as the extension's installation, because that is what it is:
+          this screen runs once, before any app is opened, and it is the only
+          place consent is granted.
+        */}
+        <p className="text-xs font-bold uppercase tracking-wide text-assist-strong">
+          ContextLens einrichten
+        </p>
+
         {/* Progress. Text first so it does not rely on the bar being visible. */}
-        <p className="text-sm font-semibold text-faint">
+        <p className="mt-1 text-sm font-semibold text-faint">
           Schritt {index + 1} von {totalSteps}
         </p>
         <div
@@ -252,7 +261,7 @@ export function OnboardingPage() {
           <div className="ml-auto">
             {isConsentStep ? (
               <Button variant="assist" size="lg" onClick={finish}>
-                Einstellungen übernehmen und starten
+                Aktivieren und Telefon öffnen
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Button>
             ) : (

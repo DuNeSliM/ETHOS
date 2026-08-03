@@ -14,6 +14,8 @@ import { useAppState } from '@/app/AppStateProvider';
 import { StatusBar } from '@/components/StatusBar';
 import { Logo } from '@/components/Logo';
 import { ResearchBanner } from '@/features/research-mode/ResearchBanner';
+import { PLATFORM_NAME } from '@/features/social-app/platform';
+import { scrollAppToTop } from '@/lib/viewport';
 
 /**
  * `match` is the path prefix that keeps a nav item highlighted. The feed entry
@@ -25,24 +27,30 @@ const NAV_ITEMS = [
   { to: '/overview', match: ['/overview'], label: 'Übersicht', icon: ClipboardList },
   { to: '/privacy', match: ['/privacy'], label: 'Datenschutz', icon: ShieldCheck },
   { to: '/settings', match: ['/settings'], label: 'Einstellungen', icon: Settings2 },
-  { to: '/research', match: ['/research'], label: 'Research Mode', icon: ScanFace },
+  { to: '/research', match: ['/research'], label: 'Research', icon: ScanFace },
 ] as const;
 
 /**
- * Application chrome shared by every screen inside the demo.
+ * Chrome of the ContextLens app itself.
  *
- * The chrome belongs to the ASSISTANCE LAYER, not to the simulated platform,
- * and is styled accordingly - the feed content inside `<Outlet />` deliberately
- * looks like a different product.
+ * Two apps run on the simulated phone. `SocialAppShell` is the platform the
+ * assistance layer lies over; this one is where the participant manages the
+ * assistance layer - history, privacy, consent switches, research mode. It
+ * wears the teal `assist` family throughout, so switching between the two is
+ * unmistakable even at a glance from the back of a room.
+ *
+ * Laid out phone-first: one column, controls at thumb height, a tab bar that
+ * does not change between breakpoints. The first tab leads back out into the
+ * platform.
  */
 export function AppShell() {
   const { settings, updateSetting } = useAppState();
   const location = useLocation();
 
-  // Move the viewport to the top on navigation. Without this, going from a
-  // long feed into a settings screen can open scrolled halfway down.
+  // Move the view to the top on navigation - the phone screen scrolls, not the
+  // window, so this cannot be left to the browser.
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    scrollAppToTop();
   }, [location.pathname]);
 
   const isDark =
@@ -52,7 +60,7 @@ export function AppShell() {
       window.matchMedia?.('(prefers-color-scheme: dark)').matches);
 
   return (
-    <div className="min-h-dvh bg-canvas">
+    <div className="app-min-h flex flex-col bg-canvas">
       <a
         href="#main"
         className="
@@ -64,47 +72,17 @@ export function AppShell() {
       </a>
 
       <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5">
+        <div className="mx-auto flex max-w-[34rem] items-center gap-2 px-3 py-2">
           <Logo />
-
-          <nav aria-label="Hauptnavigation" className="ml-auto hidden md:block">
-            <ul className="flex items-center gap-1">
-              {NAV_ITEMS.map(({ to, match, label, icon: Icon }) => {
-                const isActive = match.some((prefix) =>
-                  location.pathname.startsWith(prefix),
-                );
-                return (
-                  <li key={to}>
-                    <NavLink
-                      to={to}
-                      aria-current={isActive ? 'page' : undefined}
-                      className={`
-                        flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium
-                        transition-colors
-                        ${
-                          isActive
-                            ? 'bg-assist-tint text-assist-strong'
-                            : 'text-muted hover:bg-surface-2 hover:text-ink'
-                        }
-                      `}
-                    >
-                      <Icon aria-hidden="true" className="size-4" />
-                      {label}
-                    </NavLink>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
 
           <button
             type="button"
             onClick={() => updateSetting('theme', isDark ? 'light' : 'dark')}
             aria-pressed={isDark}
             className="
-              ml-auto flex items-center gap-1.5 rounded-lg border border-line px-2.5
-              py-2 text-xs font-medium text-muted hover:bg-surface-2 hover:text-ink
-              md:ml-0
+              ml-auto flex shrink-0 items-center gap-1.5 rounded-lg border
+              border-line px-2.5 py-2 text-xs font-medium text-muted
+              hover:bg-surface-2 hover:text-ink
             "
           >
             {isDark ? (
@@ -112,7 +90,7 @@ export function AppShell() {
             ) : (
               <Moon aria-hidden="true" className="size-4" />
             )}
-            {isDark ? 'Helles Design' : 'Dunkles Design'}
+            {isDark ? 'Hell' : 'Dunkel'}
           </button>
         </div>
 
@@ -120,19 +98,21 @@ export function AppShell() {
         <ResearchBanner />
       </header>
 
-      <main id="main" className="mx-auto max-w-6xl px-4 pb-28 pt-4 md:pb-12">
-        <Outlet />
+      <main id="main" className="flex-1 pb-24">
+        <div className="mx-auto w-full max-w-[34rem] px-3 pt-4">
+          <Outlet />
+        </div>
       </main>
 
-      {/* Mobile navigation. Labels stay visible - icons alone are not enough. */}
+      {/*
+        Tab bar. Labels stay visible - icons alone are not enough - and the
+        active tab carries a bar under it so the state is not colour-only.
+      */}
       <nav
-        aria-label="Hauptnavigation"
-        className="
-          fixed bottom-0 left-0 right-0 z-30 border-t border-line
-          bg-surface/98 backdrop-blur md:hidden
-        "
+        aria-label="Navigation von ContextLens"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-assist-line bg-surface/98 backdrop-blur"
       >
-        <ul className="mx-auto flex max-w-2xl items-stretch">
+        <ul className="mx-auto flex max-w-[34rem] items-stretch">
           {NAV_ITEMS.map(({ to, match, label, icon: Icon }) => {
             const isActive = match.some((prefix) =>
               location.pathname.startsWith(prefix),
@@ -143,8 +123,8 @@ export function AppShell() {
                   to={to}
                   aria-current={isActive ? 'page' : undefined}
                   className={`
-                    flex h-full flex-col items-center gap-0.5 px-1 py-2 text-center
-                    text-[0.6875rem] font-medium leading-tight
+                    flex h-full flex-col items-center gap-0.5 px-0.5 py-2
+                    text-center text-[0.625rem] font-medium leading-tight
                     ${isActive ? 'text-assist-strong' : 'text-muted'}
                   `}
                 >
@@ -165,6 +145,10 @@ export function AppShell() {
             );
           })}
         </ul>
+
+        <p className="sr-only">
+          Der erste Eintrag führt zurück in die simulierte App {PLATFORM_NAME}.
+        </p>
       </nav>
     </div>
   );

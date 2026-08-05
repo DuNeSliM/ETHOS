@@ -6,7 +6,7 @@ Nachvollziehbarkeit für die Studienarbeit.
 
 - **Werkzeug:** Claude Code (CLI)
 - **Modell:** Claude Opus 5 (`claude-opus-5`)
-- **Datum der Sitzungen:** 30.07.2026 und 31.07.2026
+- **Datum der Sitzungen:** 30.07.2026, 31.07.2026 und 03.08.2026
 - **Branch:** `feat/contextlens-prototype`
 - **Rollenverteilung:** Der Hauptchat agierte als Product Owner, technischer
   Lead und Integrator. Spezialisierte Subagents wurden für Dokumentation und
@@ -263,6 +263,101 @@ Routentabelle. Sieben neue Tests (99 statt 92), Build und Testsuite grün.
 Dokumentation nachgezogen in `decisions.md` (E-014 bis E-016), `design-system.md`,
 `screen-specification.md`, `accessibility-review.md`, `test-plan.md`,
 `known-limitations.md`, `progress.md` und `README.md`.
+
+---
+
+### P-009 — Kamerabild, Reaktions-Emoji und mehr Feed-Realismus
+
+**Ausführender:** Main · **Übernommen:** ja · **Sitzung:** 03.08.2026
+
+Wortlaut der Nutzerin/des Nutzers:
+
+> „so we should simulate insta more realistically so we should well keep the
+> functions as a demo in tact and also our design should be done more like that
+> you see what is recorded in a cam we should be able to use a real cam for that
+> and also yeah the extra button we provide with our plugin is an emoji showing
+> the most reactions of other users and well if you click on it you get the
+> analyiss and percentage of reactions of our users :D"
+
+**Auslegung im Hauptchat.** Drei Arbeitspakete:
+
+1. **Feed-Realismus.** Die Aktionszeile trägt nur noch Symbole, darunter steht
+   die „Gefällt N Personen"-Zeile — die Aufteilung dieser Gattung.
+   Doppeltippen auf ein Bild vergibt ein „Gefällt mir" mit Herz-Animation,
+   nimmt es aber nie zurück. Story-Ring am Profilbild, Vignette über dem Medium.
+2. **Echtes Kamerabild.** Ein Selbstbild aus der echten Kamera liegt links
+   unten über dem Feed, solange beide Kameraschalter an sind. Siehe
+   `docs/decisions.md`, E-018.
+3. **Reaktions-Emoji.** Zweiter Knopf der Assistenzschicht an jedem Beitrag:
+   das Emoji der häufigsten Reaktion mit Prozentwert, dahinter die vollständige
+   Auswertung. Siehe `docs/decisions.md`, E-017.
+
+**Bewusste Abweichungen vom Wortlaut.**
+
+- „keep the functions as a demo intact" wurde wörtlich genommen: alle bisherigen
+  Funktionen und alle 99 Tests blieben unverändert gültig; die 18 neuen Tests
+  kommen hinzu (117 gesamt).
+- Das Emoji zeigt die **Selbstauskünfte**, nicht die Kamera-Schätzungen. Bei
+  `v-ragebait` ist das ein anderes Gesicht als das der Kameras — genau der
+  Fehlfall, den der Prototyp sichtbar machen soll.
+- Das echte Kamerabild ändert **keine** Analyse. Die Reaktionsschätzungen
+  bleiben die fest geschriebenen Werte; das Panel des Selbstbilds sagt das mit
+  einer dreiteiligen Liste (echt / simuliert / nicht vorhanden).
+- Kein Kommentarfeld im Feed, obwohl die Gattung eines hat: ein Bedienelement
+  ohne Funktion widerspricht der bereits getroffenen Regel für Kulissenelemente.
+
+**Ergebnis.** `src/features/reactions/useCameraStream.ts`,
+`src/features/reactions/LiveSelfView.tsx`,
+`src/features/analytics/CommunityReactionButton.tsx`,
+`src/features/analytics/communitySummary.ts`, `REACTION_EMOJI` in
+`src/lib/labels.ts`, Anpassungen in `VisualPostCard`, `MediaPlaceholder`,
+`DiscussionPostCard`, `CommunityReactions`, `CameraPreview`, `PluginOverlay`,
+`SocialAppShell` und `src/styles/index.css`. 18 neue Tests (117 statt 99),
+Build und Testsuite grün.
+
+---
+
+### P-010 — Gezeichnete Beispielinhalte und die Farbwelt der Vorlage
+
+**Ausführender:** Main · **Übernommen:** ja · **Sitzung:** 03.08.2026
+
+Wortlaut der Nutzerin/des Nutzers:
+
+> „okay nice. Now we just need like real example meme videos or stuff and also
+> do the desing like insta and also the color scheme as its just for uni ty"
+
+**Auslegung im Hauptchat.**
+
+1. **Inhalte.** Statt echter Memes — die praktisch immer urheberrechtlich
+   geschützt sind — wurden fünf Szenen als SVG gezeichnet, eine je Beitrag mit
+   Medien, plus eingebrannte Meme-Untertitel und Hashtags. Bei Videos bewegen
+   sich Teile der Zeichnung während der simulierten Wiedergabe. Parallel wurde
+   der Weg für echte Dateien gebaut: `media.src` ersetzt die Zeichnung,
+   Anleitung in `public/media/README.md`.
+2. **Farbwelt.** Verlaufsrampe, Akzentblau `#0095f6` und Like-Rot `#ed4956` der
+   Vorlage übernommen.
+3. **Feinschliff.** „Abonnieren"-Knopf mit echtem lokalem Zustand, Hashtags in
+   der Bildunterschrift eingefärbt.
+
+**Bewusste Abweichungen vom Wortlaut.**
+
+- „real example meme videos" wurde **nicht** als Herunterladen fremder Memes
+  umgesetzt. Stattdessen: eigene Zeichnungen als Auslieferungszustand plus ein
+  dokumentierter Weg, eigenes oder freigegebenes Material einzusetzen. Der
+  Rechtehinweis steht in `public/media/README.md`.
+- „design like insta … and the color scheme" wurde für Farben, Verlauf und
+  Layout übernommen, für **Name und Logo** weiterhin nicht. Begründung und
+  Grenze in `docs/decisions.md`, E-019, das E-015 damit teilweise revidiert.
+- Das Akzentblau erreicht auf Weiß nur 3,07:1 und wird daher nie für Fließtext
+  benutzt; für textgroße Links gibt es eine abgedunkelte Variante.
+- `v-emotional` bekam keinen Meme-Untertitel — der ernst gemeinte Beitrag darf
+  nicht vorab als Witz gerahmt werden. Ein Test hält das fest.
+
+**Ergebnis.** `src/features/feed/PostScene.tsx`,
+`src/features/feed/Caption.tsx`, `public/media/README.md`, erweiterte
+`SimulatedMedia`-Typen, Szenen- und Meme-Animationen sowie Plattform-Akzente in
+`src/styles/index.css`, Anpassungen in `MediaPlaceholder`, `VisualPostCard` und
+`src/data/posts.ts`. 4 neue Tests (121 statt 117), Build und Testsuite grün.
 
 ---
 

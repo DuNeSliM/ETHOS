@@ -213,6 +213,70 @@ describe('visual feed', () => {
     ).toBeGreaterThan(0);
   });
 
+  /** Matches the whole "Gefällt N Personen" paragraph, spans and all. */
+  const likesLine = (count: string) => (_: string, element: Element | null) =>
+    element?.tagName === 'P' &&
+    element.textContent?.replace(/\s+/g, ' ').trim() === `Gefällt ${count} Personen`;
+
+  it('likes a post on double tap and never un-likes it that way', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
+
+    // The gesture this genre trained everyone to expect. The keyboard path to
+    // the same state is the labelled heart button, which is why the picture
+    // itself stays out of the accessibility tree.
+    const media = screen.getAllByText(/simulierter platzhalter/i)[0];
+    await user.dblClick(media);
+    expect(screen.getAllByRole('button', { name: /gefällt mir zurücknehmen/i })[0]).toBeDefined();
+    // The count sits in its own `tabular-nums` span, so match the paragraph.
+    expect(screen.getByText(likesLine('12.841'))).toBeInTheDocument();
+
+    // A second double tap must not quietly take the like back.
+    await user.dblClick(media);
+    // The count sits in its own `tabular-nums` span, so match the paragraph.
+    expect(screen.getByText(likesLine('12.841'))).toBeInTheDocument();
+  });
+
+  it('draws a picture for each post instead of a grey box', () => {
+    const { container } = renderWithProviders(<AppRoutes />, {
+      route: '/feed/visual',
+    });
+
+    // One drawn scene per post with media, and the meme caption burned into
+    // the picture rather than added to the caption text below it.
+    expect(container.querySelectorAll('svg[viewBox="0 0 400 500"]').length).toBe(5);
+    expect(container.querySelectorAll('.meme-caption').length).toBeGreaterThan(0);
+    // Same words in the picture and in the caption below it, the way this
+    // genre repeats its punchline.
+    expect(screen.getAllByText(/die küche hat verloren/i).length).toBe(2);
+  });
+
+  it('follows an account without pretending an account exists', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
+
+    const follow = screen.getAllByRole('button', { name: /^abonnieren$/i })[0];
+    expect(follow).toHaveAttribute('aria-pressed', 'false');
+    await user.click(follow);
+
+    expect(
+      screen.getAllByRole('button', { name: /^abonniert$/i })[0],
+    ).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('offers the community reaction as one emoji per post', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
+
+    await user.click(
+      screen.getAllByRole('button', { name: /reaktionen anderer ansehen/i })[0],
+    );
+
+    expect(
+      screen.getByRole('dialog', { name: /so haben andere reagiert/i }),
+    ).toBeInTheDocument();
+  });
+
   it('labels the decorative platform controls as non-functional', () => {
     renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
 

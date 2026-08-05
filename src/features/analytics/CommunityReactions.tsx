@@ -1,5 +1,5 @@
 import { Info, ScanFace, Users, UserCheck } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Bar,
   BarChart,
@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 import { Chip, FieldLabel, Panel, SimulatedBadge } from '@/components/primitives';
-import { COMMUNITY_KEY_LABEL } from '@/lib/labels';
+import { participantCount, rankReactions } from '@/features/analytics/communitySummary';
 import type { CommunityReactionSummary, CommunitySource } from '@/types';
 
 /**
@@ -28,35 +28,41 @@ import type { CommunityReactionSummary, CommunitySource } from '@/types';
  */
 export function CommunityReactions({
   summary,
+  /** Which of the two datasets is shown first. */
+  initialSource = 'estimated',
+  /**
+   * `true` when the component already sits inside a titled container (the
+   * sheet behind the reaction button), so it drops its own panel and heading
+   * instead of repeating them.
+   */
+  embedded = false,
 }: {
   summary: CommunityReactionSummary;
+  initialSource?: CommunitySource;
+  embedded?: boolean;
 }) {
-  const [source, setSource] = useState<CommunitySource>('estimated');
+  const [source, setSource] = useState<CommunitySource>(initialSource);
 
-  const data = Object.entries(
-    source === 'estimated'
-      ? summary.estimatedReactions
-      : summary.selfReportedReactions,
-  )
-    .map(([key, value]) => ({
-      key,
-      label: COMMUNITY_KEY_LABEL[key] ?? key,
-      value,
-    }))
-    .sort((a, b) => b.value - a.value);
+  // The emoji rides along on the visual axis only. The screen reader table
+  // below keeps the plain word, because "Gesicht mit rollenden Augen, genervt"
+  // is noise once the word is already there.
+  const data = rankReactions(summary, source).map((row) => ({
+    ...row,
+    chartLabel: `${row.emoji} ${row.label}`,
+  }));
+  const shownParticipants = participantCount(summary, source);
 
-  const shownParticipants =
-    source === 'estimated'
-      ? summary.participantCount
-      : summary.selfReportedParticipantCount;
+  const Wrapper = embedded ? PlainWrapper : PanelWrapper;
 
   return (
-    <Panel as="section" className="p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <Users aria-hidden="true" className="size-5 text-assist-strong" />
-        <h2 className="text-base font-bold text-ink">Reaktionen der Community</h2>
-        <SimulatedBadge label="erfundene Werte" />
-      </div>
+    <Wrapper>
+      {embedded ? null : (
+        <div className="flex flex-wrap items-center gap-2">
+          <Users aria-hidden="true" className="size-5 text-assist-strong" />
+          <h2 className="text-base font-bold text-ink">Reaktionen der Community</h2>
+          <SimulatedBadge label="erfundene Werte" />
+        </div>
+      )}
 
       {/* ---- source switch ------------------------------------------ */}
       <div
@@ -176,7 +182,7 @@ export function CommunityReactions({
               <XAxis type="number" domain={[0, 100]} hide />
               <YAxis
                 type="category"
-                dataKey="label"
+                dataKey="chartLabel"
                 width={132}
                 tickLine={false}
                 axisLine={false}
@@ -224,6 +230,18 @@ export function CommunityReactions({
 
         <Chip tone="caution">{summary.representativeWarning}</Chip>
       </div>
+    </Wrapper>
+  );
+}
+
+function PanelWrapper({ children }: { children: ReactNode }) {
+  return (
+    <Panel as="section" className="p-4">
+      {children}
     </Panel>
   );
+}
+
+function PlainWrapper({ children }: { children: ReactNode }) {
+  return <div>{children}</div>;
 }

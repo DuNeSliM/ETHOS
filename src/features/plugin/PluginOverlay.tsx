@@ -110,10 +110,14 @@ export function PluginOverlay() {
                 ? 'Inhaltsanalyse aktiv'
                 : 'Inhaltsanalyse aus'}
           </Chip>
+          {/* Three states, not two: the estimates are always simulated, but
+              the camera itself is either off or genuinely running. */}
           <Chip tone={settings.simulatedCameraCapture && !paused ? 'caution' : 'neutral'}>
-            {settings.simulatedCameraCapture && !paused
-              ? 'Simulierte Kamera aktiv'
-              : 'Kamera aus'}
+            {!settings.simulatedCameraCapture || paused
+              ? 'Kamera aus'
+              : settings.liveCameraPreview
+                ? 'Kamerabild live, Analyse simuliert'
+                : 'Simulierte Kamera aktiv'}
           </Chip>
           <Chip tone="neutral">
             {settings.storeReactionHistory
@@ -216,7 +220,11 @@ export function PluginStatusStrip() {
           </span>
           <Separator />
           <span className="shrink-0 text-muted">
-            {cameraActive ? 'Simulierte Kamera aktiv' : 'Kamera aus'}
+            {!cameraActive
+              ? 'Kamera aus'
+              : settings.liveCameraPreview
+                ? 'Kamerabild live'
+                : 'Simulierte Kamera aktiv'}
           </span>
           <Separator />
           <span className="truncate text-muted">
@@ -251,7 +259,9 @@ export function PluginStatusStrip() {
           ? 'Die Analyse der Inhalte läuft.'
           : 'Es werden derzeit keine Hinweise angezeigt.'}{' '}
         {cameraActive
-          ? 'Die simulierte Reaktionserfassung ist eingeschaltet.'
+          ? settings.liveCameraPreview
+            ? 'Die Kamera läuft und ihr Bild wird oben links angezeigt. Ausgewertet wird es nicht; die Reaktionsschätzungen sind simuliert.'
+            : 'Die simulierte Reaktionserfassung ist eingeschaltet.'
           : 'Die Kamera ist aus.'}{' '}
         {settings.storeReactionHistory
           ? 'Gespeichert wird ausschließlich lokal in diesem Browser.'

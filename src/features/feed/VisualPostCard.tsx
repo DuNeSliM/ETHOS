@@ -10,7 +10,9 @@ import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAppState } from '@/app/AppStateProvider';
+import { CommunityReactionButton } from '@/features/analytics/CommunityReactionButton';
 import { ContextAssistantButton } from '@/features/context-assistant/ContextAssistantButton';
+import { Caption } from '@/features/feed/Caption';
 import { MediaPlaceholder } from '@/features/feed/MediaPlaceholder';
 import { OwnReactionControl } from '@/features/reactions/OwnReactionControl';
 import { getTimeline } from '@/data/timelines';
@@ -35,6 +37,7 @@ export function VisualPostCard({ post }: { post: Post }) {
   const viewLogged = useRef(false);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [followed, setFollowed] = useState(false);
   const [captionExpanded, setCaptionExpanded] = useState(false);
 
   // Log the view once per mount. In a real product this would be tied to
@@ -62,17 +65,21 @@ export function VisualPostCard({ post }: { post: Post }) {
         */}
         <span
           aria-hidden="true"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full p-[2px]"
-          style={{
-            background: `linear-gradient(135deg, ${post.media?.palette[0] ?? '#9aa6ae'}, ${post.media?.palette[1] ?? '#6b7681'})`,
-          }}
+          className="platform-gradient flex size-9 shrink-0 items-center justify-center rounded-full p-[2px]"
         >
-          <span className="flex size-full items-center justify-center rounded-full bg-surface text-[0.6875rem] font-bold text-muted">
-            {post.author
-              .split(' ')
-              .map((part) => part[0])
-              .slice(0, 2)
-              .join('')}
+          <span className="flex size-full items-center justify-center rounded-full bg-surface p-[1.5px]">
+            <span
+              className="flex size-full items-center justify-center rounded-full text-[0.6875rem] font-bold text-white"
+              style={{
+                background: `linear-gradient(135deg, ${post.media?.palette[0] ?? '#9aa6ae'}, ${post.media?.palette[1] ?? '#6b7681'})`,
+              }}
+            >
+              {post.author
+                .split(' ')
+                .map((part) => part[0])
+                .slice(0, 2)
+                .join('')}
+            </span>
           </span>
         </span>
 
@@ -82,6 +89,23 @@ export function VisualPostCard({ post }: { post: Post }) {
           </p>
           <p className="truncate text-xs text-faint">{post.author}</p>
         </div>
+
+        {/*
+          Follow, in the genre's blue. It only flips a piece of local state -
+          there are no accounts here - but that is a real state change, not a
+          dead control, and the label says which of the two it is in.
+        */}
+        <button
+          type="button"
+          onClick={() => setFollowed((value) => !value)}
+          aria-pressed={followed}
+          className={`
+            shrink-0 rounded-lg px-2 py-1 text-sm font-semibold
+            ${followed ? 'text-muted hover:text-ink' : 'text-accent hover:opacity-80'}
+          `}
+        >
+          {followed ? 'Abonniert' : 'Abonnieren'}
+        </button>
 
         <button
           type="button"
@@ -94,12 +118,25 @@ export function VisualPostCard({ post }: { post: Post }) {
 
       {/* ---- media --------------------------------------------------- */}
       {post.media ? (
-        <MediaPlaceholder media={post.media} onTimeChange={noop} variant="feed">
+        <MediaPlaceholder
+          media={post.media}
+          onTimeChange={noop}
+          variant="feed"
+          // Double tap likes but never un-likes, exactly like the genre: an
+          // accidental second tap on a picture should not quietly withdraw
+          // something you gave. Taking it back is the heart button's job.
+          onDoubleTap={() => setLiked(true)}
+        >
           <OwnReactionControl postId={post.id} placement="overlay" />
         </MediaPlaceholder>
       ) : null}
 
-      {/* ---- action row ---------------------------------------------- */}
+      {/*
+        ---- action row ----------------------------------------------
+        Icons only, counts underneath. That split is the convention of this
+        genre and it buys us something real: the likes line below can then
+        carry a full sentence instead of a bare number next to a glyph.
+      */}
       <div className="flex items-center gap-1 px-2 pt-2">
         <button
           type="button"
@@ -107,28 +144,24 @@ export function VisualPostCard({ post }: { post: Post }) {
           aria-pressed={liked}
           aria-label={liked ? 'Gefällt mir zurücknehmen' : 'Gefällt mir'}
           className={`
-            flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium
-            hover:bg-surface-2
-            ${liked ? 'text-alert' : 'text-ink'}
+            rounded-md px-2 py-1.5 hover:bg-surface-2
+            ${liked ? 'text-like' : 'text-ink'}
           `}
         >
           <Heart
             aria-hidden="true"
             className="size-6"
+            strokeWidth={1.8}
             fill={liked ? 'currentColor' : 'none'}
           />
-          <span className="tabular-nums">{likeCount.toLocaleString('de-DE')}</span>
         </button>
 
         <Link
           to={`/post/${post.id}`}
           aria-label={`${post.commentCount} Kommentare ansehen`}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-ink hover:bg-surface-2"
+          className="rounded-md px-2 py-1.5 text-ink hover:bg-surface-2"
         >
-          <MessageCircle aria-hidden="true" className="size-6" />
-          <span className="tabular-nums">
-            {post.commentCount.toLocaleString('de-DE')}
-          </span>
+          <MessageCircle aria-hidden="true" className="size-6" strokeWidth={1.8} />
         </Link>
 
         <button
@@ -136,7 +169,7 @@ export function VisualPostCard({ post }: { post: Post }) {
           aria-label="Beitrag teilen (im Prototyp ohne Funktion)"
           className="rounded-md px-2 py-1.5 text-ink hover:bg-surface-2"
         >
-          <Send aria-hidden="true" className="size-6" />
+          <Send aria-hidden="true" className="size-6" strokeWidth={1.8} />
         </button>
 
         <button
@@ -149,6 +182,7 @@ export function VisualPostCard({ post }: { post: Post }) {
           <Bookmark
             aria-hidden="true"
             className="size-6"
+            strokeWidth={1.8}
             fill={saved ? 'currentColor' : 'none'}
           />
         </button>
@@ -156,12 +190,17 @@ export function VisualPostCard({ post }: { post: Post }) {
 
       {/* ---- caption ------------------------------------------------- */}
       <div className="px-3 pb-2.5 pt-1">
-        <p className="text-sm leading-snug text-ink">
+        <p className="text-sm font-semibold text-ink">
+          Gefällt <span className="tabular-nums">{likeCount.toLocaleString('de-DE')}</span>{' '}
+          {likeCount === 1 ? 'Person' : 'Personen'}
+        </p>
+
+        <p className="mt-1 text-sm leading-snug text-ink">
           <span className="font-semibold">
             {post.authorHandle.replace(/^@/, '')}
           </span>{' '}
           <span className={!captionExpanded && isLongCaption ? 'line-clamp-2' : ''}>
-            {post.body}
+            <Caption text={post.body} />
           </span>
         </p>
 
@@ -195,13 +234,24 @@ export function VisualPostCard({ post }: { post: Post }) {
             onOpened={() => recordView(post.id, true)}
           />
 
-          <Link
-            to={`/post/${post.id}`}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-assist-strong hover:bg-assist-tint"
-          >
-            <Timer aria-hidden="true" className="size-4" />
-            {hasTimeline ? 'Reaktionsverlauf' : 'Reaktionen'}
-          </Link>
+          {/*
+            The two questions a reader actually has, in the order they have
+            them: what does this post mean, and how did other people take it.
+          */}
+          <CommunityReactionButton postId={post.id} />
+
+          {/* Only where a scripted timeline exists - the community numbers now
+              have their own control above, so a generic "Reaktionen" link next
+              to it would just be a second door to the same room. */}
+          {hasTimeline ? (
+            <Link
+              to={`/post/${post.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-assist-strong hover:bg-assist-tint"
+            >
+              <Timer aria-hidden="true" className="size-4" />
+              Reaktionsverlauf
+            </Link>
+          ) : null}
 
           {/* Inline chip when there is no media to overlay it onto. */}
           {post.media ? null : (

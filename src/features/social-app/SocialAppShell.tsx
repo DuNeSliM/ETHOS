@@ -7,6 +7,7 @@ import { PluginOverlay, PluginStatusStrip } from '@/features/plugin/PluginOverla
 import { PlatformTabBar } from '@/features/social-app/PlatformTabBar';
 import { PlatformWordmark } from '@/features/social-app/PlatformWordmark';
 import { PLATFORM_NAME } from '@/features/social-app/platform';
+import { LiveSelfView } from '@/features/reactions/LiveSelfView';
 import { ResearchBanner } from '@/features/research-mode/ResearchBanner';
 import { scrollAppToTop } from '@/lib/viewport';
 
@@ -98,6 +99,12 @@ export function SocialAppShell() {
         </div>
       </main>
 
+      {/*
+        Both belong to the assistance layer, pinned over the platform: the
+        self-view on the left says what the camera sees, the bubble on the
+        right is the way into the extension.
+      */}
+      <LiveSelfView />
       <PluginOverlay />
 
       {/*

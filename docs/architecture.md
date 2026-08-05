@@ -1,4 +1,4 @@
-# Architektur
+﻿# Architektur
 
 ## 1. Überblick
 
@@ -210,7 +210,7 @@ synchronisiert, tabübergreifend über das `storage`-Event.
 `offsetWidth`/`offsetHeight` (Recharts misst sonst 0×0 und rendert nichts) und
 `ResizeObserver`. Nach jedem Test wird aufgeräumt und `localStorage` geleert.
 
-Testabdeckung: 99 Tests in fünf Dateien, siehe `docs/test-plan.md`.
+Testabdeckung: 121 Tests in sieben Dateien, siehe `docs/test-plan.md`.
 
 ## 9. Erweiterungspunkte
 

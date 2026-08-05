@@ -1,4 +1,4 @@
-# Testplan
+﻿# Testplan
 
 ## 1. Testziele
 
@@ -12,7 +12,7 @@
 
 ## 2. Automatisierte Tests
 
-Stand: **99 Tests in 5 Dateien, alle grün.** Ausführung: `npm test`.
+Stand: **121 Tests in 7 Dateien, alle grün.** Ausführung: `npm test`.
 
 | Bereich | Datei | Was geprüft wird | Tests |
 |---|---|---|---|

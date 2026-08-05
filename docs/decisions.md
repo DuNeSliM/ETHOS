@@ -278,3 +278,140 @@ tragen die Assist-Farbfamilie, während die Plattform schwarz auf weiß bleibt.
 **Konsequenz.** Das Panel ist ausschließlich eine Abkürzung. Jede Funktion
 darin ist auch über die ContextLens-App erreichbar; wer den Knopf nie findet,
 verliert keine Funktion.
+
+---
+
+## E-017: Ein Emoji als Einstieg in die Community-Zahlen
+
+**Kontext.** Die aggregierten Reaktionen anderer lagen bisher ausschließlich auf
+der Detailseite. Im Feed führte dorthin ein Textlink („Reaktionen"). In einer
+Oberfläche, die für schnelles Scrollen gebaut ist, wurde er kaum benutzt.
+
+**Entscheidung.** Jeder Beitrag bekommt in der Assistenz-Leiste einen zweiten
+Knopf: **ein Emoji** für die häufigste Reaktion plus deren Prozentwert. Ein Tipp
+darauf öffnet die vollständige Auswertung — dieselbe Komponente
+(`CommunityReactions`), die auch die Detailseite zeigt, nur eingebettet.
+
+**Begründung.** Das Emoji beantwortet in Daumenbreite die Frage „wie haben es
+andere aufgefasst?", die neben „was heißt das?" die zweite Frage der Zielgruppe
+ist. Ein Symbol lässt sich allerdings nicht abschwächen — daher die folgenden
+Auflagen.
+
+**Konsequenz.**
+
+1. Der Wert stammt aus den **Selbstauskünften**, nicht aus den
+   Kamera-Schätzungen. Dieselbe Rangfolge gilt schon für die eigene Reaktion:
+   was Menschen über sich sagen, schlägt das, was eine Maschine über sie rät.
+   Bei `v-ragebait` zeigt der Knopf deshalb 🙄 *genervt* (34 %) und nicht 😂
+   *amüsiert*, das die Kameras am häufigsten „sehen".
+2. Das Emoji reist nie allein: Prozentwert daneben, und der zugängliche Name
+   nennt Reaktion, Anteil, Stichprobengröße, Quelle und „simulierte Werte".
+3. Das Panel sagt ausdrücklich, wie viele Personen **etwas anderes** angegeben
+   haben, damit eine relative Mehrheit nicht als Konsens gelesen wird.
+4. Unter 30 Angaben zeigt der Knopf die Anzahl statt eines Prozentwerts
+   (`v-lowcontext`: „9 Angaben").
+5. Ohne Einwilligung (`showCommunityReactions`), bei pausierter Schicht oder
+   ohne hinterlegte Daten rendert der Knopf **nichts** — wie der
+   „Kontext erklären"-Knopf auch.
+
+---
+
+## E-018: Das echte Kamerabild wird gezeigt, aber nie ausgewertet
+
+**Kontext.** Der Prototyp behauptet, eine Kamera schaue der lesenden Person ins
+Gesicht. Diese Behauptung stand bisher nur als Text in den Einstellungen. Eine
+Testperson kann so schwer beurteilen, worauf sie sich einlassen würde.
+
+**Entscheidung.** Solange beide Schalter (`simulatedCameraCapture` und
+`liveCameraPreview`) an sind, liegt über dem Feed ein kleines **Selbstbild** aus
+der echten Kamera (`LiveSelfView`), dauerhaft sichtbar während des Scrollens.
+
+**Begründung.** Die Frage „will ich das?" lässt sich am ehrlichsten beantworten,
+wenn man sieht, was eine Kamera in diesem Moment aufnähme. Das ist der einzige
+Teil der Demo, bei dem echte Hardware mehr Erkenntnis bringt als eine Attrappe.
+
+**Konsequenz.**
+
+- Die Trennung *echtes Bild* / *simulierte Auswertung* wird an drei Stellen
+  ausgesprochen: auf der Kachel („wird nicht ausgewertet"), im Panel dahinter
+  (dreiteilige Liste echt / simuliert / nicht vorhanden) und in der Statusleiste
+  der Erweiterung („Kamerabild live, Analyse simuliert").
+- Der gestrichelte Rahmen im Selbstbild ist bewusst **statisch** und als
+  Attrappe benannt. Ein Rahmen, der einem Gesicht folgt, wäre eine Behauptung
+  über eine Erkennungsleistung, die es hier nicht gibt.
+- Die gesamte Kamera-Logik liegt in einem Hook (`useCameraStream`), damit der
+  Nachweis „nur Anzeige" an genau einer Stelle geführt werden kann. Siehe
+  `docs/privacy-review.md`, Abschnitt 1.2.
+- Pausieren der Assistenzschicht stoppt die Tracks. Die Kamera-Leuchte des
+  Geräts folgt damit der Anzeige in der Oberfläche.
+
+---
+
+## E-019: Farbwelt der Vorlage übernommen — revidiert E-015 teilweise
+
+**Kontext.** E-015 hatte entschieden, nur die *Gattung* nachzubauen und alles
+Markenspezifische wegzulassen, auch den Farbverlauf. Die Auftraggeberin bzw. der
+Auftraggeber hat das ausdrücklich anders gewünscht: Für die Abgabe an der
+Hochschule soll der Feed wie die Vorlage aussehen, einschließlich Farbschema.
+
+**Entscheidung.** Die Farbwelt wird übernommen: die Verlaufsrampe
+(`#feda75 → #fa7e1e → #d62976 → #962fbf → #4f5bd5`) für Wortmarke und
+Story-Ringe, das Akzentblau `#0095f6` für Links, Hashtags und „Abonnieren",
+das Like-Rot `#ed4956` für das gefüllte Herz. **Nicht** übernommen werden
+weiterhin Name, Logo und Wortmarkenschrift der Vorlage; die App heißt
+`Momento`, und jede Feed-Ansicht trägt sichtbar den Simulationshinweis.
+
+**Begründung.** Die Farbwelt ist der Teil, an dem die Vorlage sofort erkannt
+wird, und genau darum ging es der Auftraggeberin bzw. dem Auftraggeber: Die
+Testperson soll die Oberfläche nicht erst lernen müssen. Für einen internen
+Studienprototypen ohne Veröffentlichung ist das vertretbar. Die Grenze bleibt
+dort, wo aus Wiedererkennung eine Verwechslung würde — also bei Name und Logo.
+
+**Konsequenz.**
+
+- Kontrast: `#0095f6` erreicht auf Weiß nur 3,07:1. Es wird deshalb für
+  Bedienelemente und Symbole verwendet, aber nie für Fließtext. Für
+  textgroße Links gibt es `--cl-platform-accent-ink` (`#0064ac`, 4,62:1).
+  `#ed4956` (3,94:1) trägt nie Text, nur die Herzfläche.
+- Die Assistenzschicht bleibt bei ihrer Teal-Familie. Der Sinn der Trennung —
+  „welche Pixel gehören wem?" — hängt daran, dass ContextLens gerade *nicht*
+  wie die Plattform aussieht.
+- Sollte der Prototyp je über den Hochschulkontext hinaus gezeigt werden, ist
+  diese Entscheidung erneut zu prüfen. Sie steht deshalb hier und nicht nur im
+  Code.
+
+---
+
+## E-020: Gezeichnete Szenen statt beschrifteter grauer Flächen
+
+**Kontext.** Die Beiträge zeigten bisher einen Farbverlauf mit einem Satz
+darüber, der beschrieb, was zu sehen *wäre*. Das ist ehrlich, aber niemand
+scrollt so durch einen Feed — und die Demo lebt davon, dass die Testperson sich
+wie in einer echten App verhält.
+
+**Entscheidung.** Jeder Beitrag mit Medien bekommt eine gezeichnete Szene als
+SVG (`src/features/feed/PostScene.tsx`): Küchenunfall, Bahnsteig im Regen,
+Person vor der Kamera, Straßenmonolog, leerer Parkplatz. Bei Videos bewegen
+sich Teile der Zeichnung, solange die simulierte Wiedergabe läuft. Dazu kommt
+der eingebrannte Untertitel, den dieses Genre für seine Pointen benutzt.
+
+**Begründung.** Eine Zeichnung ist unverwechselbar keine Aufnahme — sie kann
+also gar nicht für echtes Material gehalten werden — und sieht trotzdem nach
+Inhalt aus. Sie kostet keine Rechteklärung, keine externe Datei und keinen
+Netzwerkzugriff.
+
+**Konsequenz.**
+
+- Die Beschreibung (`altText`) wandert aus der Bildmitte in die
+  `figcaption`. Sie bleibt vollständig erhalten und ist weiterhin das, was
+  Screenreader vorlesen.
+- Die Schraffur über den Medien (`.sim-hatch`) entfällt dort: Sie sollte
+  verhindern, dass ein Platzhalter für Filmmaterial gehalten wird, und eine
+  flache Vektorzeichnung erledigt das von selbst. Die Markierung „Simulierter
+  Platzhalter" über dem Bild bleibt.
+- `v-emotional` bekommt **keinen** Untertitel. Der eine ernst gemeinte Beitrag
+  darf nicht durch eine Meme-Zeile als Witz gerahmt werden, bevor die
+  Assistenzschicht überhaupt etwas gesagt hat. Ein Test hält das fest.
+- Echte Dateien sind vorgesehen, nicht ausgeschlossen: `media.src` ersetzt die
+  Zeichnung, die Markierung wechselt dann auf „Beispielclip". Anleitung und
+  Rechtehinweis in `public/media/README.md`.

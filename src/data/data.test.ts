@@ -5,6 +5,15 @@ import { COMMUNITY } from '@/data/community';
 import { POSTS } from '@/data/posts';
 import { TIMELINES } from '@/data/timelines';
 import { COMMUNITY_KEY_LABEL } from '@/lib/labels';
+import type { SceneId } from '@/types';
+
+const SCENE_IDS: SceneId[] = [
+  'kitchen-egg',
+  'rainy-platform',
+  'talking-head',
+  'street-rant',
+  'empty-lot',
+];
 
 /**
  * Data integrity checks.
@@ -44,6 +53,21 @@ describe('posts', () => {
     POSTS.filter((post) => post.media?.kind === 'video').forEach((post) => {
       expect(post.media!.durationSeconds).toBeGreaterThan(0);
     });
+  });
+
+  it('names a drawn scene for every post that has media', () => {
+    // `scene` is the fallback that has to work when no real file is supplied,
+    // so it must be present even on posts that carry a `src`.
+    POSTS.filter((post) => post.media).forEach((post) => {
+      expect(SCENE_IDS, `unknown scene on ${post.id}`).toContain(post.media!.scene);
+    });
+  });
+
+  it('keeps the sincere post free of a burned-in punchline', () => {
+    // A meme caption over the one post that is meant seriously would frame it
+    // as a joke before the assistance layer says anything at all.
+    const emotional = POSTS.find((post) => post.id === 'v-emotional');
+    expect(emotional?.media?.overlayText).toBeUndefined();
   });
 
   it('flags exactly the comments that have their own analysis', () => {

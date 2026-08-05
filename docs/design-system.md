@@ -106,10 +106,21 @@ Der Grauton, den diese App-Gattung üblicherweise für Sekundärtext benutzt
 (`#8e8e8e`), erreicht nur 3,0 : 1 und wird deshalb **nicht** verwendet. Die
 Ähnlichkeit endet dort, wo sie die Lesbarkeit kosten würde.
 
-Zusätzlich: `.platform-gradient` (Utility in `src/styles/index.css`) ist die
-Farbrampe der Plattform – Wortmarke und Story-Ringe. Eine eigene Rampe von
-`#f8c14b` über `#e0407f` nach `#7b3fe4`, keine Marken-Kopie (siehe
-`docs/decisions.md`, E-015).
+**Akzente der Plattform** (seit E-019 die der Vorlage, siehe
+`docs/decisions.md`):
+
+| CSS-Variable | Tailwind-Token | Wert | Kontrast auf Weiß | Verwendung |
+| --- | --- | --- | --- | --- |
+| `--cl-platform-accent` | `text-accent` | `#0095f6` | 3,07 : 1 | „Abonnieren", Symbole, Bedienelemente – **nie Fließtext** |
+| `--cl-platform-accent-ink` | `text-accent-ink` | `#0064ac` | 4,62 : 1 | Hashtags und Erwähnungen in der Bildunterschrift |
+| `--cl-platform-like` | `text-like` | `#ed4956` | 3,94 : 1 | ausschließlich die Herzfläche, nie Text |
+
+Im Feed überschreibt die Skin außerdem `--cl-alert` auf `#c62430` (hell) bzw.
+`#ff6b78` (dunkel), damit dieselbe Alarmfarbe im Feed zur Like-Familie passt und
+trotzdem als Text lesbar bleibt.
+
+`.platform-gradient` (Utility in `src/styles/index.css`) ist die Farbrampe für
+Wortmarke und Story-Ringe: `#feda75 → #fa7e1e → #d62976 → #962fbf → #4f5bd5`.
 
 ### 3.2 Text (`ink` / `muted` / `faint` / `inverse`)
 
@@ -624,8 +635,9 @@ Kommentare folgen. Zustimmungen mit `ArrowBigUp` statt Herz, `sr-only`
 
 ### 6.16 `MediaPlaceholder` — `src/features/feed/MediaPlaceholder.tsx`
 
-**Zweck:** Platzhalter für Foto oder Video. Statt einer grauen Box ein beschriftetes
-Element, das erzählt, was der Clip zeigen *würde*.
+**Zweck:** Das Bild eines Beitrags. Drei Quellen in dieser Reihenfolge: eine echte
+Datei aus `public/media/` (`media.src`), sonst die gezeichnete Szene (6.16b), sonst
+der reine Farbverlauf.
 
 | Prop | Typ |
 | --- | --- |
@@ -633,16 +645,47 @@ Element, das erzählt, was der Clip zeigen *würde*.
 | `onTimeChange` | `(seconds: number) => void` (optional) |
 | `children` | Overlay-Inhalt, in der Praxis `OwnReactionControl` |
 | `variant` | `'feed'` (randlos, 4∶5) · `'detail'` (gerahmt, 4∶5, ab `sm` 16∶9) |
+| `onDoubleTap` | Doppeltipp auf das Bild; löst zusätzlich das Herz `.heart-burst` aus |
 
 | Element | Umsetzung |
 | --- | --- |
-| Hintergrund | `linear-gradient` aus `media.palette[0/1]` (Inline-Style aus den Daten) |
-| Schraffur | `.sim-hatch`-Overlay, `aria-hidden` |
+| Bild | `<PostScene>`, oder `<video muted loop playsInline>` bzw. `<img>` wenn `media.src` gesetzt ist |
+| Hintergrund | `linear-gradient` aus `media.palette[0/1]`, sichtbar nur dort, wo die Szene nichts zeichnet |
+| Vignette | `radial-gradient`-Overlay, damit weiße Overlays auf jedem Motiv lesbar bleiben |
+| Meme-Untertitel | `media.overlayText.top/bottom` in `.meme-caption` (Impact, weiße Füllung, schwarze Kontur über `-webkit-text-stroke` und `paint-order`), oben und unten im Bild, `aria-hidden` |
 | Dauer-Chip | oben links, `Video`-Icon + Laufzeit `mm:ss` auf `bg-black/50` (nur Video) |
-| Simulationsmarke | oben rechts, „SIMULIERTER PLATZHALTER" in Versalien auf `bg-black/50` |
-| Beschreibung | `media.altText` als **sichtbarer Text**, mittig, weiß mit `text-shadow`, nicht als verstecktes Alt-Attribut |
+| Simulationsmarke | oben rechts, „SIMULIERTER PLATZHALTER" — bei gesetztem `src` stattdessen „BEISPIELCLIP". Verschwindet nie |
 | Overlay-Slot | unten links, `pointer-events-none` am Container und `pointer-events-auto` am Kind, damit ein leerer Slot nichts abfängt |
-| `figcaption` | `sr-only`, wiederholt Simulationshinweis **und** Beschreibung |
+| `figcaption` | `sr-only`, nennt Herkunft (gezeichnet oder Beispielclip) **und** `media.altText` |
+
+Seit E-020 liegt die Beschreibung in der `figcaption` statt in der Bildmitte, und
+die `.sim-hatch`-Schraffur entfällt hier: Eine flache Vektorzeichnung kann nicht für
+Filmmaterial gehalten werden, und die Schraffur hätte das Motiv zugedeckt.
+
+### 6.16b `PostScene` — `src/features/feed/PostScene.tsx`
+
+**Zweck:** Fünf gezeichnete Szenen als SVG (`viewBox="0 0 400 500"`,
+`preserveAspectRatio="slice"`), eine je Beitrag mit Medien. Kein externes Bild, kein
+Netzwerkzugriff, keine Rechtefrage. Begründung: `docs/decisions.md`, E-020.
+
+| `SceneId` | Beitrag | Motiv |
+| --- | --- | --- |
+| `kitchen-egg` | `v-humor` | Küche, Ei, entschuldigend gehobene Hand |
+| `rainy-platform` | `v-sarcasm` | Bahnsteig, Anzeigetafel voller Verspätungen, umgekippter Becher |
+| `talking-head` | `v-emotional` | Person nah vor der Kamera, neutraler Mund, gedämpftes Zimmer |
+| `street-rant` | `v-ragebait` | Sprechende Person mit erhobenen Händen, Verkehr im Hintergrund |
+| `empty-lot` | `v-lowcontext` | Leerer Parkplatz, ein Laternenmast |
+
+Bewegung: Die Klassen `.scene-wobble`, `.scene-drop`, `.scene-rain`,
+`.scene-breathe`, `.scene-gesture` und `.scene-pan` laufen nur, wenn das SVG
+`.scene-playing` trägt — gesetzt aus `useSimulatedPlayback`. Ein stehender Feed
+steht also wirklich still, und `prefers-reduced-motion` schaltet alles ab.
+
+### 6.16c `Caption` — `src/features/feed/Caption.tsx`
+
+**Zweck:** Bildunterschrift mit `#hashtags` und `@handles` in `text-accent-ink`.
+Bewusst **nicht** verlinkt: ein Tag, der wie ein Link aussieht und nirgendwohin
+führt, wäre ein weiteres funktionsloses Element im Tastaturpfad.
 
 | Zustand | Bedingung | Darstellung |
 | --- | --- | --- |
@@ -727,20 +770,42 @@ Sheet „Deine Reaktion":
 
 ### 6.19 `CameraPreview` — `src/features/reactions/CameraPreview.tsx`
 
-**Zweck:** Optionale lokale Kamera-Vorschau (Stretch Goal). Strikt nur Anzeige: der
-Stream hängt an einem `<video>` und sonst nirgends – kein Canvas, kein `drawImage`,
-kein `MediaRecorder`, kein Upload; beim Beenden oder Unmount werden alle Tracks
-gestoppt, damit die Kamera-Anzeige des Browsers ausgeht, wenn die UI „aus" sagt.
+**Zweck:** Große lokale Kamera-Vorschau in den Einstellungen. Strikt nur Anzeige – die
+gesamte Kameralogik liegt in `useCameraStream` (`src/features/reactions/useCameraStream.ts`),
+der einzigen Stelle im Projekt mit `getUserMedia`: der Stream hängt an `<video>`-Elementen
+und sonst nirgends, kein Canvas, kein `drawImage`, kein `MediaRecorder`, kein Upload; beim
+Beenden oder Unmount werden alle Tracks gestoppt, damit die Kamera-Anzeige des Browsers
+ausgeht, wenn die UI „aus" sagt.
 
 | Zustand | Darstellung |
 | --- | --- |
-| **aus** (Default) | `Chip tone="neutral"` + `CameraOff` „Kamera aus"; Platzhalterfläche „Die Vorschau ist aus. Du musst sie ausdrücklich starten."; `Button variant="assist"` „Vorschau starten" |
-| **an** | `Chip tone="caution"` + `Camera` „Kamera läuft"; sichtbares `<video autoPlay muted playsInline aria-hidden>`; `Button` „Vorschau beenden" |
+| **aus** | `Chip tone="neutral"` + `CameraOff` „Kamera aus"; Platzhalterfläche „Die Vorschau ist aus."; `Button variant="assist"` „Vorschau starten" |
+| **startet** | derselbe Rahmen, Platzhaltertext „Die Kamera wird gestartet …" |
+| **an** | `Chip tone="caution"` + `Camera` „Kamera läuft"; sichtbares, gespiegeltes `<video autoPlay muted playsInline aria-hidden>`; `Button` „Vorschau beenden" |
 | **Fehler** | `<p role="status">` auf `bg-caution-tint text-caution` mit `CircleAlert`; ein einziger, nicht technischer Text (deckt Ablehnung, fehlendes Gerät und belegtes Gerät gleichermaßen ab) |
 | **kein API-Support** | derselbe Fehlerkanal: „Dieser Browser stellt keine Kamera-Vorschau bereit." |
 
 Wird nur auf `/settings` gerendert, und dort nur wenn `settings.liveCameraPreview`
-gesetzt ist (was wiederum `simulatedCameraCapture` voraussetzt).
+gesetzt ist (was wiederum `simulatedCameraCapture` voraussetzt). Startet beim Mount
+von selbst — das Einschalten des Schalters *ist* die Zustimmung.
+
+### 6.19a `LiveSelfView` — `src/features/reactions/LiveSelfView.tsx`
+
+**Zweck:** Dasselbe echte Kamerabild, klein und dauerhaft über dem Feed
+(`fixed bottom-20 left-3`), als Gegenstück zum ContextLens-Knopf rechts. Es beantwortet
+die Frage „was nähme eine Kamera gerade von mir auf?" ohne Umweg über die Einstellungen.
+Begründung und Auflagen: `docs/decisions.md`, E-018.
+
+| Element | Darstellung |
+| --- | --- |
+| **Kopfzeile** | `bg-assist` mit pulsierendem Punkt (`.rec-pulse`) und „Kamera live" bzw. „Kein Bild" |
+| **Bild** | gespiegeltes `<video>` im Verhältnis 3∶4, `aria-hidden`; der zugängliche Name liegt auf dem umschließenden `<button>` |
+| **Gesichtsrahmen** | statischer, gestrichelter Rahmen – als Attrappe gekennzeichnet, folgt nichts und erkennt nichts |
+| **Fußzeile** | „wird nicht ausgewertet", schwarz hinterlegt, immer sichtbar |
+| **Panel** (Sheet) | großes Bild, Status-Chips, dreiteilige Liste *echt / simuliert / nicht vorhanden*, „Kamerabild ausschalten" und Weg in die Einstellungen |
+
+Sichtbar nur bei `liveCameraPreview && simulatedCameraCapture && !assistantPaused`;
+derselbe Ausdruck startet und stoppt den Stream.
 
 ### 6.20 `CommunityReactions` — `src/features/analytics/CommunityReactions.tsx`
 
@@ -752,6 +817,8 @@ Teilnehmerzahlen und einen Umschalter statt eines gestapelten Diagramms.
 | Prop | Typ |
 | --- | --- |
 | `summary` | `CommunityReactionSummary` |
+| `initialSource` | `CommunitySource`, Default `'estimated'` |
+| `embedded` | `boolean`, Default `false` – ohne eigenes `Panel` und ohne eigene Überschrift, wenn die Komponente bereits in einem betitelten Container sitzt (Sheet des Emoji-Knopfs) |
 
 | Zustand | Darstellung |
 | --- | --- |
@@ -771,6 +838,37 @@ je Zeile. Höhe wird aus der Datenmenge berechnet (`data.length * 38 + 10`).
 
 Am Fuß: `FieldLabel` „Woher kommen diese Zahlen?" mit `summary.sourceExplanation`
 und ein `Chip tone="caution"` mit `summary.representativeWarning`.
+
+An der Y-Achse steht das Emoji vor dem Reaktionswort (`REACTION_EMOJI`). Die
+`sr-only`-Tabelle behält das reine Wort — der Emoji-Name einer Vorlesesoftware
+wäre dort nur Rauschen.
+
+### 6.20a `CommunityReactionButton` — `src/features/analytics/CommunityReactionButton.tsx`
+
+**Zweck:** Der zweite Knopf der Assistenzschicht an jedem Beitrag, neben
+„Kontext erklären": **ein Emoji** für die häufigste Reaktion anderer plus deren
+Prozentwert. Öffnet ein Sheet mit der vollständigen Auswertung. Warum das Emoji
+aus den Selbstauskünften stammt und welche Auflagen daran hängen:
+`docs/decisions.md`, E-017.
+
+| Zustand | Darstellung |
+| --- | --- |
+| **Normalfall** | Pille in der Assist-Familie (`bg-assist-tint`, `border-assist-line`), Emoji in `text-lg` plus `NN %` in `tabular-nums` |
+| **kleine Stichprobe** (< 30 Angaben) | statt des Prozentwerts die Anzahl, z. B. „9 Angaben"; im Sheet ein `Chip tone="caution"` „Sehr wenige Angaben." |
+| **ohne Einwilligung / pausiert / ohne Daten** | rendert `null`, wie `ContextAssistantButton` |
+
+Zugänglicher Name: „Reaktionen anderer ansehen. Am häufigsten *Wort*, *N* Prozent
+von *M* Selbstauskünften. Simulierte Werte." — Reaktion, Anteil, Stichprobe,
+Quelle und Simulationshinweis, weil ein Emoji nichts davon tragen kann.
+
+Sheet „So haben andere reagiert": Kopfblock mit großem Emoji, Reaktionswort,
+Prozentwert, Stichprobengröße und Zweitplatziertem; darunter ein
+`Chip tone="caution"` mit dem Gegenanteil („66 % haben etwas anderes angegeben"),
+dann `CommunityReactions` mit `embedded` und `initialSource="self-reported"`.
+
+Ableitungen (`communitySummary.ts`): `rankReactions` sortiert nach Anteil und
+bricht Gleichstände über `SELF_REPORT_ORDER` auf, damit dieselbe Sitzung nicht
+bei jedem Neuladen ein anderes Gesicht zeigt.
 
 ### 6.21 `ReactionTimeline` — `src/features/analytics/ReactionTimeline.tsx`
 

@@ -1,7 +1,7 @@
-# Fortschritt
+﻿# Fortschritt
 
-Stand: 31.07.2026 · Branch `feat/contextlens-prototype`
-**Build:** erfolgreich · **Tests:** 99 / 99 grün
+Stand: 03.08.2026 · Branch `feat/contextlens-prototype`
+**Build:** erfolgreich · **Tests:** 121 / 121 grün
 
 ## Phasenübersicht
 
@@ -14,13 +14,18 @@ Stand: 31.07.2026 · Branch `feat/contextlens-prototype`
 | 5 | Research Mode: drei Aufgaben, Bewertung, lokale Speicherung, JSON-/CSV-Export | **abgeschlossen** |
 | 6 | Polish and QA: Responsive, Tastatur, Kontraste, Texte, Build, Tests, Leerzustände, Reset | **abgeschlossen** |
 | 7 | Produktrahmung: simuliertes Telefon, Startbildschirm, eigenständige Plattform-App, Assistenz als Erweiterung darüber | **abgeschlossen** |
+| 8 | Echtes Kamerabild über dem Feed, Emoji-Knopf für Community-Reaktionen, genauere Feed-Konventionen | **abgeschlossen** |
+| 9 | Gezeichnete Szenen statt grauer Platzhalter, Meme-Untertitel, Farbwelt der Vorlage, Weg für echte Clips | **abgeschlossen** |
 
 ## Was funktioniert
 
 **Inhalt und Feeds**
 - 9 Beispielbeiträge (5 Visual Feed, 4 Discussion Feed) mit Kommentar-Threads
 - Sichtbarer Umschalter zwischen beiden Ansichten
-- Medienplatzhalter mit beschreibendem Text statt echter Medien
+- Gezeichnete SVG-Szene je Beitrag statt grauer Platzhalter; Teile davon
+  bewegen sich, solange die simulierte Wiedergabe läuft
+- Meme-Untertitel im Bild, Hashtags in der Bildunterschrift
+- Echte Dateien können jede Zeichnung ersetzen (`public/media/README.md`)
 - Simulierter Video-Scrubber mit Abspielen/Pause
 
 **Context Assistant**
@@ -38,10 +43,14 @@ Stand: 31.07.2026 · Branch `feat/contextlens-prototype`
 - Korrektur über neun Reaktionsoptionen plus Freitext
 - Schätzung und Selbstauskunft dauerhaft getrennt sichtbar
 - Optionale lokale Kamera-Vorschau (nur Anzeige, Tracks werden gestoppt)
+- Echtes Selbstbild über dem Feed, solange beide Kameraschalter an sind, mit
+  Panel, das echtes Bild und simulierte Auswertung auseinanderhält
 
 **Transparenz und Auswertung**
 - Community-Reaktionen mit Quellenumschalter, getrennten Teilnehmerzahlen,
   Repräsentativitätswarnung und Quellenerklärung
+- Emoji-Knopf an jedem Beitrag: häufigste Selbstauskunft plus Prozentwert,
+  dahinter die vollständige Auswertung (E-017)
 - Reaktionsverlauf für drei Videos, synchron zum Scrubber
 - Persönliche Übersicht ohne Bewertung der Person, mit Einzel- und
   Gesamtlöschung
@@ -87,7 +96,12 @@ Stand: 31.07.2026 · Branch `feat/contextlens-prototype`
 | Telefonrahmen ergänzt | `features/device/`, `#app-viewport` als Scrollfläche, `transform`-Regel für `position: fixed` |
 | Apps getrennt | Zwei Shells statt einer: `SocialAppShell` (Plattform) und `AppShell` (ContextLens) |
 | Mehrspaltige Desktop-Layouts entfernt | `sm:grid-cols-*` in der Übersicht und das breite Sheet-Layout ersetzt – Begründung in `docs/known-limitations.md` |
-| Abschlussprüfung | Build erfolgreich, 99/99 Tests grün |
+| Feed-Konventionen geschärft | Aktionszeile nur mit Symbolen, „Gefällt N Personen"-Zeile darunter, Doppeltipp-Herz (vergibt, nimmt nie zurück), Story-Ring am Profilbild |
+| Echtes Kamerabild ergänzt | `useCameraStream` als einzige `getUserMedia`-Stelle; `LiveSelfView` über dem Feed; E-018 |
+| Emoji-Knopf ergänzt | Häufigste Selbstauskunft je Beitrag, Sheet mit vollständiger Auswertung; E-017 |
+| Bilder gezeichnet | Fünf SVG-Szenen (`PostScene.tsx`), Meme-Untertitel, `src`-Feld für echte Dateien; E-020 |
+| Farbwelt der Vorlage übernommen | Verlaufsrampe, Akzentblau, Like-Rot; E-019 revidiert E-015 teilweise |
+| Abschlussprüfung | Build erfolgreich, 121/121 Tests grün |
 
 ## Offene Punkte
 

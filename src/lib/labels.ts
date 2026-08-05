@@ -144,6 +144,27 @@ export const COMMUNITY_KEY_LABEL: Record<string, string> = {
   unclear: 'nicht eindeutig',
 };
 
+/**
+ * One face per reaction, for the community button on a post.
+ *
+ * These are a *shorthand for an aggregate*, never a statement about the person
+ * looking at the screen. An emoji cannot be hedged, so it never travels alone:
+ * wherever one is rendered, the reaction word, the percentage and the source
+ * of the number are next to it, and the accessible name spells all three out.
+ */
+export const REACTION_EMOJI: Record<string, string> = {
+  amused: '😂',
+  interested: '👀',
+  surprised: '😮',
+  confused: '😕',
+  annoyed: '🙄',
+  angry: '😠',
+  uncomfortable: '😟',
+  neutral: '😐',
+  other: '💬',
+  unclear: '❔',
+};
+
 export const CONTENT_CATEGORY_LABEL: Record<ContentCategory, string> = {
   humor: 'Humor',
   sarcasm: 'Sarkasmus oder Ironie',

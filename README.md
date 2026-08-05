@@ -1,4 +1,4 @@
-# ContextLens
+﻿# ContextLens
 
 **UX-Forschungsprototyp für eine freiwillige Assistenzschicht in sozialen Medien.**
 
@@ -29,7 +29,7 @@ npm run dev      # http://localhost:5173
 | `npm run dev` | Entwicklungsserver |
 | `npm run build` | Produktionsbuild (`tsc -b && vite build`) |
 | `npm run preview` | Produktionsbuild lokal ansehen |
-| `npm test` | Testsuite (99 Tests) |
+| `npm test` | Testsuite (121 Tests) |
 | `npm run test:watch` | Tests im Watch-Modus |
 
 Voraussetzung: Node.js 20 oder neuer.

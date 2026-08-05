@@ -4,8 +4,9 @@ import type { Post } from '@/types';
  * Simulated demo content for ContextLens.
  *
  * Every post is invented. Handles, communities and numbers do not refer to
- * real accounts or platforms. Media is rendered as a labelled placeholder -
- * there are no real images or videos in this prototype.
+ * real accounts or platforms. Each visual post names a drawn scene
+ * (`features/feed/PostScene.tsx`) that stands in for its footage; setting
+ * `src` on the media swaps in a real file instead (`public/media/README.md`).
  *
  * The set is deliberately built to cover the interpretation cases we want to
  * test, one post per case (see `researchNote`).
@@ -21,16 +22,18 @@ export const POSTS: Post[] = [
     author: 'Mira Falk',
     authorHandle: '@mirakocht',
     body:
-      'Tag 4 meines Versuchs, wie in Kochvideos einhändig ein Ei aufzuschlagen. Die Küche hat verloren.',
+      'Tag 4 meines Versuchs, wie in Kochvideos einhändig ein Ei aufzuschlagen. Die Küche hat verloren. #küchenchaos #tag4 #einhändig',
     postedAgo: 'vor 2 Std.',
     likes: 12840,
     commentCount: 233,
     media: {
       kind: 'video',
       altText:
-        'Simuliertes Video: Person schlägt in einer Küche ein Ei auf, die Schale fällt in die Schüssel, Person lacht und hebt entschuldigend die Hände.',
+        'Person schlägt in einer Küche ein Ei auf, die Schale fällt mit in die Schüssel, die Person lacht und hebt entschuldigend die Hände.',
       palette: ['#f6c26b', '#e08a5f'],
       durationSeconds: 18,
+      scene: 'kitchen-egg',
+      overlayText: { top: 'Tag 4', bottom: 'die Küche hat verloren' },
     },
     researchNote:
       'Eindeutig humorvoll. Kontrollfall: Erkennen Testpersonen, dass hier kein Warnhinweis nötig ist?',
@@ -42,15 +45,17 @@ export const POSTS: Post[] = [
     author: 'Jonas Reiter',
     authorHandle: '@jonasunterwegs',
     body:
-      'Absolut perfekter Start in den Tag. Wirklich ein Traum. 50 Minuten Verspätung und der Ersatzzug fährt woanders ab. Besser geht es kaum.',
+      'Absolut perfekter Start in den Tag. Wirklich ein Traum. 50 Minuten Verspätung und der Ersatzzug fährt woanders ab. Besser geht es kaum. #pendlerleben',
     postedAgo: 'vor 5 Std.',
     likes: 3410,
     commentCount: 87,
     media: {
       kind: 'image',
       altText:
-        'Simuliertes Foto: Bahnsteig im Regen, Anzeigetafel mit mehreren verspäteten Verbindungen, im Vordergrund ein umgekippter Kaffeebecher.',
+        'Bahnsteig im Regen, Anzeigetafel mit vier verspäteten Verbindungen, im Vordergrund ein umgekippter Kaffeebecher.',
       palette: ['#7f93a8', '#4a5b6e'],
+      scene: 'rainy-platform',
+      overlayText: { bottom: 'besser geht es kaum' },
     },
     researchNote:
       'Möglicherweise sarkastisch. Hauptfall für Szenario 1 im Research Mode.',
@@ -69,9 +74,12 @@ export const POSTS: Post[] = [
     media: {
       kind: 'video',
       altText:
-        'Simuliertes Video: Person sitzt in einem Zimmer und spricht ruhig, aber sichtbar angespannt in die Kamera, atmet mehrfach tief durch.',
+        'Person sitzt in einem Zimmer und spricht ruhig, aber sichtbar angespannt in die Kamera, atmet mehrfach tief durch.',
       palette: ['#8d7fb8', '#59527f'],
       durationSeconds: 27,
+      scene: 'talking-head',
+      // No burned-in caption here on purpose: the one post that is meant
+      // sincerely should not look like it is set up for a punchline.
     },
     researchNote:
       'Emotionales bzw. frustriertes Video. Trägt den simulierten Reaktionsverlauf (6.9).',
@@ -83,16 +91,20 @@ export const POSTS: Post[] = [
     author: 'Klartext Daily',
     authorHandle: '@klartext.daily',
     body:
-      'Niemand traut sich das zu sagen, also sage ich es: Wer morgens noch mit dem Auto zur Arbeit fährt, hat den Ernst der Lage einfach nicht verstanden. Schreib deine Meinung in die Kommentare, ich lese ALLES.',
+      'Niemand traut sich das zu sagen, also sage ich es: Wer morgens noch mit dem Auto zur Arbeit fährt, hat den Ernst der Lage einfach nicht verstanden. Schreib deine Meinung in die Kommentare, ich lese ALLES. #klartext #meinung',
     postedAgo: 'vor 8 Std.',
     likes: 58230,
     commentCount: 9418,
     media: {
       kind: 'video',
       altText:
-        'Simuliertes Video: Person spricht schnell und mit großen Gesten direkt in die Kamera, im Hintergrund eine stark befahrene Straße, eingeblendeter Text in Großbuchstaben.',
+        'Person spricht schnell und mit großen Gesten direkt in die Kamera, im Hintergrund eine stark befahrene Straße, eingeblendeter Text in Großbuchstaben.',
       palette: ['#d76a6a', '#8f3b4d'],
       durationSeconds: 22,
+      scene: 'street-rant',
+      // The all-caps overlay is part of what the analysis flags as
+      // reaction-seeking, so it has to be visible in the picture.
+      overlayText: { top: 'niemand traut sich das zu sagen', bottom: 'ich lese ALLES' },
     },
     researchNote:
       'Stark polarisierender, reaktionsorientierter Beitrag. Hauptfall für Szenario 2 (Community-Reaktionen).',
@@ -110,9 +122,10 @@ export const POSTS: Post[] = [
     media: {
       kind: 'video',
       altText:
-        'Simuliertes Video: sehr kurzer Clip ohne Sprache, Kamera schwenkt über einen leeren Parkplatz, kein Text und keine Musik.',
+        'Sehr kurzer Clip ohne Sprache, die Kamera schwenkt über einen leeren Parkplatz, kein Text und keine Musik.',
       palette: ['#9aa6ae', '#6b7681'],
       durationSeconds: 4,
+      scene: 'empty-lot',
     },
     researchNote:
       'Unzureichender Kontext. Prüft, ob Testpersonen ein ehrliches "keine Einschätzung" akzeptieren.',

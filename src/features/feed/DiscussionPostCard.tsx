@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 
 import { useAppState } from '@/app/AppStateProvider';
+import { CommunityReactionButton } from '@/features/analytics/CommunityReactionButton';
 import { ContextAssistantButton } from '@/features/context-assistant/ContextAssistantButton';
 import { OwnReactionControl } from '@/features/reactions/OwnReactionControl';
 import type { Post } from '@/types';
@@ -80,6 +81,7 @@ export function DiscussionPostCard({
             postId={post.id}
             onOpened={() => recordView(post.id, true)}
           />
+          <CommunityReactionButton postId={post.id} />
           <Link
             to={`/post/${post.id}`}
             className="
@@ -88,7 +90,7 @@ export function DiscussionPostCard({
             "
           >
             <BarChart3 aria-hidden="true" className="size-4" />
-            Reaktionen ansehen
+            Alles zum Beitrag
           </Link>
           <OwnReactionControl postId={post.id} placement="inline" />
         </div>

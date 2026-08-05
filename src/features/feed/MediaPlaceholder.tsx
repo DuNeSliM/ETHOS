@@ -1,8 +1,9 @@
-import { Pause, Play, Video } from 'lucide-react';
-import { useEffect } from 'react';
+import { Heart, Pause, Play, Video } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useSimulatedPlayback } from '@/hooks/useSimulatedPlayback';
 import { formatClock } from '@/data/timelines';
+import { PostScene } from '@/features/feed/PostScene';
 import type { SimulatedMedia } from '@/types';
 
 /**
@@ -23,6 +24,11 @@ export function MediaPlaceholder({
   children,
   /** `feed` is the full-bleed 4:5 card variant, `detail` is a contained one. */
   variant = 'feed',
+  /**
+   * Double tap on the picture. The gesture every photo feed has trained its
+   * users to expect; the caller decides what it means (here: like the post).
+   */
+  onDoubleTap,
 }: {
   media: SimulatedMedia;
   /** Called with the playback position so a parent can sync the timeline. */
@@ -30,10 +36,13 @@ export function MediaPlaceholder({
   /** Overlay rendered on top of the media, e.g. the own-reaction chip. */
   children?: React.ReactNode;
   variant?: 'feed' | 'detail';
+  onDoubleTap?: () => void;
 }) {
   const duration = media.durationSeconds ?? 0;
   const playback = useSimulatedPlayback(duration);
   const isVideo = media.kind === 'video';
+  const [burst, setBurst] = useState(0);
+  const burstTimer = useRef<number | undefined>(undefined);
 
   // Report the position upward in an effect, never during render - a parent
   // setState call while rendering would loop.
@@ -41,18 +50,82 @@ export function MediaPlaceholder({
     onTimeChange?.(playback.currentTime);
   }, [playback.currentTime, onTimeChange]);
 
+  useEffect(() => () => window.clearTimeout(burstTimer.current), []);
+
+  function handleDoubleTap() {
+    if (!onDoubleTap) return;
+    onDoubleTap();
+    // Keyed remount of the heart, so a second double tap restarts the
+    // animation instead of being swallowed by the running one.
+    setBurst((value) => value + 1);
+    window.clearTimeout(burstTimer.current);
+    burstTimer.current = window.setTimeout(() => setBurst(0), 800);
+  }
+
   return (
     <figure className="relative m-0">
       <div
+        onDoubleClick={handleDoubleTap}
         className={`
           relative overflow-hidden bg-surface-3
+          ${onDoubleTap ? 'select-none' : ''}
           ${variant === 'feed' ? 'aspect-[4/5]' : 'aspect-[4/5] rounded-xl border border-line sm:aspect-video'}
         `}
         style={{
           background: `linear-gradient(150deg, ${media.palette[0]}, ${media.palette[1]})`,
         }}
       >
-        <div className="sim-hatch absolute inset-0" aria-hidden="true" />
+        {/*
+          Three ways to fill this frame, in order of preference: a real file
+          the demo was given, the drawn scene, and - only if a post ever ships
+          without either - the plain gradient behind both.
+        */}
+        {media.src ? (
+          isVideo ? (
+            <video
+              src={media.src}
+              poster={media.poster}
+              muted
+              loop
+              playsInline
+              autoPlay={playback.isPlaying}
+              aria-hidden="true"
+              className="size-full object-cover"
+            />
+          ) : (
+            <img src={media.src} alt="" className="size-full object-cover" />
+          )
+        ) : (
+          <PostScene
+            scene={media.scene}
+            palette={media.palette}
+            isPlaying={playback.isPlaying}
+          />
+        )}
+
+        {/*
+          Vignette. Photo feeds are dense with white text on arbitrary
+          pictures, and the corners are where the overlays sit.
+        */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_40%,transparent_45%,rgb(0_0_0/0.28))]"
+        />
+
+        {/* Meme caption, where the post carries one. */}
+        {media.overlayText ? (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 flex flex-col justify-between p-4 text-center"
+          >
+            <p className="meme-caption text-[1.375rem]">
+              {media.overlayText.top ?? ''}
+            </p>
+            <p className="meme-caption text-[1.375rem]">
+              {media.overlayText.bottom ?? ''}
+            </p>
+          </div>
+        ) : null}
 
         {/* Top row: media type and the simulation marker. */}
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
@@ -65,19 +138,14 @@ export function MediaPlaceholder({
             <span />
           )}
 
+          {/*
+            The marker stays even now that the frame carries a picture -
+            especially now. A participant must never have to work out whether
+            what they are looking at was filmed.
+          */}
           <span className="rounded-md bg-black/50 px-2 py-1 text-[0.6875rem] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-            Simulierter Platzhalter
+            {media.src ? 'Beispielclip' : 'Simulierter Platzhalter'}
           </span>
-        </div>
-
-        {/*
-          The description is the actual content of this placeholder, so it gets
-          the centre of the frame rather than being tucked away.
-        */}
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          <p className="max-w-sm text-center text-[0.9375rem] font-medium leading-snug text-white [text-shadow:0_1px_12px_rgb(0_0_0_/_0.85)]">
-            {media.altText}
-          </p>
         </div>
 
         {/*
@@ -89,6 +157,26 @@ export function MediaPlaceholder({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-start p-3 [&>*]:pointer-events-auto">
           {children}
         </div>
+
+        {/*
+          The double-tap heart. Decoration only: the like itself is owned by
+          the labelled button under the picture, which is also the one route
+          to it for keyboard and screen reader users. Under
+          `prefers-reduced-motion` the animation collapses to nothing, which is
+          the intended outcome here.
+        */}
+        {burst > 0 ? (
+          <div
+            key={burst}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          >
+            <Heart
+              className="heart-burst size-24 text-white drop-shadow-[0_2px_12px_rgb(0_0_0/0.5)]"
+              fill="currentColor"
+            />
+          </div>
+        ) : null}
       </div>
 
       {isVideo && duration > 0 ? (
@@ -130,9 +218,16 @@ export function MediaPlaceholder({
         </div>
       ) : null}
 
+      {/*
+        The description carries the whole content of the frame for anyone not
+        looking at it, so it says what the scene shows - and says plainly
+        whether it was drawn for this prototype or is a supplied example clip.
+      */}
       <figcaption className="sr-only">
-        Simulierter Platzhalter. In diesem Prototyp gibt es keine echten Bilder
-        oder Videos. Beschreibung: {media.altText}
+        {media.src
+          ? 'Beispielclip in einem simulierten Feed.'
+          : 'Gezeichnete Szene. In diesem Prototyp gibt es keine echten Fotos oder Videos.'}{' '}
+        Beschreibung: {media.altText}
       </figcaption>
     </figure>
   );

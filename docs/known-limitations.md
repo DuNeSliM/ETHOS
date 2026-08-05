@@ -5,15 +5,29 @@
 - **Keine KI.** Es ist kein Modell beteiligt — weder lokal noch entfernt. Jede
   Einschätzung steht wortwörtlich in `src/data/analyses.ts`. Der Prototyp kann
   daher nichts über die Qualität einer echten Analyse aussagen.
-- **Keine Emotionserkennung.** Auch bei aktivierter Kamera-Vorschau wird kein
-  Bild ausgewertet. Die „Schätzungen" sind feste Werte aus einer Tabelle in
-  `mockEngine.ts`.
+- **Keine Emotionserkennung.** Auch bei laufendem Selbstbild wird kein Bild
+  ausgewertet. Die „Schätzungen" sind feste Werte aus einer Tabelle in
+  `mockEngine.ts` und ändern sich nicht, egal was vor der Kamera passiert. Der
+  gestrichelte Rahmen im Selbstbild ist eine Attrappe: statisch, ohne
+  Gesichtssuche.
+- **Das Kamerabild ist der einzige echte Sensor.** Wo eine Testperson vor einem
+  Gerät ohne Webcam sitzt oder den Zugriff ablehnt, zeigt die Kachel „Kamera
+  nicht verfügbar"; alles andere funktioniert unverändert. Umgekehrt kann eine
+  laufende Kamera den Eindruck erwecken, die Schätzungen kämen von ihr — das ist
+  der Effekt, den die Kachel und ihr Panel ausdrücklich benennen müssen.
 - **Keine Plattformintegration.** Kein Bezug zu Instagram, TikTok, Reddit oder
   YouTube. Alle Beiträge, Konten, Communities, Likes und Kommentarzahlen sind
   erfunden.
+- **Keine echten Fotos oder Videos.** Die Bilder der Beiträge sind gezeichnete
+  SVG-Szenen (`features/feed/PostScene.tsx`). Sie sehen nach Inhalt aus, sind
+  aber unverwechselbar keine Aufnahmen. Wer echtes Material zeigen will, legt es
+  nach `public/media/` und setzt `media.src` — der Rechtehinweis dort ist zu
+  beachten, fremde Memes sind in aller Regel geschützt.
 - **Die simulierte App „Momento" ist eine Attrappe.** Übernommen sind die
-  Konventionen der Gattung (Wortmarke, Stories, randlose Medien, Tab-Leiste),
-  keine Marke. Von ihren Bedienelementen funktionieren nur der Ansichtswechsel,
+  Konventionen der Gattung (Stories, randlose Medien, Tab-Leiste) **und seit
+  E-019 auch die Farbwelt der Vorlage** — Verlaufsrampe, Akzentblau, Like-Rot.
+  Nicht übernommen sind Name und Logo. Das ist eine Entscheidung für den
+  Hochschulkontext; außerhalb davon wäre sie neu zu prüfen. Von ihren Bedienelementen funktionieren nur der Ansichtswechsel,
   „Gefällt mir", „Speichern" und die Wege in einen Beitrag; Suche, Erstellen,
   Reels, Profil, Aktivität und Direktnachrichten melden beim Antippen, dass es
   sie im Prototyp nicht gibt.

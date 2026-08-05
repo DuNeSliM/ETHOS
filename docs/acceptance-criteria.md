@@ -1,4 +1,4 @@
-# Akzeptanzkriterien
+﻿# Akzeptanzkriterien
 
 Status: **ERFÜLLT** = im Code umgesetzt und (wo möglich) durch einen
 automatisierten Test abgesichert · **TEILWEISE** = umgesetzt, aber mit
@@ -187,6 +187,6 @@ ausgeschriebene Endpunkte. — ERFÜLLT (Test)
 | Kriterium | Status |
 |---|---|
 | `npm run build` erfolgreich | ERFÜLLT |
-| `npm test` grün (99 Tests) | ERFÜLLT |
+| `npm test` grün (121 Tests) | ERFÜLLT |
 | TypeScript strict ohne Fehler | ERFÜLLT |
 | Playwright-E2E-Smoke-Test | OFFEN (optionales Stretch Goal) |

@@ -82,14 +82,40 @@ export type FeedMode = 'visual' | 'discussion';
 
 export type PostKind = 'video' | 'image' | 'text-post' | 'thread';
 
+/** The drawn scenes in `features/feed/PostScene.tsx`. */
+export type SceneId =
+  | 'kitchen-egg'
+  | 'rainy-platform'
+  | 'talking-head'
+  | 'street-rant'
+  | 'empty-lot';
+
+/** Two colours a scene builds its gradients from. */
+export type ScenePalette = [string, string];
+
 export type SimulatedMedia = {
   kind: 'video' | 'image';
-  /** Short caption describing what the placeholder stands in for. */
+  /** Short caption describing what the media shows. */
   altText: string;
-  /** Decorative gradient pair used to render the placeholder. */
-  palette: [string, string];
+  /** Colours the drawn scene is built from. */
+  palette: ScenePalette;
   /** Seconds. Only meaningful for `kind: 'video'`. */
   durationSeconds?: number;
+  /** Which illustration stands in for the missing footage. */
+  scene: SceneId;
+  /**
+   * Path to a real file under `public/media/`. When present it replaces the
+   * drawing entirely - that is how a real clip gets into the demo. See
+   * `public/media/README.md`.
+   */
+  src?: string;
+  /** Poster frame for a real video, same folder. */
+  poster?: string;
+  /**
+   * Caption burned into the picture, the way this genre's jokes carry their
+   * punchline. Rendered over the media, not as part of the post text.
+   */
+  overlayText?: { top?: string; bottom?: string };
 };
 
 export type Comment = {

@@ -17,7 +17,7 @@ Gesucht wurde im gesamten `src/` nach:
 `fetch(`, `XMLHttpRequest`, `WebSocket`, `sendBeacon`, `http://`, `https://`.
 
 **Ergebnis: null Treffer.** Der einzige Treffer für `MediaRecorder` und
-`drawImage` liegt in einem *Kommentar* in `CameraPreview.tsx`, der ausdrücklich
+`drawImage` liegt in einem *Kommentar* in `useCameraStream.ts`, der ausdrücklich
 festhält, dass diese APIs nicht verwendet werden.
 
 **Bewertung:** Die Aussage ist zutreffend. Der Prototyp kann strukturell keine
@@ -32,15 +32,25 @@ Gesucht nach `canvas`, `drawImage`, `toDataURL`, `getImageData`,
 
 **Ergebnis: null Treffer im ausführbaren Code.**
 
-`getUserMedia` erscheint genau einmal (`CameraPreview.tsx:44`). Der Stream wird
-ausschließlich an `videoRef.current.srcObject` gehängt (Zeile 50). Es gibt
-keinen Pfad, auf dem ein Einzelbild ausgelesen würde.
+`getUserMedia` erscheint genau einmal, in
+`src/features/reactions/useCameraStream.ts`. Dieser Hook ist die **einzige**
+Stelle im Projekt, die die Kamera anfasst; `CameraPreview` (Einstellungen) und
+`LiveSelfView` (Selbstbild über dem Feed) sind reine Darstellungsschichten
+darüber. Der Stream wird ausschließlich an `srcObject` von `<video>`-Elementen
+gehängt. Es gibt keinen Pfad, auf dem ein Einzelbild ausgelesen würde.
 
-**Freigabe der Kamera:** `stop()` beendet alle Tracks und setzt `srcObject` auf
-`null`; `useEffect(() => stop, [stop])` ruft das beim Unmount auf. Die
-Kamera-Leuchte des Geräts erlischt also, wenn die UI „Kamera aus" anzeigt.
+**Freigabe der Kamera:** `stop()` beendet alle Tracks und setzt `srcObject`
+aller angehängten `<video>`-Elemente auf `null`; ein Cleanup-Effekt ruft
+dasselbe beim Unmount auf. Die Kamera-Leuchte des Geräts erlischt also, wenn die
+UI „Kamera aus" anzeigt — und da `LiveSelfView` den Hook an
+`liveCameraPreview && simulatedCameraCapture && !assistantPaused` koppelt, auch
+beim Pausieren der Assistenzschicht.
 
-**Bewertung:** Zutreffend. Die Vorschau ist tatsächlich reine Anzeige.
+**Bewertung:** Zutreffend. Beide Ansichten sind tatsächlich reine Anzeige. Die
+Reaktionsschätzungen an den Beiträgen bleiben die fest geschriebenen Werte aus
+`mockEngine.ts` — sie ändern sich nicht, wenn die Kamera läuft. Das Panel des
+Selbstbilds sagt genau das (`LiveSelfView.tsx`, Abschnitt „Echt ist nur das
+Bild") und benennt auch den gestrichelten Rahmen im Vorschaubild als Attrappe.
 
 ### 1.3 „Alles bleibt lokal im localStorage"
 

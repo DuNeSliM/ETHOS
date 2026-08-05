@@ -70,6 +70,14 @@
 
   --cl-focus: #0b4f5e;
   --cl-shadow: 15 24 34;
+
+  /*
+    Platform accents. Defined here only so the Tailwind utilities resolve
+    outside the feed too; the values that matter are the ones in
+    `.platform-skin` below.
+  */
+  --cl-platform-accent: #1d4ed8;
+  --cl-platform-like: #a4243d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -176,6 +184,12 @@
            border-strong #8a8a8a 5.98:1
   All clear WCAG AA; `#8e8e8e`, the shade this genre usually uses for
   secondary text, does not (3.0:1) and is therefore not used.
+
+  The two accents are the ones this genre is recognised by: a saturated blue
+  for links and affirmative actions, and a warm red for the like. `#0095f6` on
+  white is 3.07:1 - enough for a 24 px icon or a bold pill, not enough for body
+  copy, so it is used for controls and never for prose. `--cl-platform-accent-ink`
+  is the darkened variant for text-sized links.
 */
 .platform-skin {
   --cl-canvas: #ffffff;
@@ -189,6 +203,15 @@
   --cl-text-muted: #545454;
   --cl-text-faint: #6b6b6b;
   --cl-text-inverse: #ffffff;
+
+  --cl-platform-accent: #0095f6;
+  /* 4.62:1 on white - the same blue, dark enough to read as text. */
+  --cl-platform-accent-ink: #0064ac;
+  --cl-platform-like: #ed4956;
+
+  /* The like colour is what `text-alert` means inside the feed. */
+  --cl-alert: #c62430;
+  --cl-alert-tint: #fdebef;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -204,6 +227,14 @@
     --cl-text-muted: #b3b3b3;
     --cl-text-faint: #a1a1a1;
     --cl-text-inverse: #000000;
+
+    --cl-platform-accent: #0095f6;
+    /* On black the blue already clears AA (5.6:1), so no darkened variant. */
+    --cl-platform-accent-ink: #58aef4;
+    --cl-platform-like: #ed4956;
+
+    --cl-alert: #ff6b78;
+    --cl-alert-tint: #2b1114;
   }
 }
 
@@ -219,6 +250,13 @@
   --cl-text-muted: #b3b3b3;
   --cl-text-faint: #a1a1a1;
   --cl-text-inverse: #000000;
+
+  --cl-platform-accent: #0095f6;
+  --cl-platform-accent-ink: #58aef4;
+  --cl-platform-like: #ed4956;
+
+  --cl-alert: #ff6b78;
+  --cl-alert-tint: #2b1114;
 }
 
 @theme inline {
@@ -255,6 +293,11 @@
   --color-sim: var(--cl-sim);
   --color-sim-tint: var(--cl-sim-tint);
   --color-sim-line: var(--cl-sim-border);
+
+  /* Platform accents - only meaningful inside `.platform-skin`. */
+  --color-accent: var(--cl-platform-accent);
+  --color-accent-ink: var(--cl-platform-accent-ink, var(--cl-platform-accent));
+  --color-like: var(--cl-platform-like);
 
   --color-focus: var(--cl-focus);
 
@@ -367,18 +410,193 @@
   }
 
   /*
-    Wordmark and story rings of the simulated platform. Warm-to-violet ramps
-    are the visual shorthand of this app genre; this is our own ramp, not a
-    copy of a specific product's brand gradient.
+    Wordmark and story rings of the simulated platform: the warm-to-violet ramp
+    this app genre is recognised by, angled from the bottom left the way the
+    story rings do it.
   */
   .platform-gradient {
     background-image: linear-gradient(
       45deg,
-      #f8c14b 0%,
-      #ef5a5a 32%,
-      #e0407f 62%,
-      #7b3fe4 100%
+      #feda75 0%,
+      #fa7e1e 25%,
+      #d62976 50%,
+      #962fbf 75%,
+      #4f5bd5 100%
     );
+  }
+
+  /*
+    Double-tap heart over a picture. `forwards` matters: under the
+    reduced-motion rule at the end of this file the duration collapses to
+    almost zero, and the element then holds the final frame - fully
+    transparent - instead of flashing at full size.
+  */
+  .heart-burst {
+    animation: cl-heart-burst 750ms ease-out forwards;
+  }
+
+  /* The recording dot on the live self-view. */
+  .rec-pulse {
+    animation: cl-rec-pulse 1.6s ease-in-out infinite;
+  }
+
+  /*
+    Motion inside the drawn scenes. Everything is paused by default and only
+    runs while the simulated playback is running, so a still feed stays still
+    and a "playing" clip visibly is one.
+  */
+  .scene-wobble,
+  .scene-drop,
+  .scene-rain,
+  .scene-breathe,
+  .scene-gesture,
+  .scene-pan {
+    animation-play-state: paused;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+  }
+
+  .scene-playing .scene-wobble,
+  .scene-playing .scene-drop,
+  .scene-playing .scene-rain,
+  .scene-playing .scene-breathe,
+  .scene-playing .scene-gesture,
+  .scene-playing .scene-pan {
+    animation-play-state: running;
+  }
+
+  .scene-wobble {
+    animation-name: cl-scene-wobble;
+    animation-duration: 2.4s;
+  }
+  .scene-drop {
+    animation-name: cl-scene-drop;
+    animation-duration: 2.2s;
+    animation-timing-function: ease-in;
+  }
+  .scene-rain {
+    animation-name: cl-scene-rain;
+    animation-duration: 0.9s;
+    animation-timing-function: linear;
+  }
+  .scene-breathe {
+    animation-name: cl-scene-breathe;
+    animation-duration: 3.6s;
+  }
+  .scene-gesture {
+    animation-name: cl-scene-gesture;
+    animation-duration: 1.5s;
+  }
+  .scene-pan {
+    animation-name: cl-scene-pan;
+    animation-duration: 6s;
+    animation-timing-function: linear;
+  }
+
+  /*
+    Meme caption: the heavy outlined block letters this genre burns into its
+    pictures. `paint-order` puts the stroke behind the fill so the outline does
+    not eat into the glyph.
+  */
+  .meme-caption {
+    font-family: 'Impact', 'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
+    letter-spacing: 0.01em;
+    color: #ffffff;
+    -webkit-text-stroke: 0.055em #000000;
+    paint-order: stroke fill;
+    text-transform: uppercase;
+    line-height: 1.05;
+  }
+}
+
+@keyframes cl-scene-wobble {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes cl-scene-drop {
+  0% {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(46px);
+    opacity: 0;
+  }
+}
+
+@keyframes cl-scene-rain {
+  0% {
+    transform: translate(0, -34px);
+  }
+  100% {
+    transform: translate(-10px, 34px);
+  }
+}
+
+@keyframes cl-scene-breathe {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes cl-scene-gesture {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes cl-scene-pan {
+  0% {
+    transform: translateX(-16px);
+  }
+  100% {
+    transform: translateX(16px);
+  }
+}
+
+@keyframes cl-heart-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes cl-rec-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
   }
 }
 

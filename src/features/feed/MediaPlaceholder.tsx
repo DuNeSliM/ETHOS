@@ -41,6 +41,7 @@ export function MediaPlaceholder({
   const duration = media.durationSeconds ?? 0;
   const playback = useSimulatedPlayback(duration);
   const isVideo = media.kind === 'video';
+  const hasStaticFile = Boolean(media.src || media.poster);
   const [burst, setBurst] = useState(0);
   const burstTimer = useRef<number | undefined>(undefined);
 
@@ -63,9 +64,8 @@ export function MediaPlaceholder({
   }
 
   return (
-    <figure className="relative m-0">
+    <figure className="relative m-0" onDoubleClick={handleDoubleTap}>
       <div
-        onDoubleClick={handleDoubleTap}
         className={`
           relative overflow-hidden bg-surface-3
           ${onDoubleTap ? 'select-none' : ''}
@@ -77,8 +77,9 @@ export function MediaPlaceholder({
       >
         {/*
           Three ways to fill this frame, in order of preference: a real file
-          the demo was given, the drawn scene, and - only if a post ever ships
-          without either - the plain gradient behind both.
+          the demo was given, a real poster file as a photo preview for a video
+          post, the drawn scene, and - only if a post ever ships without either -
+          the plain gradient behind both.
         */}
         {media.src ? (
           isVideo ? (
@@ -95,6 +96,8 @@ export function MediaPlaceholder({
           ) : (
             <img src={media.src} alt="" className="size-full object-cover" />
           )
+        ) : media.poster && isVideo ? (
+          <img src={media.poster} alt="" className="size-full object-cover" />
         ) : (
           <PostScene
             scene={media.scene}
@@ -144,7 +147,7 @@ export function MediaPlaceholder({
             what they are looking at was filmed.
           */}
           <span className="rounded-md bg-black/50 px-2 py-1 text-[0.6875rem] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-            {media.src ? 'Beispielclip' : 'Simulierter Platzhalter'}
+            {hasStaticFile ? 'Beispielclip' : 'Simulierter Platzhalter'}
           </span>
         </div>
 
@@ -224,7 +227,7 @@ export function MediaPlaceholder({
         whether it was drawn for this prototype or is a supplied example clip.
       */}
       <figcaption className="sr-only">
-        {media.src
+        {hasStaticFile
           ? 'Beispielclip in einem simulierten Feed.'
           : 'Gezeichnete Szene. In diesem Prototyp gibt es keine echten Fotos oder Videos.'}{' '}
         Beschreibung: {media.altText}

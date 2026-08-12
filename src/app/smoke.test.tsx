@@ -225,7 +225,7 @@ describe('visual feed', () => {
     // The gesture this genre trained everyone to expect. The keyboard path to
     // the same state is the labelled heart button, which is why the picture
     // itself stays out of the accessibility tree.
-    const media = screen.getAllByText(/simulierter platzhalter/i)[0];
+    const media = screen.getAllByText(/beispielclip|simulierter platzhalter/i)[0];
     await user.dblClick(media);
     expect(screen.getAllByRole('button', { name: /gefällt mir zurücknehmen/i })[0]).toBeDefined();
     // The count sits in its own `tabular-nums` span, so match the paragraph.
@@ -237,14 +237,14 @@ describe('visual feed', () => {
     expect(screen.getByText(likesLine('12.841'))).toBeInTheDocument();
   });
 
-  it('draws a picture for each post instead of a grey box', () => {
+  it('loads example imagery for each post instead of a grey box', () => {
     const { container } = renderWithProviders(<AppRoutes />, {
       route: '/feed/visual',
     });
 
-    // One drawn scene per post with media, and the meme caption burned into
-    // the picture rather than added to the caption text below it.
-    expect(container.querySelectorAll('svg[viewBox="0 0 400 500"]').length).toBe(5);
+    // The feed is now photo-backed: five posts point at usable media files or
+    // their poster/still frames, so the DOM must carry real picture nodes.
+    expect(container.querySelectorAll('img').length).toBe(5);
     expect(container.querySelectorAll('.meme-caption').length).toBeGreaterThan(0);
     // Same words in the picture and in the caption below it, the way this
     // genre repeats its punchline.
@@ -290,9 +290,11 @@ describe('visual feed', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('keeps every media placeholder marked as simulated', () => {
+  it('keeps the media layer labelled as either an example clip or a simulated fallback', () => {
     renderWithProviders(<AppRoutes />, { route: '/feed/visual' });
-    expect(screen.getAllByText(/simulierter platzhalter/i).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(/beispielclip|simulierter platzhalter/i).length,
+    ).toBeGreaterThan(0);
   });
 
   it('shows the status bar with the camera reported as off', () => {

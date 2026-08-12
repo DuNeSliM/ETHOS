@@ -1,11 +1,13 @@
-# Eigene Beispielclips einsetzen
+# Eigene Beispielclips und Bilddateien einsetzen
 
 Der Prototyp zeichnet die Bilder seiner Beiträge selbst
 (`src/features/feed/PostScene.tsx`). Das ist der Auslieferungszustand: keine
 externen Dateien, kein Netzwerkzugriff, keine Rechtefragen.
 
-Für eine Vorführung lässt sich jede dieser Zeichnungen durch eine **echte
-Datei** ersetzen.
+Für eine Vorführung lassen sich die Bildinhalte zusätzlich durch **echte
+Medien** austauschen. Die lokalen SVG-Assets in diesem Ordner sind einfache,
+realistische Bilddateien statt Comic-Illustrationen. Der Feed kann bei Bedarf
+solche Dateien über `src` im `media`-Objekt einbinden.
 
 ## In drei Schritten
 

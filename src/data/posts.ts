@@ -33,6 +33,7 @@ export const POSTS: Post[] = [
       palette: ['#f6c26b', '#e08a5f'],
       durationSeconds: 18,
       scene: 'kitchen-egg',
+      poster: '/media/kitchen-recipe.jpg',
       overlayText: { top: 'Tag 4', bottom: 'die Küche hat verloren' },
     },
     researchNote:
@@ -55,6 +56,7 @@ export const POSTS: Post[] = [
         'Bahnsteig im Regen, Anzeigetafel mit vier verspäteten Verbindungen, im Vordergrund ein umgekippter Kaffeebecher.',
       palette: ['#7f93a8', '#4a5b6e'],
       scene: 'rainy-platform',
+      src: '/media/platform-rain.jpg',
       overlayText: { bottom: 'besser geht es kaum' },
     },
     researchNote:
@@ -78,6 +80,7 @@ export const POSTS: Post[] = [
       palette: ['#8d7fb8', '#59527f'],
       durationSeconds: 27,
       scene: 'talking-head',
+      poster: '/media/portrait-couple.jpg',
       // No burned-in caption here on purpose: the one post that is meant
       // sincerely should not look like it is set up for a punchline.
     },
@@ -102,6 +105,7 @@ export const POSTS: Post[] = [
       palette: ['#d76a6a', '#8f3b4d'],
       durationSeconds: 22,
       scene: 'street-rant',
+      poster: '/media/street-voice.jpg',
       // The all-caps overlay is part of what the analysis flags as
       // reaction-seeking, so it has to be visible in the picture.
       overlayText: { top: 'niemand traut sich das zu sagen', bottom: 'ich lese ALLES' },
@@ -126,6 +130,7 @@ export const POSTS: Post[] = [
       palette: ['#9aa6ae', '#6b7681'],
       durationSeconds: 4,
       scene: 'empty-lot',
+      poster: '/media/empty-lot.jpg',
     },
     researchNote:
       'Unzureichender Kontext. Prüft, ob Testpersonen ein ehrliches "keine Einschätzung" akzeptieren.',

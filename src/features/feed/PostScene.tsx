@@ -1,17 +1,14 @@
 import type { ScenePalette, SceneId } from '@/types';
 
 /**
- * Drawn stand-ins for the posts' pictures and clips.
+ * Graphic scene stand-ins for the posts' pictures and clips.
  *
- * The prototype ships no photographs and no film. A grey box with a caption
- * under it, though, is not what a participant scrolls past in real life - and
- * the whole point of this feed is that it should feel like one, so that people
- * pay attention to the assistance layer rather than to an unfamiliar surface.
- *
- * So each post gets a flat illustration of what its clip would show, drawn as
- * SVG: no copyright questions, no external files, no network request, and it
- * scales to any screen. Where a scene stands for a video, parts of it move
- * while the simulated playback is running (`isPlaying`).
+ * The prototype ships no real photography or footage. To preserve the feed's
+ * draft-like feel without falling back to the old comic-style placeholder, the
+ * app now emits more grounded, photo-inspired SVG scenes: local geometry,
+ * soft light, visible surfaces and environment cues instead of cleanly comic
+ * linework. The scenes still stay local and deterministic so the browser does
+ * not need a network request to feel complete.
  *
  * Real footage can replace any of these at any time - set `src` on the post's
  * media and the file wins over the drawing. See `public/media/README.md`.
@@ -52,66 +49,45 @@ function KitchenEgg({ palette }: SceneProps) {
           <stop offset="0%" stopColor={palette[0]} />
           <stop offset="100%" stopColor={palette[1]} />
         </linearGradient>
+        <radialGradient id="kitchen-glow" cx="0.78" cy="0.15" r="0.65">
+          <stop offset="0" stopColor="#fffaf2" stopOpacity="0.96" />
+          <stop offset="1" stopColor="#f8e2c2" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
       <rect width="400" height="500" fill="url(#kitchen-wall)" />
+      <rect width="400" height="500" fill="url(#kitchen-glow)" opacity="0.68" />
 
-      {/* wall tiles */}
-      <g opacity="0.18" stroke="#ffffff" strokeWidth="2">
-        {[0, 1, 2, 3, 4, 5].map((row) => (
-          <line key={row} x1="0" y1={40 + row * 44} x2="400" y2={40 + row * 44} />
-        ))}
-        {[0, 1, 2, 3, 4, 5, 6, 7].map((col) => (
-          <line key={col} x1={col * 52} y1="0" x2={col * 52} y2="300" />
-        ))}
+      <rect x="22" y="34" width="356" height="128" rx="10" fill="#f9f2e8" opacity="0.12" />
+      <rect x="44" y="54" width="96" height="88" rx="8" fill="#efe7d5" opacity="0.8" />
+      <rect x="154" y="54" width="96" height="88" rx="8" fill="#efe7d5" opacity="0.75" />
+      <rect x="265" y="54" width="96" height="88" rx="8" fill="#efe7d5" opacity="0.78" />
+
+      <rect x="0" y="286" width="400" height="214" fill="#eadfd0" />
+      <rect x="0" y="286" width="400" height="16" fill="#b59471" opacity="0.92" />
+      <rect x="16" y="308" width="368" height="82" rx="8" fill="#fffdf9" opacity="0.75" />
+      <rect x="40" y="335" width="317" height="12" rx="6" fill="#e2d9cd" />
+
+      <ellipse cx="125" cy="451" rx="112" ry="42" fill="#3a3131" opacity="0.88" />
+      <ellipse cx="118" cy="415" rx="94" ry="44" fill="#201c22" opacity="0.92" />
+      <ellipse cx="116" cy="244" rx="56" ry="54" fill="#ebbd9c" />
+      <path d="M63 230c6-50 46-88 96-84 44 3 83 28 91 97-43-12-110-11-151-13Z" fill="#514137" opacity="0.95" />
+      <path d="M100 246c10-20 46-19 50 8 2 23-20 12-50 3Z" fill="#d8bfa0" opacity="0.75" />
+      <path d="M103 265q20 12 38 0" stroke="#885730" strokeWidth="4" fill="none" strokeLinecap="round" />
+
+      <ellipse cx="256" cy="390" rx="94" ry="30" fill="#fbf9ee" />
+      <ellipse cx="240" cy="388" rx="45" ry="22" fill="#ecb13d" opacity="0.95" />
+      <path d="M334 426c-8-56 15-78 56-75 38 4 50 51 28 76Z" fill="#cbbba8" opacity="0.74" />
+
+      <g className="scene-drop" opacity="0.92">
+        <ellipse cx="301" cy="327" rx="15" ry="12" fill="#fffaf0" />
+        <ellipse cx="326" cy="346" rx="11" ry="9" fill="#fffaf0" />
       </g>
 
-      {/* worktop */}
-      <rect x="0" y="300" width="400" height="200" fill="#f2e6d2" />
-      <rect x="0" y="300" width="400" height="12" fill="#d9c7ab" />
-
-      {/* the cook */}
-      <g>
-        <ellipse cx="150" cy="470" rx="86" ry="120" fill="#3e4a63" />
-        <circle cx="150" cy="238" r="52" fill="#e8b490" />
-        {/* hair */}
-        <path d="M98 232a52 52 0 0 1 104 0c0-36-24-58-52-58s-52 22-52 58Z" fill="#40312a" />
-        {/* squeezed-shut eyes, the universal sign of a plan going wrong */}
-        <path
-          d="M126 234q8-9 16 0M158 234q8-9 16 0"
-          stroke="#40312a"
-          strokeWidth="4"
-          fill="none"
-          strokeLinecap="round"
-        />
-        {/* open, laughing mouth */}
-        <path d="M132 258q18 22 36 0Z" fill="#8c3b3b" />
-      </g>
-
-      {/* the raised, apologetic free hand */}
-      <g className="scene-wobble" style={{ transformOrigin: '246px 330px' }}>
-        <path
-          d="M232 344c-6-20 2-40 14-46 10-5 18 2 20 12 3-12 14-14 20-8 6-8 18-4 18 8 8-2 14 6 10 18-6 20-18 34-38 38-18 4-38-6-44-22Z"
-          fill="#e8b490"
-        />
-      </g>
-
-      {/* bowl, and the shell that missed */}
-      <ellipse cx="292" cy="404" rx="72" ry="26" fill="#ffffff" />
-      <path d="M220 404a72 26 0 0 0 144 0v6a72 40 0 0 1-144 0Z" fill="#e4e8ee" />
-      <ellipse cx="292" cy="404" rx="52" ry="16" fill="#f6d365" />
-      <ellipse cx="286" cy="401" rx="14" ry="10" fill="#fff8e1" />
-
-      <g className="scene-drop">
-        <ellipse cx="330" cy="368" rx="13" ry="10" fill="#fdf6e6" />
-        <ellipse cx="352" cy="382" rx="9" ry="7" fill="#fdf6e6" />
-      </g>
-
-      {/* splatter on the worktop */}
-      <g fill="#f6d365" opacity="0.85">
-        <ellipse cx="90" cy="430" rx="20" ry="7" />
-        <circle cx="120" cy="446" r="5" />
-        <circle cx="62" cy="450" r="4" />
+      <g fill="#f7b4a9" opacity="0.88">
+        <ellipse cx="84" cy="431" rx="22" ry="8" />
+        <ellipse cx="115" cy="421" rx="14" ry="6" />
+        <ellipse cx="60" cy="454" rx="12" ry="5" />
       </g>
     </>
   );
@@ -132,45 +108,37 @@ function RainyPlatform({ palette }: SceneProps) {
       </defs>
 
       <rect width="400" height="500" fill="url(#platform-sky)" />
+      <rect x="0" y="78" width="400" height="410" fill="#4d5968" opacity="0.16" />
 
-      {/* canopy */}
-      <path d="M0 0h400v78L200 96 0 78Z" fill="#2f3b48" />
-      <rect x="188" y="90" width="16" height="150" fill="#46545f" />
+      <path d="M0 0h400v82L200 96 0 82Z" fill="#293b40" opacity="0.88" />
+      <rect x="150" y="80" width="100" height="180" rx="24" fill="#6a747f" opacity="0.8" />
 
-      {/* the departure board */}
-      <g>
-        <rect x="96" y="104" width="208" height="104" rx="8" fill="#12181f" />
-        <rect x="106" y="114" width="188" height="84" rx="4" fill="#0a0f14" />
-        {[0, 1, 2, 3].map((row) => (
-          <g key={row} transform={`translate(114 ${126 + row * 20})`}>
-            <rect width="46" height="9" rx="2" fill="#f3b03c" opacity="0.9" />
-            <rect x="56" width="72" height="9" rx="2" fill="#f3b03c" opacity="0.55" />
-            {/* every single line delayed - the joke of the picture */}
-            <rect x="138" width="34" height="9" rx="2" fill="#ef5a5a" />
-          </g>
-        ))}
+      <rect x="88" y="116" width="224" height="104" rx="10" fill="#11151a" opacity="0.94" />
+      <rect x="98" y="126" width="205" height="84" rx="6" fill="#27363b" opacity="0.8" />
+      <g fill="#f1ba54">
+        <rect x="112" y="137" width="38" height="9" rx="2" />
+        <rect x="158" y="137" width="84" height="9" rx="2" />
+        <rect x="112" y="166" width="28" height="9" rx="2" />
+        <rect x="148" y="166" width="88" height="9" rx="2" />
+        <rect x="244" y="137" width="40" height="9" rx="2" fill="#cb564b" />
       </g>
 
-      {/* rails and platform edge */}
-      <rect x="0" y="330" width="400" height="170" fill="#5c6672" />
-      <rect x="0" y="330" width="400" height="10" fill="#7d8794" />
-      <g fill="#c9ac3a">
-        <rect x="0" y="352" width="400" height="7" opacity="0.75" />
+      <rect x="0" y="330" width="400" height="170" fill="#596a74" />
+      <rect x="0" y="330" width="400" height="10" fill="#8798a5" />
+      <g opacity="0.9">
+        <rect x="0" y="356" width="400" height="2" fill="#c8be90" />
+        <rect x="0" y="371" width="400" height="2" fill="#c8be90" />
       </g>
 
-      {/* the cup, on its side */}
-      <g transform="translate(250 396) rotate(-104)">
-        <path d="M0 0h44l-6 46H6Z" fill="#ffffff" />
-        <rect x="-3" y="-9" width="50" height="11" rx="4" fill="#9c5a34" />
-      </g>
-      <ellipse cx="222" cy="424" rx="46" ry="13" fill="#6b4a30" opacity="0.75" />
+      <rect x="226" y="338" width="66" height="78" rx="10" fill="#eee7cb" />
+      <rect x="235" y="346" width="40" height="34" rx="4" fill="#642d24" />
+      <ellipse cx="250" cy="390" rx="58" ry="22" fill="#120d11" opacity="0.44" />
 
-      {/* rain */}
-      <g className="scene-rain" stroke="#dfe8f2" strokeWidth="2" opacity="0.55">
-        {Array.from({ length: 26 }, (_, index) => {
-          const x = (index * 37) % 400;
-          const y = (index * 73) % 340;
-          return <line key={index} x1={x} y1={y} x2={x - 9} y2={y + 30} />;
+      <g className="scene-rain" stroke="#dbeaff" strokeWidth="2" opacity="0.85">
+        {Array.from({ length: 28 }, (_, index) => {
+          const x = (index * 35) % 400;
+          const y = (index * 38) % 240;
+          return <line key={index} x1={x} y1={y + 70} x2={x - 8} y2={y + 105} />;
         })}
       </g>
     </>
@@ -185,61 +153,35 @@ function TalkingHead({ palette }: SceneProps) {
   return (
     <>
       <defs>
-        <radialGradient id="room-light" cx="0.5" cy="0.3" r="0.9">
+        <radialGradient id="room-light" cx="0.5" cy="0.25" r="0.85">
           <stop offset="0%" stopColor={palette[0]} />
           <stop offset="100%" stopColor={palette[1]} />
         </radialGradient>
       </defs>
 
       <rect width="400" height="500" fill="url(#room-light)" />
+      <rect x="24" y="34" width="352" height="432" rx="6" fill="#191b2a" opacity="0.14" />
 
-      {/* a room behind: shelf, plant, lamp glow */}
-      <rect x="24" y="150" width="120" height="8" rx="3" fill="#000000" opacity="0.25" />
-      <rect x="40" y="118" width="14" height="32" fill="#000000" opacity="0.22" />
-      <rect x="60" y="126" width="11" height="24" fill="#000000" opacity="0.22" />
-      <path
-        d="M330 158c-14 0-26 12-26 30s12 34 26 34 26-16 26-34-12-30-26-30Z"
-        fill="#000000"
-        opacity="0.18"
-      />
-      <rect x="325" y="220" width="12" height="40" fill="#000000" opacity="0.18" />
+      <rect x="24" y="128" width="116" height="24" rx="2" fill="#2e2b38" opacity="0.85" />
+      <rect x="36" y="156" width="94" height="42" rx="2" fill="#867965" opacity="0.36" />
+      <rect x="288" y="124" width="84" height="116" rx="4" fill="#a6aa9d" opacity="0.36" />
 
-      {/* shoulders and head, close to the camera the way a confessional is */}
-      <path d="M60 500c0-92 62-150 140-150s140 58 140 150Z" fill="#2e2a44" />
-      <circle cx="200" cy="252" r="86" fill="#e0a888" />
-      <path
-        d="M114 244c0-52 38-88 86-88s86 36 86 88c0-64-30-96-86-96s-86 32-86 96Z"
-        fill="#2b2118"
-      />
+      <path d="M44 500c8-118 76-150 161-150s158 52 152 150Z" fill="#463e58" opacity="0.92" />
+      <ellipse cx="204" cy="254" rx="88" ry="88" fill="#e7bda9" />
+      <path d="M122 244c0-85 38-118 90-116 39 2 84 42 84 117-12-34-47-60-88-60-37 0-61 21-86 59Z" fill="#4f352e" opacity="0.96" />
 
-      {/* eyes, slightly downcast; no smile */}
-      <g fill="#2b2118">
-        <ellipse cx="172" cy="248" rx="7" ry="8" />
-        <ellipse cx="228" cy="248" rx="7" ry="8" />
+      <g fill="#37251b">
+        <ellipse cx="176" cy="252" rx="7" ry="8" />
+        <ellipse cx="230" cy="252" rx="7" ry="8" />
       </g>
-      <path
-        d="M158 228q14-10 28-2M214 226q14-8 28 2"
-        stroke="#2b2118"
-        strokeWidth="5"
-        fill="none"
-        strokeLinecap="round"
-      />
-      {/* a flat, level mouth - the scene must not read as either happy or angry */}
-      <path
-        d="M180 296q20 8 40 0"
-        stroke="#8c5a52"
-        strokeWidth="5"
-        fill="none"
-        strokeLinecap="round"
-      />
+      <path d="M164 230q14-12 28-2M212 225q12-10 34 3" stroke="#32251a" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <path d="M176 298q24 12 50-2" stroke="#7d453d" strokeWidth="5" fill="none" strokeLinecap="round" />
 
-      {/* the low-light grain of a phone camera indoors */}
-      <rect width="400" height="500" fill="url(#room-light)" opacity="0" />
-      <g className="scene-breathe" opacity="0.18" fill="#ffffff">
-        <circle cx="86" cy="96" r="2" />
-        <circle cx="312" cy="70" r="2" />
-        <circle cx="248" cy="132" r="1.6" />
-        <circle cx="132" cy="188" r="1.6" />
+      <g className="scene-breathe" opacity="0.36" fill="#ffffff">
+        <circle cx="100" cy="110" r="2" />
+        <circle cx="360" cy="78" r="2" />
+        <circle cx="326" cy="126" r="1.8" />
+        <circle cx="118" cy="410" r="2" />
       </g>
     </>
   );
@@ -260,43 +202,30 @@ function StreetRant({ palette }: SceneProps) {
       </defs>
 
       <rect width="400" height="500" fill="url(#street-bg)" />
+      <rect x="0" y="246" width="400" height="254" fill="#222a30" opacity="0.95" />
 
-      {/* traffic behind, blurred into blocks */}
-      <g opacity="0.4">
-        <rect x="0" y="250" width="400" height="90" fill="#1d232c" />
-        {[10, 96, 190, 286].map((x) => (
-          <g key={x}>
-            <rect x={x} y="266" width="72" height="40" rx="8" fill="#39424f" />
-            <rect x={x + 10} y="252" width="46" height="20" rx="6" fill="#39424f" />
-            <circle cx={x + 60} cy="300" r="6" fill="#ffd76a" />
-          </g>
-        ))}
+      <g opacity="0.36">
+        <rect x="12" y="268" width="74" height="42" rx="8" fill="#48515d" />
+        <rect x="104" y="268" width="68" height="42" rx="8" fill="#48515d" />
+        <rect x="196" y="268" width="74" height="42" rx="8" fill="#48515d" />
+        <rect x="292" y="268" width="88" height="42" rx="8" fill="#48515d" />
       </g>
-      <rect x="0" y="340" width="400" height="160" fill="#232a33" />
 
-      {/* the speaker, filling the frame */}
-      <path d="M92 500c0-86 48-136 108-136s108 50 108 136Z" fill="#1f2733" />
-      <circle cx="200" cy="286" r="72" fill="#dda57f" />
-      <path d="M128 280c0-44 32-74 72-74s72 30 72 74c0-56-26-84-72-84s-72 28-72 84Z" fill="#221a14" />
+      <rect x="28" y="342" width="344" height="158" rx="12" fill="#171a26" opacity="0.92" />
+      <ellipse cx="200" cy="286" rx="80" ry="82" fill="#e3b394" />
+      <path d="M116 272c3-88 58-120 102-110 48 12 75 55 75 107-39-54-105-62-130-26Z" fill="#1d1719" opacity="0.95" />
 
-      {/* raised brows and a wide, mid-sentence mouth */}
-      <g fill="#221a14">
-        <ellipse cx="176" cy="282" rx="6" ry="7" />
-        <ellipse cx="224" cy="282" rx="6" ry="7" />
-      </g>
-      <path
-        d="M162 258q14-14 28-6M210 252q14-8 28 6"
-        stroke="#221a14"
-        strokeWidth="5"
-        fill="none"
-        strokeLinecap="round"
-      />
-      <ellipse cx="200" cy="322" rx="20" ry="13" fill="#6d2b2b" />
+      <path d="M160 254q16-20 34 2M210 252q14-16 30 3" stroke="#2b201e" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <ellipse cx="202" cy="318" rx="24" ry="13" fill="#8a452c" />
 
-      {/* both hands up, mid-gesture */}
       <g className="scene-gesture">
-        <ellipse cx="86" cy="392" rx="30" ry="38" fill="#dda57f" />
-        <ellipse cx="314" cy="374" rx="30" ry="38" fill="#dda57f" />
+        <ellipse cx="76" cy="388" rx="34" ry="54" fill="#e2a782" opacity="0.9" />
+        <ellipse cx="330" cy="388" rx="34" ry="54" fill="#e2a782" opacity="0.9" />
+      </g>
+
+      <g fill="#f4d7c2" opacity="0.9">
+        <path d="M96 388c6-7 28-5 30 5-2 15-23 12-30 9Z" />
+        <path d="M300 384c8-5 26-2 28 9-3 10-20 14-30 8Z" />
       </g>
     </>
   );
@@ -317,25 +246,21 @@ function EmptyLot({ palette }: SceneProps) {
       </defs>
 
       <rect width="400" height="500" fill="url(#lot-sky)" />
-      <rect x="0" y="250" width="400" height="250" fill="#6f7883" />
+      <rect x="0" y="248" width="400" height="252" fill="#69777f" opacity="0.95" />
 
-      {/* horizon: a fence and two far-off buildings, nothing else */}
-      <rect x="0" y="236" width="400" height="16" fill="#57606b" />
-      <rect x="40" y="196" width="70" height="42" fill="#5f6873" />
-      <rect x="270" y="184" width="90" height="54" fill="#5f6873" />
+      <rect x="0" y="242" width="400" height="14" fill="#45535b" />
+      <rect x="30" y="164" width="100" height="82" rx="4" fill="#505b65" opacity="0.88" />
+      <rect x="262" y="160" width="112" height="84" rx="4" fill="#505b65" opacity="0.88" />
 
-      {/* parking bays, converging - the pan of an empty lot */}
-      <g className="scene-pan" stroke="#e6e9ec" strokeWidth="5" opacity="0.75">
-        <line x1="-40" y1="500" x2="120" y2="256" />
-        <line x1="80" y1="500" x2="176" y2="256" />
-        <line x1="200" y1="500" x2="232" y2="256" />
-        <line x1="320" y1="500" x2="288" y2="256" />
-        <line x1="440" y1="500" x2="344" y2="256" />
+      <g className="scene-pan" stroke="#eef1e8" strokeWidth="4" opacity="0.76">
+        <line x1="-40" y1="500" x2="118" y2="260" />
+        <line x1="80" y1="500" x2="184" y2="260" />
+        <line x1="172" y1="500" x2="240" y2="260" />
+        <line x1="306" y1="500" x2="292" y2="260" />
       </g>
 
-      {/* one lamp post, because a truly empty frame reads as a bug */}
-      <rect x="342" y="150" width="8" height="106" fill="#4d545d" />
-      <rect x="330" y="144" width="32" height="9" rx="4" fill="#4d545d" />
+      <rect x="330" y="142" width="6" height="106" fill="#424750" />
+      <rect x="318" y="134" width="31" height="10" rx="4" fill="#4b565d" />
     </>
   );
 }

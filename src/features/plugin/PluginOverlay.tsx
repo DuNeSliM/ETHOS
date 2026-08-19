@@ -1,0 +1,280 @@
+import {
+  ClipboardList,
+  Pause,
+  Play,
+  ScanFace,
+  Settings2,
+  ShieldCheck,
+} from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { useAppState } from '@/app/AppStateProvider';
+import { Sheet } from '@/components/Sheet';
+import { Toggle } from '@/components/Toggle';
+import { Chip, SimulatedBadge } from '@/components/primitives';
+import { PLATFORM_NAME } from '@/features/social-app/platform';
+
+/**
+ * The assistance layer's presence on top of a foreign app.
+ *
+ * A floating button pinned over the platform, plus the panel it opens. This is
+ * the piece that makes the product claim concrete: ContextLens is not a feature
+ * of the feed underneath, it is a separate thing lying over it, reachable at
+ * any moment, and switchable off from there in one tap.
+ *
+ * Everything the panel offers already exists elsewhere in the app. It is a
+ * shortcut, never the only way to reach a setting - a participant who never
+ * finds the bubble can still do everything from the ContextLens app.
+ */
+const SHORTCUTS = [
+  {
+    to: '/overview',
+    label: 'Persönliche Übersicht',
+    hint: 'Was du angesehen hast, lokal gespeichert',
+    icon: ClipboardList,
+  },
+  {
+    to: '/privacy',
+    label: 'Datenschutz',
+    hint: 'Was aktiv ist, exportieren, löschen',
+    icon: ShieldCheck,
+  },
+  {
+    to: '/settings',
+    label: 'Einstellungen',
+    hint: 'Jede Funktion einzeln schaltbar',
+    icon: Settings2,
+  },
+  {
+    to: '/research',
+    label: 'Research Mode',
+    hint: 'Drei geführte Testaufgaben',
+    icon: ScanFace,
+  },
+] as const;
+
+export function PluginOverlay() {
+  const { settings, updateSetting } = useAppState();
+  const [open, setOpen] = useState(false);
+
+  const paused = settings.assistantPaused;
+  const analysisActive = settings.contentAnalysis && !paused;
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="ContextLens öffnen"
+        className={`
+          fixed bottom-20 right-3 z-40 flex items-center gap-2 rounded-full
+          border py-2 pl-2.5 pr-3.5 text-sm font-bold panel-shadow
+          ${
+            paused
+              ? 'border-line-strong bg-surface text-muted'
+              : 'border-assist-line bg-assist text-assist-on'
+          }
+        `}
+      >
+        <span
+          aria-hidden="true"
+          className={`
+            flex size-6 items-center justify-center rounded-full
+            ${paused ? 'bg-surface-3 text-muted' : 'bg-assist-on/20 text-assist-on'}
+          `}
+        >
+          <svg viewBox="0 0 24 24" className="size-4" fill="none">
+            <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2.5" />
+            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+          </svg>
+        </span>
+        ContextLens
+      </button>
+
+      <Sheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title="ContextLens"
+        description={`Assistenzschicht über ${PLATFORM_NAME}. Sie gehört nicht zu dieser App.`}
+        titleAdornment={<SimulatedBadge label="Systemerweiterung, simuliert" />}
+      >
+        <div className="flex flex-wrap gap-1.5">
+          {/* Same three facts and the same wording as `StatusBar`. "Paused" and
+              "analysis switched off" are different states and must not be
+              collapsed into one label. */}
+          <Chip tone={analysisActive ? 'assist' : paused ? 'caution' : 'neutral'}>
+            {paused
+              ? 'Assistent pausiert'
+              : analysisActive
+                ? 'Inhaltsanalyse aktiv'
+                : 'Inhaltsanalyse aus'}
+          </Chip>
+          {/* Three states, not two: the estimates are always simulated, but
+              the camera itself is either off or genuinely running. */}
+          <Chip tone={settings.simulatedCameraCapture && !paused ? 'caution' : 'neutral'}>
+            {!settings.simulatedCameraCapture || paused
+              ? 'Kamera aus'
+              : settings.liveCameraPreview
+                ? 'Kamerabild live, Analyse simuliert'
+                : 'Simulierte Kamera aktiv'}
+          </Chip>
+          <Chip tone="neutral">
+            {settings.storeReactionHistory
+              ? 'Speicherung: nur lokal'
+              : 'Keine Speicherung'}
+          </Chip>
+        </div>
+
+        <div className="mt-4">
+          <Toggle
+            label="Assistenzschicht aktiv"
+            description={`Aus bedeutet: keine Hinweise, keine Schätzungen, kein Symbol über ${PLATFORM_NAME}. Deine Einstellungen bleiben erhalten.`}
+            checked={!paused}
+            onChange={(next) => updateSetting('assistantPaused', !next)}
+          />
+        </div>
+
+        <h3 className="mt-5 text-xs font-bold uppercase tracking-wide text-faint">
+          ContextLens öffnen
+        </h3>
+        <ul className="mt-2 space-y-1.5">
+          {SHORTCUTS.map(({ to, label, hint, icon: Icon }) => (
+            <li key={to}>
+              <Link
+                to={to}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 hover:bg-surface-2"
+              >
+                <Icon aria-hidden="true" className="size-5 shrink-0 text-assist" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-ink">
+                    {label}
+                  </span>
+                  <span className="block text-xs text-muted">{hint}</span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <p className="mt-5 rounded-xl bg-surface-2 p-3 text-xs leading-relaxed text-muted">
+          So wäre es gedacht: Die Erweiterung liest nur, was gerade auf dem
+          Bildschirm sichtbar ist, und wertet es lokal aus. In diesem Prototyp
+          passiert auch das nicht – die Einschätzungen sind vorab geschrieben,
+          und {PLATFORM_NAME} ist eine erfundene App ohne Verbindung nach außen.
+        </p>
+      </Sheet>
+    </>
+  );
+}
+
+/**
+ * One-line system strip under the platform's header.
+ *
+ * The bubble is easy to overlook and a panel that has to be opened cannot
+ * answer "is the camera on right now?" at a glance. This strip is always
+ * visible while the participant is inside the foreign app, and it is styled as
+ * assistance-layer chrome so it never reads as part of the feed.
+ */
+export function PluginStatusStrip() {
+  const { settings, updateSetting } = useAppState();
+
+  const paused = settings.assistantPaused;
+  const analysisActive = settings.contentAnalysis && !paused;
+  const cameraActive = settings.simulatedCameraCapture && !paused;
+
+  return (
+    <div className="border-b border-assist-line bg-assist-tint">
+      <div className="mx-auto flex max-w-[30rem] items-center gap-2 px-3 py-1.5">
+        <span
+          aria-hidden="true"
+          className={`
+            flex size-5 shrink-0 items-center justify-center rounded-full
+            ${paused ? 'bg-surface-3 text-muted' : 'bg-assist text-assist-on'}
+          `}
+        >
+          <svg viewBox="0 0 24 24" className="size-3.5" fill="none">
+            <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="3" />
+            <circle cx="12" cy="12" r="3" fill="currentColor" />
+          </svg>
+        </span>
+
+        {/*
+          Each fact is its own element with nothing but its own text in it.
+          That keeps the wording identical to the ContextLens status bar and
+          lets both be asserted on by exact text.
+        */}
+        <p className="flex min-w-0 flex-1 items-baseline gap-1 overflow-hidden text-xs">
+          <span className="sr-only">Status der Assistenzschicht:</span>
+          <span
+            className={`shrink-0 font-semibold ${
+              analysisActive ? 'text-assist-strong' : 'text-muted'
+            }`}
+          >
+            {paused
+              ? 'Assistent pausiert'
+              : analysisActive
+                ? 'Inhaltsanalyse aktiv'
+                : 'Inhaltsanalyse aus'}
+          </span>
+          <Separator />
+          <span className="shrink-0 text-muted">
+            {!cameraActive
+              ? 'Kamera aus'
+              : settings.liveCameraPreview
+                ? 'Kamerabild live'
+                : 'Simulierte Kamera aktiv'}
+          </span>
+          <Separator />
+          <span className="truncate text-muted">
+            {settings.storeReactionHistory ? 'nur lokal' : 'keine Speicherung'}
+          </span>
+        </p>
+
+        <button
+          type="button"
+          onClick={() => updateSetting('assistantPaused', !paused)}
+          className="
+            flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs
+            font-bold text-assist-strong hover:bg-assist-tint-2
+          "
+        >
+          {paused ? (
+            <Play aria-hidden="true" className="size-3.5" />
+          ) : (
+            <Pause aria-hidden="true" className="size-3.5" />
+          )}
+          {paused ? 'Fortsetzen' : 'Pausieren'}
+        </button>
+      </div>
+
+      {/*
+        The strip above is a summary; the full wording lives in the status bar
+        of the ContextLens app. Screen reader users get the same three facts
+        spelled out here rather than as a truncated line.
+      */}
+      <p className="sr-only">
+        {analysisActive
+          ? 'Die Analyse der Inhalte läuft.'
+          : 'Es werden derzeit keine Hinweise angezeigt.'}{' '}
+        {cameraActive
+          ? settings.liveCameraPreview
+            ? 'Die Kamera läuft und ihr Bild wird oben links angezeigt. Ausgewertet wird es nicht; die Reaktionsschätzungen sind simuliert.'
+            : 'Die simulierte Reaktionserfassung ist eingeschaltet.'
+          : 'Die Kamera ist aus.'}{' '}
+        {settings.storeReactionHistory
+          ? 'Gespeichert wird ausschließlich lokal in diesem Browser.'
+          : 'Es wird nichts gespeichert.'}
+      </p>
+    </div>
+  );
+}
+
+function Separator() {
+  return (
+    <span aria-hidden="true" className="shrink-0 text-faint">
+      ·
+    </span>
+  );
+}

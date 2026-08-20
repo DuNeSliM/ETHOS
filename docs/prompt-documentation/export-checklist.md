@@ -20,6 +20,10 @@ stellt sicher, dass der manuelle Export vor der Abgabe vollständig erfolgt.
 | P-006 | Agent 6 | `exports/P-006-agent6.md` | [ ] | Nur Teilverlauf — Abbruch |
 | P-007 | Agent 7 | `exports/P-007-agent7.md` | [ ] | Nur Teilverlauf — Abbruch |
 | P-008 | Main (zweite Sitzung) | `exports/P-008-produktrahmung.md` | [ ] | Eigener Verlauf vom 31.07.2026: Telefonrahmen, Plattform-Optik, Assistenz als Erweiterung |
+| P-009/P-010 | Main (dritte Sitzung) | `exports/P-009-kamera-emoji.md`, `exports/P-010-inhalte-farbwelt.md` | [ ] | Gemeinsamer Verlauf vom 03.08.2026; bei Bedarf derselbe Export mit zwei nachvollziehbaren Dateiverweisen |
+| P-011 | OpenAI Codex (vierte Sitzung) | `exports/P-011-three-apps-ethos.md` | [ ] | Vollständiger Auftrag, Klärungen, genehmigter Plan, Implementierung und Verifikation vom 20.08.2026 |
+| P-012 | OpenAI Codex (vierte Sitzung) | `exports/P-012-comments-reddit-media.md` | [ ] | Native Instagram-Kommentare, getrennte ETHOS-Details sowie Reddit-Bild und -Video vom 20.08.2026 |
+| P-013 | OpenAI Codex (vierte Sitzung) | `exports/P-013-video-phone-fullscreen.md` | [ ] | Doom-Videoformat, entfernter Demo-Text und fokussierter Handy-Modus vom 20.08.2026 |
 
 P-005 hat keinen eigenen Verlauf: die Simulationsarbeit lief als Arbeitsphase im
 Hauptchat und ist in `P-001-master.md` enthalten.

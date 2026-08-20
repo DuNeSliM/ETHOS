@@ -1,6 +1,6 @@
-import { getPostsForMode } from '@/data/posts';
+import { getPostsForPlatform } from '@/data/posts';
 import { DiscussionPostCard } from '@/features/feed/DiscussionPostCard';
-import { PLATFORM_NAME } from '@/features/social-app/platform';
+import { SOCIAL_PLATFORMS } from '@/lib/identity';
 
 /**
  * Discussion feed: headlines, text posts and comment threads.
@@ -13,20 +13,30 @@ import { PLATFORM_NAME } from '@/features/social-app/platform';
  * around it belongs to the simulated platform.
  */
 export function DiscussionFeedPage() {
-  const posts = getPostsForMode('discussion');
+  const posts = getPostsForPlatform('reddit');
+  const communityCount = new Set(posts.map((post) => post.community)).size;
 
   return (
     <div>
-      <h1 className="sr-only">Discussion Feed</h1>
+      <h1 className="sr-only">Reddit-Startseite</h1>
 
       <p className="border-b border-sim-line bg-sim-tint px-3 py-1.5 text-center text-[0.6875rem] font-semibold text-sim">
-        Simulierte Diskussionen in {PLATFORM_NAME} · Beiträge und Konten sind
-        erfunden
+        {SOCIAL_PLATFORMS.reddit.mockNotice}
       </p>
 
+      <div className="flex items-center justify-between gap-3 border-b border-line bg-surface px-4 py-3">
+        <div>
+          <p className="text-sm font-bold text-ink">Dein Start-Feed</p>
+          <p className="text-xs text-faint">Sortierung: Beste Beiträge · simuliert</p>
+        </div>
+        <span className="rounded-full bg-alert-tint px-2.5 py-1 text-xs font-semibold text-alert">
+          {communityCount} Communities
+        </span>
+      </div>
+
       <p className="px-4 pt-3 text-sm text-muted">
-        Hier fehlen Tonfall und Mimik – Ironie ist deshalb besonders schwer zu
-        erkennen. Einzelne Kommentare haben eigene Hinweise.
+        In Textbeiträgen fehlen Tonfall und Mimik. ETHOS markiert mögliche
+        Ironie vorsichtig und zeigt freiwillige Reaktionen anderer getrennt an.
       </p>
 
       <ul className="mt-3 space-y-3 px-3">

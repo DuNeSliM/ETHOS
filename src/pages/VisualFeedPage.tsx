@@ -1,7 +1,7 @@
-import { getPostsForMode } from '@/data/posts';
+import { getPostsForPlatform } from '@/data/posts';
 import { StoriesRow } from '@/features/feed/StoriesRow';
 import { VisualPostCard } from '@/features/feed/VisualPostCard';
-import { PLATFORM_NAME } from '@/features/social-app/platform';
+import { SOCIAL_PLATFORMS } from '@/lib/identity';
 
 /**
  * Visual feed: short videos and images with captions.
@@ -16,15 +16,14 @@ import { PLATFORM_NAME } from '@/features/social-app/platform';
  * it is visible to everyone.
  */
 export function VisualFeedPage() {
-  const posts = getPostsForMode('visual');
+  const posts = getPostsForPlatform('instagram');
 
   return (
     <div>
       <h1 className="sr-only">Visual Feed</h1>
 
       <p className="border-b border-sim-line bg-sim-tint px-3 py-1.5 text-center text-[0.6875rem] font-semibold text-sim">
-        Simulierter Feed von {PLATFORM_NAME} · Beiträge, Konten und Zahlen sind
-        erfunden
+        {SOCIAL_PLATFORMS.instagram.mockNotice}
       </p>
 
       <StoriesRow />

@@ -1,7 +1,7 @@
 # Prompt-Dokumentation
 
 Dieses Verzeichnis dokumentiert den KI-Einsatz bei der Entwicklung des
-ContextLens-Prototypen. Es erfüllt die Vorgabe aus dem Projekt-README:
+ETHOS-Prototypen (historisch ContextLens). Es erfüllt die Vorgabe aus dem Projekt-README:
 
 > Each AI prompt must be documented under "Prompt Documentation" by exporting
 > the corresponding chat.
@@ -11,12 +11,14 @@ ContextLens-Prototypen. Es erfüllt die Vorgabe aus dem Projekt-README:
 | Datei | Zweck |
 |---|---|
 | `README.md` | Dieses Dokument: Aufbau und Vorgehen |
-| `prompt-register.md` | Tabellarisches Register aller Prompts (P-001 bis P-007) |
+| `prompt-catalog.md` | **Kanonischer Katalog** mit verfügbarem Wortlaut/Zusammenfassungen P-001 bis P-013 |
+| `prompt-register.md` | Tabellarisches Register aller Prompts (P-001 bis P-013) |
 | `export-checklist.md` | Checkliste für den manuellen Export der Chatverläufe |
 | `exports/` | **Manuell anzulegen** — hier gehören die exportierten Chats hinein |
 
-Der **Wortlaut** der Prompts steht in `AGENTS.md` im Projektstammverzeichnis,
-zusammen mit der Rollenverteilung und den Korrekturen nach dem Agent-Review.
+Der verfügbare **Wortlaut** und die ehrliche Kennzeichnung historischer Lücken
+stehen kanonisch in `prompt-catalog.md`. `AGENTS.md` enthält zusätzlich die
+historische Rollenverteilung und Korrekturen nach dem Agent-Review.
 
 ## Vorgehen
 

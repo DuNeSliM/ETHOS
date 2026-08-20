@@ -1,249 +1,148 @@
-﻿# Architektur
+# Architektur
 
-## 1. Überblick
+Stand: 20.08.2026 · Drei-App-Smartphone mit Instagram-, Reddit- und ETHOS-Bereich.
+
+## Technischer Rahmen
 
 | Baustein | Version | Zweck |
-|---|---|---|
-| React | 18.3 | UI |
-| TypeScript | 5.7 (`strict`) | Typsicherheit |
-| Vite | 6.4 | Dev-Server und Build |
-| Tailwind CSS | 4.x (`@tailwindcss/vite`) | Styling über Design-Tokens |
-| React Router | 6.28 | Routing |
-| Recharts | 2.15 | Community-Diagramm |
-| Lucide React | 0.469 | Icons |
-| Vitest 3 + Testing Library | — | Tests (jsdom) |
+|---|---:|---|
+| React / React DOM | 18.3 | UI und Zustand |
+| TypeScript | 5.7, strict | Typverträge |
+| Vite | 6.4 | Entwicklung und Build |
+| Tailwind CSS | 4.x | Token-basierte Styles |
+| React Router | 6.30.6 | Routing und Legacy-Redirects |
+| Recharts | 3.10.1 | persönliche Visualisierungen |
+| React Is | 18.3.1 | passendes Recharts-Peer für React 18 |
+| Vitest / Testing Library | 3.2 / 16.x | Komponenten-, Daten- und Smoke-Tests |
 
-**Harte Randbedingungen:** kein Backend, keine Datenbank, keine
-Authentifizierung, keine echten Social-Media-APIs, keine echte
-Emotionserkennung, keine Cloud-Abhängigkeit. Alle Daten sind lokal und
-simuliert.
+Harte Grenzen: kein Backend, keine Datenbank, keine Anmeldung, keine Social-Media-API, keine Netzwerktelemetrie, keine echte Inhalts- oder Emotionserkennung. Die optionale Webcam dient ausschließlich als lokale Vorschau.
 
-## 2. Verzeichnisstruktur
+## Schichten und Shells
 
-```
-src/
-  app/            ContextLens-App-Chrome, Routing, globaler Zustand
-  components/     Geteilte, domänenfreie UI-Bausteine
-  data/           Handgeschriebene Beispieldaten (Posts, Analysen, Community, Verläufe)
-  features/
-    analytics/    Community-Diagramm, Reaktionsverlauf, Vergleichslogik
-    context-assistant/  Assistenzbutton, Assistenzkarte, Variantenzuordnung
-    device/       Simuliertes Telefon: Rahmen, Bühne, OS-Statusleiste
-    feed/         Beitragskarten, Medienplatzhalter, Feed-Umschalter
-    plugin/       Präsenz der Assistenz über der fremden App
-    reactions/    Eigene Reaktion, Kamera-Vorschau
-    research-mode/ Szenarien, Sitzungszustand, Banner
-    simulation/   Mock-Engine
-    social-app/   Chrome und Identität der simulierten Plattform
-  hooks/          Wiederverwendbare Hooks
-  lib/            Reine Hilfsfunktionen (Speicher, Labels, Viewport)
-  pages/          Screens; komponieren Features, enthalten wenig eigene Logik
-  styles/         Design-Tokens und Basis-Styles
-  test/           Testaufbau und Hilfsfunktionen
-  types/          Gemeinsamer Typvertrag
+```text
+DeviceLayout
+├── PhoneHomePage                       /phone
+├── SocialAppShell (Instagram)          /instagram/*
+│   └── VisualFeed / native comments / ETHOS detail
+├── RedditAppShell                      /reddit/*
+│   └── DiscussionFeed / native post / ETHOS detail
+└── AppShell (ETHOS)                    /ethos/*
+    ├── Overview
+    ├── Settings
+    ├── Privacy
+    └── Research
 ```
 
-**Modulgrenzen.**
+Instagram und Reddit besitzen jeweils eigenes Chrome und eine sichtbare inoffizielle Mock-Kennzeichnung. Über beiden liegen `PluginStatusStrip`, `PluginOverlay`, Kontext-Erklärung, Community-Auswertung und optionale Selbstauskunft. `AppShell` ist das Chrome der eigenständigen ETHOS-App. Jede Shell enthält einen zugänglichen Home-Weg nach `/phone`.
 
-- `app/` besitzt den Zustand und die Shell. Nur hier wird geschrieben.
-- `features/*` kapseln je eine Domäne und dürfen `components/`, `lib/`,
-  `data/` und `types/` nutzen — aber nicht querbeet einander.
-- `components/` kennt keine Domänenbegriffe und keinen Zustand.
-- `data/` enthält ausschließlich Daten, keine Logik.
-- `lib/` ist frei von React.
-- `pages/` setzt zusammen; Logik gehört in `features/`.
-- `types/` ist der gemeinsame Vertrag und importiert nichts.
+`DeviceLayout` besitzt zusätzlich rein lokalen Präsentationszustand. Im Desktopmodus blendet `phoneFullscreen` die erklärende `DeviceCaption` aus und wechselt den Telefonrahmen auf größere, viewportbegrenzte Maße. Es wird bewusst keine Browser-Fullscreen-API und keine Berechtigung benötigt; der Beenden-Schalter bleibt außerhalb des transformierten Geräts erreichbar.
 
-## 3. Datenmodell
+## Routen
 
-Definiert in `src/types/index.ts`.
+Kanonisch:
 
-**Namenskonvention — der wichtigste Teil der Architektur:**
+| Bereich | Routen |
+|---|---|
+| Gerät | `/phone` |
+| Instagram | `/instagram`, `/instagram/post/:postId` (Kommentare), `/instagram/post/:postId/ethos` (Analyse) |
+| Reddit | `/reddit`, `/reddit/post/:postId` (Post/Kommentare), `/reddit/post/:postId/ethos` (Analyse) |
+| ETHOS | `/ethos/overview`, `/ethos/settings`, `/ethos/privacy`, `/ethos/research` |
 
-| Präfix/Suffix | Bedeutung | Beispiel |
-|---|---|---|
-| `...Analysis` | Aussage über den **Inhalt** | `ContentAnalysis` |
-| `estimated...` | maschinelle **Vermutung** über die betrachtende Person | `estimatedExpression` |
-| `selfReported...` | **Angabe der Person selbst** | `selfReportedReaction` |
+Normale Kommentar-Controls verlinken ausschließlich auf die native Plattformroute. Nur der klar abgesetzte ETHOS-Streifen verlinkt auf die `/ethos`-Detailroute mit Inhaltsanalyse, Reaktionsverlauf und Community-Verteilung. Kompatibilitäts-Redirects erhalten `/feed`, `/feed/visual`, `/feed/discussion`, `/post/:postId`, `/overview`, `/settings`, `/privacy` und `/research`. Der Legacy-Detailredirect liest `post.platform` und wählt die native Ansicht der richtigen Social App.
 
-Diese drei dürfen nie zu einem Feld verschmelzen. Sie sind epistemisch
-verschieden: eine Textbeobachtung, eine Sensorvermutung und eine Selbstaussage.
-Sobald sie in einem Feld liegen, kann die UI die Unterscheidung nicht mehr
-darstellen — und genau diese Unterscheidung ist das Produkt.
+## Datenvertrag
 
-**Kerntypen**
+`src/types/index.ts` trennt vier epistemisch verschiedene Quellen:
 
-- `ContentAnalysis` — `probableTone`, `confidence`, `explanation`, `indicators`,
-  `polarizationLevel`, `possibleRagebait`, `limitations` (Pflicht),
-  `alternativeReadings` (Pflicht), optional `emotionalLanguage`,
-  `visibleFacialExpression`, `toneOfVoice`, `possibleIntent`.
-- `ViewerReaction` — `estimatedExpression` + `confidence` **und** optional
-  `selfReportedReaction` + `selfReportedNote`. Beides im selben Datensatz, aber
-  in getrennten Feldern.
-- `CommunityReactionSummary` — zwei Verteilungen
-  (`estimatedReactions`, `selfReportedReactions`), zwei Teilnehmerzahlen,
-  `representativeWarning` und `sourceExplanation`.
-- `ReactionTimelineSegment` — `expression` (Ausdruck) **und** `label`
-  (Alltagswort). Deshalb kann die UI „amüsiert" anzeigen, während die
-  hinterlegte Behauptung „sichtbares Lächeln" bleibt.
-- `Settings` — alle Einwilligungsschalter plus Darstellung.
-- `HistoryEntry`, `ResearchResult`, `AssistantFeedback`, `Post`, `Comment`,
-  `SimulatedMedia`.
+- `ContentAnalysis`: handgeschriebene Aussage über den Beitrag.
+- `estimatedExpression`: simulierte Vermutung über sichtbaren Ausdruck.
+- `selfReportedReaction`: aktive Angabe der Person selbst.
+- `CommunityReactionData`: aggregierte, simulierte Gruppenwerte mit getrennten Quellen.
 
-## 4. Simulation Engine
-
-`src/features/simulation/mockEngine.ts` ist die **einzige** Stelle, die
-Analyseergebnisse liefert. Alles ist deterministisch und rein.
-
-**Einwilligungs-Gating.** Die Resolver geben nicht einfach `null` zurück,
-sondern einen benannten Grund:
+Diese Felder dürfen nie verschmolzen werden. Zusätzlich:
 
 ```ts
-resolveAnalysis(postId, settings)
-// { status: 'available', analysis, variant }
-// { status: 'disabled', reason: 'paused' | 'analysis-off' | 'sarcasm-off' | 'ragebait-off' }
-// { status: 'none' }
+type SocialPlatform = 'instagram' | 'reddit';
+
+type PostEngagement = {
+  postId: string;
+  platform: SocialPlatform;
+  liked: boolean; // Like auf Instagram, Upvote auf Reddit
+  saved: boolean;
+  updatedAt: number;
+};
 ```
 
-Dadurch kann die UI sagen, *welcher* Schalter den Hinweis zurückhält, statt nur
-nichts anzuzeigen — eine der Forschungsfragen lautet, ob Nutzende zu den
-Schaltern zurückfinden.
+Jeder `Post` besitzt `platform`; `getPostsForPlatform()` übernimmt die Filterung. Historische Feed-Modi und der UI-Umschalter sind entfernt.
 
-`estimateViewerExpression()` liefert `null`, solange
-`simulatedCameraCapture === false` oder der Assistent pausiert ist. Es gibt
-keinen Codepfad, der ohne diesen Schalter eine Schätzung erzeugt (durch Test
-abgesichert). Analog `resolveTimeline()` und `resolveCommunity()`.
+## Zustand und Speicherung
 
-**Variantenableitung.** `deriveCardVariant()` bestimmt die Darstellung aus den
-Daten, in fester Rangfolge:
+`AppStateProvider` ist die einzige Schreibstelle für:
 
-1. keine Indikatoren → `insufficient-context`
-2. `possibleRagebait` → `ragebait`
-3. `sarcastic` → `sarcasm`, `ironic` → `irony`
-4. `frustrated` / `aggressive` → `emotional`
-5. `humorous` → `exaggeration`
-6. sonst → `ambiguous`
+- Einstellungen und Onboarding-Zustand,
+- Verlauf und `ViewerReaction`,
+- `PostEngagement`,
+- Research-Ergebnisse und Assistenz-Feedback.
 
-Weil die Variante berechnet und nicht gespeichert wird, kann eine Überschrift
-nie den Daten widersprechen, die sie zusammenfasst.
+Likes/Upvotes und Speichern verwenden in beiden Social Apps dieselben Actions. `storeReactionHistory=false` entfernt Verlauf, Reaktionen und Engagements aus `localStorage`, lässt den React-Zustand aber für die laufende Sitzung intakt. Export, Einzellöschung, Gesamtlöschung und Demo-Reset berücksichtigen Engagements.
 
-**Beabsichtigter Fehlfall.** `SIMULATED_EXPRESSION['v-ragebait']` ist `smile`,
-obwohl der Beitrag die meisten Menschen ärgert. Research-Mode-Szenario 3 baut
-darauf auf.
+Die Präfixe `contextlens.v1.*` bleiben absichtlich unverändert. Das ist interne Rückwärtskompatibilität, keine sichtbare Marke. `snapshotAll()` liest nur diese bekannten Schlüssel; `clearAll()` löscht keine fremden Browserdaten.
 
-## 5. State Management
+## Analytik ohne Quellenvermischung
 
-Ein einziger React-Context (`src/app/AppStateProvider.tsx`). Bewusst keine
-State-Bibliothek: Der Datenumfang ist klein, und wenn genau **eine** Datei alle
-Schreibvorgänge besitzt, lässt sich die Datenschutzaussage prüfen.
+`DEMO_PROFILE` ist ein deterministischer, explizit fiktiver Datensatz. `buildSessionAnalytics()` wird separat aus Engagements und aktiven Selbstauskünften abgeleitet. Verlauf steuert keine Likes, automatische Ausdrucksschätzungen steuern keine Emotionsstatistik. Die UI wählt genau eine `AnalyticsSource`:
 
-Besonderheiten:
-
-- **Persistenz per Effekt.** Wird `storeReactionHistory` abgeschaltet, werden die
-  vorhandenen Schlüssel **entfernt**, nicht nur weitere Schreibvorgänge
-  unterlassen.
-- **Schalterkopplung.** `simulatedCameraCapture = false` schaltet
-  `liveCameraPreview` und `shareAnonymousReaction` mit ab.
-- **`recordEstimate` überschreibt nie.** Existiert bereits ein Datensatz, bleibt
-  er unverändert — sonst würde ein Re-Render eine Korrektur der Testperson
-  stillschweigend zurücksetzen.
-- **`recordSelfReport` behält die Schätzung** im selben Datensatz.
-- **Standardwerte sind der Fallback.** Gespeicherte Einstellungen werden über
-  `DEFAULT_SETTINGS` gespreizt, damit ein fehlender Schlüssel aus einem älteren
-  Build nicht `undefined` wird.
-- **Theme** wird als `data-theme` auf `<html>` gesetzt bzw. entfernt.
-
-## 6. Routing
-
-`src/app/App.tsx`, drei ineinanderliegende Ebenen:
-
-```
-/                    Landing                 ─┐ Projektseite,
-/how-it-works        So funktioniert es      ─┘ volle Breite
-<DeviceLayout>                                 simuliertes Telefon
-  /onboarding        Einrichtung + Einwilligung
-  /phone             Startbildschirm
-  <SocialAppShell>   simulierte Plattform
-    /feed/visual  /feed/discussion  /post/:postId
-  <AppShell>         ContextLens-App
-    /overview  /settings  /privacy  /research
-*                    Wiederherstellungsseite
+```text
+Simuliertes Profil ──┐
+                    ├── PersonalAnalyticsCharts (jeweils nur eine Quelle)
+Diese Sitzung ──────┘
 ```
 
-Die Verschachtelung ist inhaltlich, nicht kosmetisch: `SocialAppShell` und
-`AppShell` sind zwei Apps auf demselben Gerät, und keine enthält die andere.
-Beide zeigen den Zustand der Assistenzschicht permanent an — in der
-ContextLens-App über `StatusBar`, über der Plattform über `PluginStatusStrip`,
-mit identischem Wortlaut.
+Die drei Diagramme besitzen immer eine Textalternative:
 
-`/feed` leitet auf `/feed/visual` um, `*` auf eine Wiederherstellungsseite. Beim
-Routenwechsel scrollt die jeweilige Shell über `scrollAppToTop()`
-(`src/lib/viewport.ts`) an den Anfang: Innerhalb des Geräterahmens ist der
-Telefonbildschirm (`#app-viewport`) die Scrollfläche, außerhalb das Fenster.
+- Donut + Liste für gelikte Inhaltskategorien,
+- 100-%-Stapel + Tabelle für Selbstauskünfte je Kategorie,
+- direkt beschriftete Balken für Instagram/Reddit.
 
-## 7. Lokale Speicherung
+Animationen sind deaktiviert. Tokens liefern Hell-/Dunkelwerte; Farbe wird durch Text, Reihenfolge, Icons und Tabellen redundant kodiert.
 
-`src/lib/storage.ts`. Schlüssel sind namespaced und versioniert
-(`contextlens.v1.*`), damit ein Schemawechsel keine inkompatiblen Altdaten
-wiederbelebt.
+## Verzeichnisgrenzen
 
-Defensiv: Lesefehler und kaputtes JSON gelten als „keine Daten"; Schreibfehler
-(Quota, privater Modus) werden geschluckt — die App läuft dann im Speicher
-weiter. Eine laufende Testsitzung darf daran nicht scheitern.
+```text
+src/app/          Routing, Shell, globaler Zustand
+src/data/         statische Mock-Daten und Demo-Profil
+src/features/     Domänenkomponenten und reine Analytik-Ableitung
+src/lib/          Identität, Labels, Speicherung, Hilfen
+src/pages/        Seitendekomposition
+src/types/        importfreier gemeinsamer Vertrag
+src/test/         jsdom-Setup und Renderer
+```
 
-`snapshotAll()` liefert den Export, `clearAll()` löscht ausschließlich die
-eigenen Schlüssel. `downloadFile()` erzeugt einen Blob und eine Object-URL —
-kein Netzwerk.
+## Build, Tests und Abhängigkeiten
 
-Der Research-Mode-Sitzungszustand liegt in einem eigenen Schlüssel, weil die
-Testperson die Seite verlässt und in der App unterwegs ist. Mehrere gemountete
-Instanzen des Hooks (Banner und Seite) werden über ein `CustomEvent`
-synchronisiert, tabübergreifend über das `storage`-Event.
+`npm run typecheck` nutzt `tsc -b --noEmit`; dadurch entstehen keine JavaScript-Duplikate neben TypeScript-Dateien. Vite trennt React und Recharts in Vendor-Chunks. Router-Future-Flags sind aktiviert, `scrollTo` und Diagrammdimensionen werden in jsdom realistisch genug gemockt, und Research-Mode-Benachrichtigungen erfolgen nicht mehr in einem fremden Render-Zyklus.
 
-## 8. Build und Tests
+Stand P-013: 133/133 Tests, Typprüfung und Produktionsbuild erfolgreich. `npm audit --audit-level=high` ist grün; zwei moderate Router-v6-Advisories benötigen Router 7 und bleiben bis zur geplanten Migration offen.
 
-`vite.config.ts`: Alias `@ → src`, React- und Tailwind-Plugin,
-`manualChunks` trennt `recharts` und den React-Kern vom Anwendungscode
-(Feed-Einstieg lädt das Diagramm-Bundle nicht mit).
+## Erweiterungsrezepte
 
-`src/test/setup.ts` ergänzt in jsdom fehlende Browser-APIs: `matchMedia`,
-`offsetWidth`/`offsetHeight` (Recharts misst sonst 0×0 und rendert nichts) und
-`ResizeObserver`. Nach jedem Test wird aufgeräumt und `localStorage` geleert.
+### Beitrag ergänzen
 
-Testabdeckung: 121 Tests in sieben Dateien, siehe `docs/test-plan.md`.
+1. `Post` mit kanonischem `platform` in `src/data/posts.ts` hinzufügen.
+2. Analyse, Community-Daten und optional Verlauf/Schätzung unter derselben ID ergänzen.
+3. Datenintegritäts- und Plattformtests ausführen.
 
-## 9. Erweiterungspunkte
+Reddit-Medien mit `media.src` rendert `RedditPostMedia` nativ. Bilder erhalten `altText`; Videos verwenden Browser-Controls, kein Autoplay, keine Stummschaltung und einen minimalen Seek nach dem Laden der Metadaten, damit der erste Frame im pausierten Zustand dekodiert wird. Instagram-Medien bleiben im simulierten Player, weil nur dieser die feste ETHOS-Zeitachse antreibt.
 
-**Neuen Beitrag hinzufügen**
-1. Objekt in `src/data/posts.ts` ergänzen (eindeutige `id`, `mode`, `researchNote`).
-2. Analyse in `src/data/analyses.ts` unter derselben `id` ergänzen —
-   `limitations` und `alternativeReadings` sind Pflicht.
-3. Community-Datensatz in `src/data/community.ts` ergänzen, beide Verteilungen
-   müssen 100 ergeben.
-4. Optional: Verlauf in `src/data/timelines.ts` (lückenlos bis zur Laufzeit) und
-   Schätzwert in `SIMULATED_EXPRESSION`.
-5. `npm test` — die Datenintegritätstests prüfen alle vier Punkte.
+Das Doom-Video ist 4:3 kodiert und wird deshalb in einem 4:3-Element über die volle Kartenbreite gerendert. So entsteht keine durch ein 16:9-Zielformat verursachte seitliche Letterbox. Textlose Medienposts lassen den optionalen Body-Block vollständig weg.
 
-**Neue Kartenvariante**
-1. In `AssistantCardVariant` (`src/types/index.ts`) ergänzen.
-2. Titel und Untertitel in `src/lib/labels.ts`.
-3. Icon und Farbfamilie in `variantPresentation.ts`.
-4. Ableitungsregel in `deriveCardVariant()` einsortieren — die Rangfolge ist
-   testrelevant.
+### Neue persönliche Statistik
 
-**Neuen Einwilligungsschalter**
-1. Feld in `Settings` ergänzen, Standardwert in `DEFAULT_SETTINGS` — bei allem,
-   was die Person selbst betrifft, `false`.
-2. `<Toggle>` in `SettingsPage` und ggf. im Onboarding-Einwilligungsschritt.
-3. Gating im passenden Resolver der Mock-Engine.
-4. Zeile im Datenschutz-Dashboard, damit der Zustand sichtbar bleibt.
+1. Quelle im `PersonalAnalyticsSnapshot` typisieren.
+2. Demo-Wert und Session-Ableitung getrennt ergänzen.
+3. Grafik mit semantischer Alternative und leerem Zustand bauen.
+4. Sicherstellen, dass keine automatische Schätzung als Selbstauskunft gezählt wird.
 
-## 10. Bewusste Vereinfachungen
+## Bewusste Vereinfachungen
 
-- Kein Code-Splitting je Route (nur Vendor-Chunks).
-- Ein einziger Context — breite Re-Renders, bei dieser Größe irrelevant.
-- Keine i18n-Schicht; Deutsch ist fest verdrahtet (siehe E-011).
-- Kein E2E-Test (Playwright war optionales Stretch Goal).
-- Recharts für wenige Diagramme; das ist das größte Bundle.
-- Der Video-Player ist ein Timer, kein `<video>`-Element.
-- Kein Error Boundary — ein Absturz zeigt eine leere Seite.
+Ein React-Context, keine i18n-Schicht, keine Playwright-Suite, keine globale Error Boundary, kein viewportgenaues View-Tracking und noch keine Router-7-Migration. Siehe `known-limitations.md`.

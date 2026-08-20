@@ -1,12 +1,15 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { BrowserRouter } from 'react-router-dom';
 
 import { AppStateProvider } from '@/app/AppStateProvider';
 import { AppShell } from '@/app/AppShell';
 import { DeviceLayout } from '@/features/device/DeviceFrame';
 import { SocialAppShell } from '@/features/social-app/SocialAppShell';
+import { RedditAppShell } from '@/features/social-app/RedditAppShell';
+import { getPost } from '@/data/posts';
 import { DiscussionFeedPage } from '@/pages/DiscussionFeedPage';
 import { HowItWorksPage } from '@/pages/HowItWorksPage';
+import { InstagramCommentsPage } from '@/pages/InstagramCommentsPage';
 import { LandingPage } from '@/pages/LandingPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { OnboardingPage } from '@/pages/OnboardingPage';
@@ -14,6 +17,7 @@ import { OverviewPage } from '@/pages/OverviewPage';
 import { PhoneHomePage } from '@/pages/PhoneHomePage';
 import { PostDetailPage } from '@/pages/PostDetailPage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
+import { RedditPostPage } from '@/pages/RedditPostPage';
 import { ResearchModePage } from '@/pages/ResearchModePage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { VisualFeedPage } from '@/pages/VisualFeedPage';
@@ -28,7 +32,7 @@ import { VisualFeedPage } from '@/pages/VisualFeedPage';
  *  - `<DeviceLayout>` is the simulated phone. Everything a participant
  *    navigates between during a test happens inside it;
  *  - inside the phone, `<SocialAppShell>` is a foreign app and `<AppShell>` is
- *    ContextLens itself. Both are reachable from the home screen, neither
+ *    ETHOS itself. All are reachable from the home screen; none
  *    contains the other.
  *
  * The consent flow sits inside the device but outside both apps: it is the
@@ -45,18 +49,33 @@ export function AppRoutes() {
         <Route path="/phone" element={<PhoneHomePage />} />
 
         <Route element={<SocialAppShell />}>
-          <Route path="/feed" element={<Navigate to="/feed/visual" replace />} />
-          <Route path="/feed/visual" element={<VisualFeedPage />} />
-          <Route path="/feed/discussion" element={<DiscussionFeedPage />} />
-          <Route path="/post/:postId" element={<PostDetailPage />} />
+          <Route path="/instagram" element={<VisualFeedPage />} />
+          <Route path="/instagram/post/:postId" element={<InstagramCommentsPage />} />
+          <Route path="/instagram/post/:postId/ethos" element={<PostDetailPage expectedPlatform="instagram" />} />
+        </Route>
+
+        <Route element={<RedditAppShell />}>
+          <Route path="/reddit" element={<DiscussionFeedPage />} />
+          <Route path="/reddit/post/:postId" element={<RedditPostPage />} />
+          <Route path="/reddit/post/:postId/ethos" element={<PostDetailPage expectedPlatform="reddit" />} />
         </Route>
 
         <Route element={<AppShell />}>
-          <Route path="/overview" element={<OverviewPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/research" element={<ResearchModePage />} />
+          <Route path="/ethos" element={<Navigate to="/ethos/overview" replace />} />
+          <Route path="/ethos/overview" element={<OverviewPage />} />
+          <Route path="/ethos/settings" element={<SettingsPage />} />
+          <Route path="/ethos/privacy" element={<PrivacyPage />} />
+          <Route path="/ethos/research" element={<ResearchModePage />} />
         </Route>
+
+        <Route path="/feed" element={<Navigate to="/instagram" replace />} />
+        <Route path="/feed/visual" element={<Navigate to="/instagram" replace />} />
+        <Route path="/feed/discussion" element={<Navigate to="/reddit" replace />} />
+        <Route path="/post/:postId" element={<LegacyPostRedirect />} />
+        <Route path="/overview" element={<Navigate to="/ethos/overview" replace />} />
+        <Route path="/settings" element={<Navigate to="/ethos/settings" replace />} />
+        <Route path="/privacy" element={<Navigate to="/ethos/privacy" replace />} />
+        <Route path="/research" element={<Navigate to="/ethos/research" replace />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
@@ -64,10 +83,16 @@ export function AppRoutes() {
   );
 }
 
+function LegacyPostRedirect() {
+  const { postId = '' } = useParams();
+  const platform = getPost(postId)?.platform ?? 'instagram';
+  return <Navigate to={`/${platform}/post/${postId}`} replace />;
+}
+
 export function App() {
   return (
     <AppStateProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AppRoutes />
       </BrowserRouter>
     </AppStateProvider>

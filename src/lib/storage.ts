@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   settings: `${PREFIX}.settings`,
   history: `${PREFIX}.history`,
   reactions: `${PREFIX}.reactions`,
+  engagements: `${PREFIX}.engagements`,
   research: `${PREFIX}.research`,
   feedback: `${PREFIX}.feedback`,
   onboardingDone: `${PREFIX}.onboardingDone`,

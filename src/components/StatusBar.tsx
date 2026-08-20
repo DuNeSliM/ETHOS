@@ -60,7 +60,7 @@ export function StatusBar() {
         </Chip>
 
         <Link
-          to="/settings"
+          to="/ethos/settings"
           className="
             ml-auto rounded-md px-2 py-1 text-xs font-semibold text-assist-strong
             underline decoration-assist-line underline-offset-2 hover:bg-assist-tint

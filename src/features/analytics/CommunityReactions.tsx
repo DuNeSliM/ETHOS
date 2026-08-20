@@ -206,7 +206,7 @@ export function CommunityReactions({
                 <LabelList
                   dataKey="value"
                   position="right"
-                  formatter={(value: number) => `${value} %`}
+                  formatter={(value) => `${value ?? 0} %`}
                   style={{
                     fill: 'var(--cl-text)',
                     fontSize: 12,

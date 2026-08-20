@@ -1,10 +1,10 @@
 import {
+  BarChart3,
   Bookmark,
   Heart,
   MessageCircle,
   MoreHorizontal,
   Send,
-  Timer,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -15,7 +15,6 @@ import { ContextAssistantButton } from '@/features/context-assistant/ContextAssi
 import { Caption } from '@/features/feed/Caption';
 import { MediaPlaceholder } from '@/features/feed/MediaPlaceholder';
 import { OwnReactionControl } from '@/features/reactions/OwnReactionControl';
-import { getTimeline } from '@/data/timelines';
 import type { Post } from '@/types';
 
 /**
@@ -33,10 +32,8 @@ import type { Post } from '@/types';
  * separated from the simulated platform chrome above them.
  */
 export function VisualPostCard({ post }: { post: Post }) {
-  const { recordView } = useAppState();
+  const { engagements, recordView, setPostLiked, setPostSaved } = useAppState();
   const viewLogged = useRef(false);
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [followed, setFollowed] = useState(false);
   const [captionExpanded, setCaptionExpanded] = useState(false);
 
@@ -49,9 +46,10 @@ export function VisualPostCard({ post }: { post: Post }) {
     recordView(post.id, false);
   }, [post.id, recordView]);
 
-  const hasTimeline = getTimeline(post.id) !== undefined;
   const noop = useCallback(() => {}, []);
 
+  const liked = engagements[post.id]?.liked ?? false;
+  const saved = engagements[post.id]?.saved ?? false;
   const likeCount = post.likes + (liked ? 1 : 0);
   const isLongCaption = post.body.length > 120;
 
@@ -125,7 +123,7 @@ export function VisualPostCard({ post }: { post: Post }) {
           // Double tap likes but never un-likes, exactly like the genre: an
           // accidental second tap on a picture should not quietly withdraw
           // something you gave. Taking it back is the heart button's job.
-          onDoubleTap={() => setLiked(true)}
+          onDoubleTap={() => setPostLiked(post.id, true)}
         >
           <OwnReactionControl postId={post.id} placement="overlay" />
         </MediaPlaceholder>
@@ -140,7 +138,7 @@ export function VisualPostCard({ post }: { post: Post }) {
       <div className="flex items-center gap-1 px-2 pt-2">
         <button
           type="button"
-          onClick={() => setLiked((value) => !value)}
+          onClick={() => setPostLiked(post.id, !liked)}
           aria-pressed={liked}
           aria-label={liked ? 'Gefällt mir zurücknehmen' : 'Gefällt mir'}
           className={`
@@ -157,7 +155,7 @@ export function VisualPostCard({ post }: { post: Post }) {
         </button>
 
         <Link
-          to={`/post/${post.id}`}
+          to={`/instagram/post/${post.id}`}
           aria-label={`${post.commentCount} Kommentare ansehen`}
           className="rounded-md px-2 py-1.5 text-ink hover:bg-surface-2"
         >
@@ -174,7 +172,7 @@ export function VisualPostCard({ post }: { post: Post }) {
 
         <button
           type="button"
-          onClick={() => setSaved((value) => !value)}
+          onClick={() => setPostSaved(post.id, !saved)}
           aria-pressed={saved}
           aria-label={saved ? 'Aus Sammlung entfernen' : 'Beitrag speichern'}
           className="ml-auto rounded-md px-2 py-1.5 text-ink hover:bg-surface-2"
@@ -215,7 +213,7 @@ export function VisualPostCard({ post }: { post: Post }) {
         ) : null}
 
         <Link
-          to={`/post/${post.id}`}
+          to={`/instagram/post/${post.id}`}
           className="mt-1.5 block text-sm text-faint hover:text-muted"
         >
           Alle {post.commentCount.toLocaleString('de-DE')} Kommentare ansehen
@@ -240,18 +238,13 @@ export function VisualPostCard({ post }: { post: Post }) {
           */}
           <CommunityReactionButton postId={post.id} />
 
-          {/* Only where a scripted timeline exists - the community numbers now
-              have their own control above, so a generic "Reaktionen" link next
-              to it would just be a second door to the same room. */}
-          {hasTimeline ? (
-            <Link
-              to={`/post/${post.id}`}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-assist-strong hover:bg-assist-tint"
-            >
-              <Timer aria-hidden="true" className="size-4" />
-              Reaktionsverlauf
-            </Link>
-          ) : null}
+          <Link
+            to={`/instagram/post/${post.id}/ethos`}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-assist-strong hover:bg-assist-tint"
+          >
+            <BarChart3 aria-hidden="true" className="size-4" />
+            ETHOS-Auswertung
+          </Link>
 
           {/* Inline chip when there is no media to overlay it onto. */}
           {post.media ? null : (

@@ -194,7 +194,7 @@ export function LiveSelfView() {
               Kamerabild ausschalten
             </Button>
 
-            <Link to="/settings" onClick={() => setOpen(false)}>
+            <Link to="/ethos/settings" onClick={() => setOpen(false)}>
               <Button>
                 <Settings2 aria-hidden="true" className="size-4" />
                 Einstellungen

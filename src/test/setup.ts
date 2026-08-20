@@ -27,6 +27,12 @@ if (!window.matchMedia) {
   });
 }
 
+Object.defineProperty(window, 'scrollTo', {
+  configurable: true,
+  writable: true,
+  value: vi.fn(),
+});
+
 // Recharts measures its container, which jsdom always reports as 0x0.
 // Without a size the charts render nothing and assertions on labels fail.
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
@@ -36,6 +42,23 @@ Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
 Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
   configurable: true,
   value: 400,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'getBoundingClientRect', {
+  configurable: true,
+  value() {
+    return {
+      width: 800,
+      height: 400,
+      top: 0,
+      right: 800,
+      bottom: 400,
+      left: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    };
+  },
 });
 
 if (!window.ResizeObserver) {

@@ -136,7 +136,7 @@ export function ContextAssistantButton({
             </Panel>
 
             <div className="mt-4">
-              <Link to="/settings">
+              <Link to="/ethos/settings">
                 <Button variant="assist">
                   <Settings2 aria-hidden="true" className="size-4" />
                   Zu den Einstellungen

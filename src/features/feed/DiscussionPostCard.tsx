@@ -1,10 +1,11 @@
-import { ArrowBigUp, BarChart3, MessageCircle } from 'lucide-react';
+import { ArrowBigUp, BarChart3, Bookmark, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 
 import { useAppState } from '@/app/AppStateProvider';
 import { CommunityReactionButton } from '@/features/analytics/CommunityReactionButton';
 import { ContextAssistantButton } from '@/features/context-assistant/ContextAssistantButton';
+import { RedditPostMedia } from '@/features/feed/RedditPostMedia';
 import { OwnReactionControl } from '@/features/reactions/OwnReactionControl';
 import type { Post } from '@/types';
 
@@ -27,7 +28,7 @@ export function DiscussionPostCard({
   post: Post;
   showAllComments?: boolean;
 }) {
-  const { recordView } = useAppState();
+  const { engagements, recordView, setPostLiked, setPostSaved } = useAppState();
   const viewLogged = useRef(false);
 
   useEffect(() => {
@@ -37,6 +38,9 @@ export function DiscussionPostCard({
   }, [post.id, recordView]);
 
   const comments = post.comments ?? [];
+  const liked = engagements[post.id]?.liked ?? false;
+  const saved = engagements[post.id]?.saved ?? false;
+  const voteCount = post.likes + (liked ? 1 : 0);
   const visibleComments = showAllComments ? comments : comments.slice(0, 2);
   const hiddenCount = comments.length - visibleComments.length;
 
@@ -57,21 +61,55 @@ export function DiscussionPostCard({
         ) : null}
       </header>
 
-      <div className="px-4 pt-2">
-        <p className="text-[0.9375rem] leading-relaxed text-ink">{post.body}</p>
-      </div>
+      {post.body ? (
+        <div className="px-4 pt-2">
+          <p className="text-[0.9375rem] leading-relaxed text-ink">{post.body}</p>
+        </div>
+      ) : null}
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 pb-3 pt-2.5 text-xs text-muted">
-        <span className="inline-flex items-center gap-1.5">
-          <ArrowBigUp aria-hidden="true" className="size-4" />
-          {post.likes.toLocaleString('de-DE')}
+      {post.media ? (
+        <RedditPostMedia
+          media={post.media}
+          title={post.title ?? `Beitrag von ${post.author}`}
+        />
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-1 px-3 pb-3 pt-2.5 text-xs text-muted">
+        <button
+          type="button"
+          onClick={() => setPostLiked(post.id, !liked)}
+          aria-pressed={liked}
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-semibold hover:bg-alert-tint ${liked ? 'text-alert' : 'text-muted'}`}
+        >
+          <ArrowBigUp
+            aria-hidden="true"
+            className="size-4"
+            fill={liked ? 'currentColor' : 'none'}
+          />
+          {voteCount.toLocaleString('de-DE')}
           <span className="sr-only">Zustimmungen</span>
-        </span>
-        <span className="inline-flex items-center gap-1.5">
+        </button>
+        <Link
+          to={`/reddit/post/${post.id}`}
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 hover:bg-surface-2"
+        >
           <MessageCircle aria-hidden="true" className="size-3.5" />
           {post.commentCount.toLocaleString('de-DE')}
           <span className="sr-only">Kommentare</span>
-        </span>
+        </Link>
+        <button
+          type="button"
+          onClick={() => setPostSaved(post.id, !saved)}
+          aria-pressed={saved}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 hover:bg-surface-2"
+        >
+          <Bookmark
+            aria-hidden="true"
+            className="size-3.5"
+            fill={saved ? 'currentColor' : 'none'}
+          />
+          {saved ? 'Gespeichert' : 'Speichern'}
+        </button>
       </div>
 
       {/* ---- assistance strip -------------------------------------- */}
@@ -83,14 +121,14 @@ export function DiscussionPostCard({
           />
           <CommunityReactionButton postId={post.id} />
           <Link
-            to={`/post/${post.id}`}
+            to={`/reddit/post/${post.id}/ethos`}
             className="
               inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm
               font-medium text-assist-strong hover:bg-assist-tint
             "
           >
             <BarChart3 aria-hidden="true" className="size-4" />
-            Alles zum Beitrag
+            ETHOS-Auswertung
           </Link>
           <OwnReactionControl postId={post.id} placement="inline" />
         </div>
@@ -121,7 +159,7 @@ export function DiscussionPostCard({
           {hiddenCount > 0 ? (
             <div className="px-4 py-2.5">
               <Link
-                to={`/post/${post.id}`}
+                to={`/reddit/post/${post.id}`}
                 className="text-sm font-semibold text-assist-strong hover:underline"
               >
                 {hiddenCount} weitere{hiddenCount === 1 ? 'r' : ''} Kommentar

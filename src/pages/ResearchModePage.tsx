@@ -76,12 +76,12 @@ export function ResearchModePage() {
 
   function exportJson() {
     downloadFile(
-      `contextlens-research-${timestampSlug()}.json`,
+      `ethos-research-${timestampSlug()}.json`,
       JSON.stringify(
         {
           exportedAt: new Date().toISOString(),
           note:
-            'Research-Mode-Ergebnisse aus dem ContextLens-Prototyp. Die bewerteten Analysen waren simuliert.',
+            'Research-Mode-Ergebnisse aus dem ETHOS-Prototyp. Die bewerteten Analysen waren simuliert.',
           scale: RESEARCH_SCALE_ENDS,
           results: research,
         },
@@ -116,7 +116,7 @@ export function ResearchModePage() {
         .join(','),
     );
     downloadFile(
-      `contextlens-research-${timestampSlug()}.csv`,
+      `ethos-research-${timestampSlug()}.csv`,
       [header.map(escape).join(','), ...rows].join('\r\n'),
       'text/csv',
     );

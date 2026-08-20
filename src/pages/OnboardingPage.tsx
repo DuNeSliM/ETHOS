@@ -28,7 +28,7 @@ const STEPS: Step[] = [
     icon: Eye,
     title: 'Emotionale und soziale Signale verständlicher machen',
     body:
-      'ContextLens liegt als zusätzliche Schicht über einem Feed. Zu jedem unterstützten Beitrag gibt es einen kleinen Button „Kontext erklären“. Erst wenn du ihn antippst, erscheint eine Erklärung.',
+      'ETHOS liegt als zusätzliche Schicht über Instagram- und Reddit-Mocks. Zu jedem unterstützten Beitrag gibt es einen kleinen Button „Kontext erklären“. Erst wenn du ihn antippst, erscheint eine Erklärung.',
     points: [
       'Nichts wird automatisch über den Inhalt gelegt.',
       'Die Assistenz ist optisch klar von den Beiträgen getrennt.',
@@ -113,7 +113,7 @@ export function OnboardingPage() {
           place consent is granted.
         */}
         <p className="text-xs font-bold uppercase tracking-wide text-assist-strong">
-          ContextLens einrichten
+          ETHOS einrichten
         </p>
 
         {/* Progress. Text first so it does not rely on the bar being visible. */}

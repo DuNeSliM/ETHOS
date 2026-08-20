@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import { getAnalysis } from '@/data/analyses';
+import { getPost } from '@/data/posts';
 import { deriveContentCategory } from '@/features/simulation/mockEngine';
 import {
   STORAGE_KEYS,
@@ -21,6 +22,7 @@ import type {
   AssistantFeedback,
   EstimatedExpression,
   HistoryEntry,
+  PostEngagement,
   ResearchResult,
   SelfReportedReaction,
   Settings,
@@ -76,6 +78,10 @@ type AppStateValue = {
   ) => void;
   clearSelfReport: (postId: string) => void;
 
+  engagements: Record<string, PostEngagement>;
+  setPostLiked: (postId: string, liked: boolean) => void;
+  setPostSaved: (postId: string, saved: boolean) => void;
+
   history: HistoryEntry[];
   recordView: (postId: string, openedAssistant: boolean) => void;
   deleteHistoryEntry: (entryId: string) => void;
@@ -111,6 +117,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<HistoryEntry[]>(() =>
     readJson(STORAGE_KEYS.history, []),
   );
+  const [engagements, setEngagements] = useState<Record<string, PostEngagement>>(
+    () => readJson(STORAGE_KEYS.engagements, {}),
+  );
   const [research, setResearch] = useState<ResearchResult[]>(() =>
     readJson(STORAGE_KEYS.research, []),
   );
@@ -133,11 +142,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     if (settings.storeReactionHistory) {
       writeJson(STORAGE_KEYS.history, history);
       writeJson(STORAGE_KEYS.reactions, reactions);
+      writeJson(STORAGE_KEYS.engagements, engagements);
     } else {
       removeKey(STORAGE_KEYS.history);
       removeKey(STORAGE_KEYS.reactions);
+      removeKey(STORAGE_KEYS.engagements);
     }
-  }, [history, reactions, settings.storeReactionHistory]);
+  }, [engagements, history, reactions, settings.storeReactionHistory]);
 
   useEffect(() => {
     writeJson(STORAGE_KEYS.research, research);
@@ -261,6 +272,38 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const updateEngagement = useCallback(
+    (postId: string, patch: Pick<Partial<PostEngagement>, 'liked' | 'saved'>) => {
+      const post = getPost(postId);
+      if (!post) return;
+      setEngagements((previous) => {
+        const existing = previous[postId];
+        return {
+          ...previous,
+          [postId]: {
+            postId,
+            platform: post.platform,
+            liked: existing?.liked ?? false,
+            saved: existing?.saved ?? false,
+            ...patch,
+            updatedAt: Date.now(),
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  const setPostLiked = useCallback(
+    (postId: string, liked: boolean) => updateEngagement(postId, { liked }),
+    [updateEngagement],
+  );
+
+  const setPostSaved = useCallback(
+    (postId: string, saved: boolean) => updateEngagement(postId, { saved }),
+    [updateEngagement],
+  );
+
   const recordView = useCallback((postId: string, openedAssistant: boolean) => {
     setHistory((previous) => {
       const category = deriveContentCategory(getAnalysis(postId));
@@ -300,6 +343,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           const { [entry.postId]: _removed, ...rest } = prevReactions;
           return rest;
         });
+        setEngagements((previousEngagements) => {
+          const { [entry.postId]: _removed, ...rest } = previousEngagements;
+          return rest;
+        });
       }
       return previous.filter((e) => e.id !== entryId);
     });
@@ -327,10 +374,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setReactions({});
     setResearch([]);
     setFeedback([]);
+    setEngagements({});
     removeKey(STORAGE_KEYS.history);
     removeKey(STORAGE_KEYS.reactions);
     removeKey(STORAGE_KEYS.research);
     removeKey(STORAGE_KEYS.feedback);
+    removeKey(STORAGE_KEYS.engagements);
   }, []);
 
   const resetDemo = useCallback(() => {
@@ -339,6 +388,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setReactions({});
     setResearch([]);
     setFeedback([]);
+    setEngagements({});
     setSettings(DEFAULT_SETTINGS);
     setOnboardingDoneState(false);
   }, []);
@@ -352,6 +402,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       recordEstimate,
       recordSelfReport,
       clearSelfReport,
+      engagements,
+      setPostLiked,
+      setPostSaved,
       history,
       recordView,
       deleteHistoryEntry,
@@ -373,6 +426,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       recordEstimate,
       recordSelfReport,
       clearSelfReport,
+      engagements,
+      setPostLiked,
+      setPostSaved,
       history,
       recordView,
       deleteHistoryEntry,

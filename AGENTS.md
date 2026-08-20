@@ -1,20 +1,23 @@
 # AGENTS.md — KI-Einsatz und Prompt-Transparenz
 
 Dieses Dokument legt offen, welche KI-Unterstützung bei der Entwicklung des
-ContextLens-Prototypen eingesetzt wurde und mit welchen Prompts. Es dient der
+ETHOS-Prototypen (historisch ContextLens) eingesetzt wurde und mit welchen
+Prompts. Es dient der
 Nachvollziehbarkeit für die Studienarbeit.
 
-- **Werkzeug:** Claude Code (CLI)
-- **Modell:** Claude Opus 5 (`claude-opus-5`)
-- **Datum der Sitzungen:** 30.07.2026, 31.07.2026 und 03.08.2026
-- **Branch:** `feat/contextlens-prototype`
+- **Werkzeuge/Modelle:** P-001 bis P-010: Claude Code / Claude Opus 5;
+  P-011: OpenAI Codex / GPT-5
+- **Datum der Sitzungen:** 30.07.2026, 31.07.2026, 03.08.2026 und 20.08.2026
+- **Branches:** ursprünglich `feat/contextlens-prototype`, P-011 auf
+  `feat/reddit-and-so`
 - **Rollenverteilung:** Der Hauptchat agierte als Product Owner, technischer
   Lead und Integrator. Spezialisierte Subagents wurden für Dokumentation und
   Review eingesetzt.
 
-Ergänzend: `docs/prompt-documentation/prompt-register.md` (tabellarisches
-Register), `docs/prompt-documentation/export-checklist.md` (Checkliste für den
-manuellen Chat-Export).
+Der **kanonische Prompt-Nachweis** ist
+`docs/prompt-documentation/prompt-catalog.md`. Ergänzend:
+`prompt-register.md` (tabellarisches Register) und `export-checklist.md`
+(Checkliste für den manuellen Chat-Export).
 
 ---
 
@@ -361,6 +364,87 @@ Wortlaut der Nutzerin/des Nutzers:
 
 ---
 
+### P-011 — Drei-App-Smartphone: Instagram, Reddit und ETHOS
+
+**Ausführender:** OpenAI Codex / GPT-5 · **Übernommen:** ja · **Sitzung:**
+20.08.2026
+
+**Vollständiger Wortlaut und Klärungen:**
+`docs/prompt-documentation/prompt-catalog.md`, P-011. Der manuelle Chat-Export
+ist als `docs/prompt-documentation/exports/P-011-three-apps-ethos.md`
+vorgesehen.
+
+**Kernauftrag.** Das simulierte Telefon erhält drei getrennte, anklickbare Apps:
+Instagram als bisheriger visueller Mock, Reddit als eigener scrollbarer
+Diskussions-Mock und ETHOS als umbenannte Assistenz-App mit visueller Statistik.
+Die Assistenz liegt über beiden Social Apps. Community-Werte benennen die am
+häufigsten selbstberichtete Reaktion sichtbar und sprechen unter 50 Prozent
+nicht von einer Mehrheit.
+
+**Klärungsentscheidungen.** Reale Plattformnamen, aber keine offiziellen Logos,
+Assets, Authentifizierung oder APIs; ein reiches fiktives Demo-Profil als
+Standard und eine strikt getrennte Sitzungsquelle; persistente Likes/Upvotes und
+Speicherungen mit memory-only-Verhalten bei deaktivierter Speicherung;
+risikoarme Dependency- und Warnungsbereinigung. Router 7, Playwright, globale
+Error Boundary und viewportgenaues View-Tracking bleiben bewusst offen.
+
+**Ergebnis.** Kanonische Instagram-, Reddit- und ETHOS-Routen mit historischen
+Redirects; zentrale Identität und `SocialPlatform`; `PostEngagement` in Zustand,
+Export, Löschung und Reset; Reddit-Shell; ETHOS-Overlay über beiden Apps;
+deterministisches Demo-Profil und getrennte Sitzungsanalyse; Donutdiagramm,
+100-%-Emotionslandschaft und direkt beschriftete Plattformbalken mit semantischen
+Alternativen. Recharts 3 und kompatible Patches; Typprüfung, 127/127 Tests und
+Produktionsbuild erfolgreich. Keine hohe oder kritische Audit-Schwachstelle;
+zwei moderate Router-v6-Advisories bleiben bis zur v7-Migration dokumentiert.
+
+---
+
+### P-012 — Native Kommentare und Reddit-Medien
+
+**Ausführender:** OpenAI Codex / GPT-5 · **Übernommen:** ja · **Sitzung:**
+20.08.2026
+
+**Vollständiger Wortlaut:**
+`docs/prompt-documentation/prompt-catalog.md`, P-012. Der manuelle Chat-Export
+ist als `docs/prompt-documentation/exports/P-012-comments-reddit-media.md`
+vorgesehen.
+
+**Kernauftrag.** Normale Instagram-Kommentar-Controls sollen die bekannte
+Instagram-Kommentarsektion statt der ETHOS-Analyse öffnen. Reddit soll `r/`
+verwenden und als zweiten Post ein bedienbares, hörbares Doom-Video aus
+`r/marvel`, als dritten ein Kerle-Meme aus `r/de` zeigen.
+
+**Ergebnis.** Native Instagram-Kommentar- und Reddit-Thread-Seiten sind von
+den `/ethos`-Analyseansichten getrennt. Alle Communities verwenden `r/`.
+`RedditPostMedia` bindet `doom.mp4` ohne Autoplay/`muted` mit erstem pausiertem
+Frame und `kerle.jpg` mit Bildbeschreibung ein. Analyse-/Community-Daten,
+Dokumentation und Tests wurden ergänzt; Typprüfung, 132/132 Tests,
+Produktionsbuild und Browserprüfung erfolgreich.
+
+---
+
+### P-013 — Doom-Video und Handy-Vollbild
+
+**Ausführender:** OpenAI Codex / GPT-5 · **Übernommen:** ja · **Sitzung:**
+20.08.2026
+
+**Vollständiger Wortlaut und Bildreferenzen:**
+`docs/prompt-documentation/prompt-catalog.md`, P-013. Der manuelle Chat-Export
+ist als `docs/prompt-documentation/exports/P-013-video-phone-fullscreen.md`
+vorgesehen.
+
+**Kernauftrag.** Seitliche schwarze Ränder am Doom-Video entfernen und das
+Video vergrößern; den technischen Demo-Erklärabsatz am Post entfernen; einen
+Modus anbieten, der die linke Demo-Erklärung ausblendet und das Telefon groß
+in der Mitte zeigt.
+
+**Ergebnis.** Das native Video nutzt sein 4:3-Seitenverhältnis über die volle
+Kartenbreite. `DeviceLayout` besitzt einen umkehrbaren und zugänglichen
+`Handy-Vollbild`-Präsentationsmodus ohne Browser-Berechtigung. Typprüfung,
+133/133 Tests, Produktionsbuild und visuelle Browserprüfung erfolgreich.
+
+---
+
 ## 3. Korrekturen nach dem Agent-Review
 
 Aus dem Bericht von Agent 2 und den eigenen Prüfungen des Hauptchats wurden
@@ -391,8 +475,8 @@ Farbverläufe der Medienplatzhalter, ungenutzte Button-Variante — siehe
 - Die Datenschutzaussagen sind im Code überprüfbar: die Suche nach Netzwerk- und
   Bildaufnahme-APIs liefert null Treffer im ausführbaren Code. Belege in
   `docs/privacy-review.md`, Abschnitt 1.
-- Alle 99 Tests sind grün, `npm run build` läuft fehlerfrei.
+- Der aktuelle Stand besteht 133 Tests, Typprüfung und Produktionsbuild.
 - Die Aussagen zur Produktrahmung sind ebenfalls testgestützt: dass der
-  Startbildschirm zwei getrennte Apps anbietet, dass Kulissensymbole keine
+  Startbildschirm drei getrennte Apps anbietet, dass Kulissensymbole keine
   Bedienelemente sind und dass ein funktionsloses Bedienelement der simulierten
   App das auch sagt, prüft `src/app/smoke.test.tsx`.

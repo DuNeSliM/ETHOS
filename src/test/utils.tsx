@@ -25,7 +25,10 @@ export function renderWithProviders(
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <AppStateProvider>
-        <MemoryRouter initialEntries={[route]}>
+        <MemoryRouter
+          initialEntries={[route]}
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
           {path ? (
             <Routes>
               <Route path={path} element={children} />

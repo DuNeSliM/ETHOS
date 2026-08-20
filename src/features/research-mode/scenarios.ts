@@ -32,7 +32,7 @@ export const SCENARIOS: Scenario[] = [
       'Sieh dir an, wie sicher die Einschätzung ist und woran sie festgemacht wird.',
       'Öffne auch „Warum wird das so eingeschätzt?“.',
     ],
-    startPath: '/feed/visual',
+    startPath: '/instagram',
     startLabel: 'Visual Feed öffnen',
   },
   {
@@ -43,11 +43,11 @@ export const SCENARIOS: Scenario[] = [
     steps: [
       'Öffne im Visual Feed den Beitrag von „Klartext Daily“ über das Autofahren.',
       'Lies die Einschätzung der Assistenzschicht zu diesem Beitrag.',
-      'Öffne die Detailansicht über „Reaktionsverlauf ansehen“.',
+      'Öffne die getrennte Analyseansicht über „ETHOS-Auswertung“.',
       'Sieh dir die Community-Reaktionen an und wechsle zwischen „Automatische Schätzungen“ und „Aktive Selbstauskünfte“.',
       'Überlege: Was sagen diese Zahlen aus – und was nicht?',
     ],
-    startPath: '/post/v-ragebait',
+    startPath: '/instagram/post/v-ragebait/ethos',
     startLabel: 'Beitrag direkt öffnen',
   },
   {
@@ -62,7 +62,7 @@ export const SCENARIOS: Scenario[] = [
       'Prüfe, ob du danach noch erkennen kannst, was geschätzt und was von dir angegeben wurde.',
       'Finde anschließend die Möglichkeit, den Assistenten zu pausieren und alle Daten zu löschen.',
     ],
-    startPath: '/settings',
+    startPath: '/ethos/settings',
     startLabel: 'Einstellungen öffnen',
   },
 ];

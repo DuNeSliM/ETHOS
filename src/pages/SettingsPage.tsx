@@ -188,8 +188,8 @@ export function SettingsPage() {
           />
 
           <Toggle
-            label="Reaktionsverlauf lokal speichern"
-            description="Speichert deine betrachteten Beiträge und Angaben in diesem Browser, damit die persönliche Übersicht funktioniert."
+            label="Verlauf und Interaktionen lokal speichern"
+            description="Speichert betrachtete Beiträge, eigene Angaben, Likes, Upvotes und gemerkte Beiträge in diesem Browser, damit die Sitzungsübersicht nach einem Neuladen erhalten bleibt. Ausgeschaltet funktionieren Interaktionen nur im Arbeitsspeicher."
             checked={settings.storeReactionHistory}
             onChange={(value) => updateSetting('storeReactionHistory', value)}
           />
@@ -259,7 +259,7 @@ export function SettingsPage() {
           <RotateCcw aria-hidden="true" className="size-4" />
           Einstellungen zurücksetzen
         </Button>
-        <Link to="/privacy">
+        <Link to="/ethos/privacy">
           <Button variant="assist">
             <ShieldCheck aria-hidden="true" className="size-4" />
             Zum Datenschutz-Dashboard

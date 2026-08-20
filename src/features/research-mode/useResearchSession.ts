@@ -57,14 +57,9 @@ export function useResearchSession() {
   );
 
   const beginRating = useCallback(() => {
-    setActive((current) => {
-      if (!current) return current;
-      const next: ActiveScenario = { ...current, phase: 'rating' };
-      writeJson(STORAGE_KEYS.activeScenario, next);
-      window.dispatchEvent(new Event(SYNC_EVENT));
-      return next;
-    });
-  }, []);
+    if (!active) return;
+    publish({ ...active, phase: 'rating' });
+  }, [active, publish]);
 
   const finish = useCallback(() => publish(null), [publish]);
 

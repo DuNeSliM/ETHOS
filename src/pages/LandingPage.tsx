@@ -17,7 +17,7 @@ const BENEFITS = [
     icon: MessageSquareQuote,
     title: 'Sarkasmus und Ironie einordnen',
     body:
-      'Wenn ein Beitrag wahrscheinlich nicht wörtlich gemeint ist, erklärt ContextLens auf Wunsch, woran das zu erkennen sein könnte.',
+      'Wenn ein Beitrag wahrscheinlich nicht wörtlich gemeint ist, erklärt ETHOS auf Wunsch, woran das zu erkennen sein könnte.',
   },
   {
     icon: HandHeart,
@@ -76,7 +76,7 @@ export function LandingPage() {
         </h1>
 
         <p className="mt-4 max-w-2xl text-lg text-muted">
-          ContextLens legt sich auf Wunsch über einen Social-Media-Feed und
+          ETHOS legt sich auf Wunsch über Social-Media-Feeds und
           erklärt, was in einem Beitrag mitschwingen könnte: Sarkasmus, Ironie,
           emotionale Untertöne, Tonfall oder stark zuspitzende Formulierungen.
         </p>
@@ -86,7 +86,7 @@ export function LandingPage() {
             <strong className="font-semibold">Für wen ist das gedacht?</strong>{' '}
             Vor allem für Menschen, denen das Deuten solcher Signale schwerfällt
             – zum Beispiel weil Ironie im Text keinen Tonfall hat oder weil
-            Mimik in Videos schwer einzuordnen ist. ContextLens nimmt niemandem
+            Mimik in Videos schwer einzuordnen ist. ETHOS nimmt niemandem
             die Deutung ab. Es macht einen Vorschlag, der falsch sein kann, und
             sagt das auch.
           </p>
@@ -113,8 +113,9 @@ export function LandingPage() {
         </div>
 
         <p className="mt-3 text-sm text-faint">
-          Die Demo läuft auf einem simulierten Telefon: Startbildschirm, eine
-          erfundene Foto-App und ContextLens als Erweiterung darüber. Die
+          Die Demo läuft auf einem simulierten Telefon: Startbildschirm,
+          inoffizielle Instagram- und Reddit-Mocks und ETHOS als Erweiterung
+          darüber. Die
           Nutzung ist vollständig freiwillig – du kannst jederzeit pausieren und
           alle lokal gespeicherten Daten löschen.
         </p>

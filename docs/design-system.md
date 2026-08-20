@@ -1,1118 +1,123 @@
-# ContextLens – Design System
-
-Dieses Dokument beschreibt das Designsystem **so, wie es implementiert ist**. Jede
-Aussage lässt sich am Code prüfen; die jeweilige Quelldatei ist genannt.
-
-Technischer Rahmen: React + TypeScript + Tailwind CSS v4, Icons aus `lucide-react`,
-Charts aus `recharts`, Routing über `react-router-dom`.
-
-Quelle der Wahrheit für alle Tokens: `src/styles/index.css`.
-
----
-
-## 1. Designprinzipien
-
-Die Prinzipien sind nicht nachträglich formuliert, sondern stehen als Kommentare in
-den Quelldateien und sind dort umgesetzt.
-
-| Prinzip | Bedeutung | Umsetzung im Code |
-| --- | --- | --- |
-| **Ruhig statt alarmierend** | Die Assistenz drängt sich nicht auf. Kein Dauer-Banner mit Emotionsanzeige über dem Inhalt. | `ContextAssistantButton` rendert nur einen kleinen Button; die gesamte Analyse liegt hinter einem `Sheet` (`src/features/context-assistant/ContextAssistantButton.tsx`). |
-| **Hinweise auf Abruf** | Nichts wird automatisch über den Beitrag gelegt. | Default `hintVisibility: 'on-demand'` (`src/app/AppStateProvider.tsx`), Onboarding-Text „Nichts wird automatisch über den Inhalt gelegt." |
-| **Nicht klinisch** | Keine Laborästhetik, keine Prozentbalken als Hauptaussage, keine Diagnose-Sprache. | Sicherheit wird als Wort + „2 von 3" + Balken gezeigt (`ConfidenceMeter`); Wortschatz zentral und gehedgt in `src/lib/labels.ts`. |
-| **Nicht überladen** | Feste, immer gleiche Reihenfolge in der Assistenzkarte, damit man lernt, wo man schaut. | Kommentar und Reihenfolge in `AssistantCardBody.tsx`: Überschrift → Kurzlesart → Sicherheit → Begründung → Beobachtungen → Ton/Ausdruck → Polarisierung → Grenzen → Feedback. |
-| **Jede Karte gibt ihre Grenzen zu** | Der Block „Was diese Analyse nicht wissen kann" ist nicht optional. | `AssistantCardBody.tsx` rendert `analysis.limitations` bedingungslos. |
-| **Simuliertes ist immer als solches markiert** | Eine Testperson darf nie im Zweifel sein, ob eine Zahl gemessen wurde. | `SimulatedBadge`, `.sim-hatch`, `sim`-Tokenfamilie – siehe Abschnitt 4. |
-| **Trennung von drei Aussagearten** | Aussage über den Beitrag ≠ Maschinenschätzung über die Person ≠ Selbstauskunft. | Typ-Namenskonvention in `src/types/index.ts`; `DefinitionRow` mit `tone="assist"` vs. `tone="self"` in `OwnReactionControl` und `OverviewPage`. |
-| **Freiwilligkeit ist sichtbar** | Was gerade läuft, steht permanent im Chrome. | `StatusBar` unter dem Header auf jeder Seite innerhalb der `AppShell`. |
-
----
-
-## 2. Die drei visuellen Welten
-
-Der Kommentarkopf von `src/styles/index.css` benennt sie explizit:
-
-1. **Simuliertes GERÄT** (Rahmen, Betriebssystem-Statusleiste, Startbildschirm)
-   → dunkles Hardware-Chrome, Hintergrundverlauf. Kulisse um die Demo herum,
-   die niemandem der beiden Produkte gehört.
-2. **Simulierte PLATTFORM** (Feeds, Beiträge, Kommentare) → Schwarz auf Weiß,
-   Haarlinien statt Rahmen, „fotografische" Medien-Platzhalter, dichte
-   Informationsanordnung. Umgesetzt als Token-Überschreibung `.platform-skin`,
-   siehe 3.1a.
-3. **ASSISTENZSCHICHT** (Kontextassistent, Reaktions-Chips, Transparenzflächen) →
-   Teal-`assist`-Familie, gerundete Panels, Linsen-Ikonografie.
-
-Die Assist-Tokens werden von `.platform-skin` **absichtlich nicht** überschrieben.
-Deshalb sieht die Assistenzschicht in der fremden App genauso aus wie in ihrer
-eigenen – sie ist dort erkennbar zu Gast.
-
-### Wie die Trennung technisch hergestellt wird
-
-| Mittel | Konkret | Fundstelle |
-| --- | --- | --- |
-| **Eigene Farbfamilie** | Alles, was zur Assistenz gehört, benutzt `assist`-Tokens (`bg-assist`, `bg-assist-tint`, `text-assist-strong`, `border-assist-line`). Plattforminhalt benutzt nur `surface`/`line`/`ink`/`muted`. | `src/styles/index.css`, alle Feature-Komponenten |
-| **Assistenzstreifen an der Karte** | Post-Karten sind bis zur Engagement-Zeile neutral; die Assistenz sitzt darunter in einem eigenen abgesetzten Streifen `border-t border-assist-line bg-assist-tint/50`. | `VisualPostCard.tsx` Z. 90, `DiscussionPostCard.tsx` Z. 77 (dort `border-y`) |
-| **Teal-Oberkante am Sheet** | Jedes Sheet trägt oben eine 6 px hohe Leiste `h-1.5 w-full bg-assist` mit `aria-hidden`. | `src/components/Sheet.tsx` Z. 145 |
-| **Panel-Rahmen** | `Panel variant="assist"` = `bg-assist-tint border-assist-line`; Plattformkarten benutzen `border-line bg-surface`. | `src/components/primitives.tsx` |
-| **Linsen-Ikonografie** | Das Logo ist ein aus Tokens gezeichnetes SVG (Außenring + Fokuspunkt) auf `bg-assist`, kein Bild. | `src/components/Logo.tsx` |
-| **Zwei getrennte Apps** | Plattform-Chrome (`SocialAppShell`) und ContextLens-Chrome (`AppShell`) sind zwei Shells auf demselben Telefon. Keine enthält die andere; beide sind vom Startbildschirm aus erreichbar. | `src/app/App.tsx` (Routentabelle), `src/features/social-app/SocialAppShell.tsx` |
-| **Sichtbare Präsenz über der App** | Über der Plattform liegen genau zwei Assistenz-Elemente: `PluginStatusStrip` (schmale Leiste unter der App-Kopfzeile) und `PluginOverlay` (schwebender Knopf). Beide in Assist-Farben, während die App darunter schwarz auf weiß bleibt. | `src/features/plugin/PluginOverlay.tsx` |
-| **Chrome gehört zur Assistenz** | In der ContextLens-App sind Header, Navigation und StatusBar in der Assistenz-Sprache gestaltet. | Kommentar in `src/app/AppShell.tsx` |
-| **Assist-Auslöser sind erkennbar** | Der „Kontext erklären"-Button ist immer `border-assist-line bg-assist-tint text-assist-strong` mit `Sparkles`-Icon. | `ContextAssistantButton.tsx` |
-| **Aktive Navigation in Teal** | Aktive Nav-Items: `bg-assist-tint text-assist-strong` (Desktop) bzw. `text-assist-strong` + Teal-Unterstrich (Mobile). | `AppShell.tsx` |
-
-Der Plattformbereich benutzt **keine** `assist`-Tokens – ausgenommen genau die
-Streifen, die die Assistenz einführt. Damit bleibt die Regel „Teal = Assistenz"
-lesbar.
-
----
-
-## 3. Farbtokens
-
-Semantische Werte liegen als CSS Custom Properties (`--cl-*`) vor und werden über
-`@theme inline` als Tailwind-Utilities re-exportiert (`--color-*`). Nur so kann ein
-Farbschema komplett getauscht werden, ohne eine einzige Utility-Klasse anzufassen.
-
-### 3.1 Plattform-Flächen (`surface` / `line`)
-
-| CSS-Variable | Tailwind-Token | Utility-Beispiel | Hell | Dunkel |
-| --- | --- | --- | --- | --- |
-| `--cl-canvas` | `--color-canvas` | `bg-canvas` | `#f4f6f8` | `#0a0e13` |
-| `--cl-surface` | `--color-surface` | `bg-surface` | `#ffffff` | `#141b23` |
-| `--cl-surface-2` | `--color-surface-2` | `bg-surface-2` | `#eef1f5` | `#1c252f` |
-| `--cl-surface-3` | `--color-surface-3` | `bg-surface-3` | `#e3e8ee` | `#26313d` |
-| `--cl-border` | `--color-line` | `border-line` | `#d6dce4` | `#2c3944` |
-| `--cl-border-strong` | `--color-line-strong` | `border-line-strong` | `#b6c0cc` | `#43535f` |
-
-### 3.1a Plattform-Skin (`.platform-skin`)
-
-Innerhalb der simulierten Foto-App werden genau die Plattform-Tokens
-überschrieben – Assist-, Ton- und Simulationsfamilien bleiben unverändert.
-Gesetzt wird die Klasse an genau einer Stelle: am Bildschirmelement des Geräts
-in `src/features/device/DeviceFrame.tsx`, abhängig von der Route.
-
-| CSS-Variable | Hell | Dunkel | Kontrast gegen die eigene Fläche |
-| --- | --- | --- | --- |
-| `--cl-canvas` / `--cl-surface` | `#ffffff` | `#000000` | – |
-| `--cl-surface-2` | `#fafafa` | `#121212` | – |
-| `--cl-surface-3` | `#efefef` | `#1f1f1f` | – |
-| `--cl-border` | `#dbdbdb` | `#2e2e2e` | dekorative Trennlinie |
-| `--cl-border-strong` | `#767676` | `#8a8a8a` | 4,54 : 1 / 5,98 : 1 |
-| `--cl-text` | `#000000` | `#fafafa` | 21 : 1 / 20,2 : 1 |
-| `--cl-text-muted` | `#545454` | `#b3b3b3` | 7,59 : 1 / 10,0 : 1 |
-| `--cl-text-faint` | `#6b6b6b` | `#a1a1a1` | 5,33 : 1 / 8,1 : 1 |
+# ETHOS – Designsystem
 
-Der Grauton, den diese App-Gattung üblicherweise für Sekundärtext benutzt
-(`#8e8e8e`), erreicht nur 3,0 : 1 und wird deshalb **nicht** verwendet. Die
-Ähnlichkeit endet dort, wo sie die Lesbarkeit kosten würde.
+Stand: 20.08.2026. Quelle der Token-Wahrheit ist `src/styles/index.css`; Icons stammen aus `lucide-react`, Diagramme aus Recharts 3.
 
-**Akzente der Plattform** (seit E-019 die der Vorlage, siehe
-`docs/decisions.md`):
+## Visuelle Welten
 
-| CSS-Variable | Tailwind-Token | Wert | Kontrast auf Weiß | Verwendung |
-| --- | --- | --- | --- | --- |
-| `--cl-platform-accent` | `text-accent` | `#0095f6` | 3,07 : 1 | „Abonnieren", Symbole, Bedienelemente – **nie Fließtext** |
-| `--cl-platform-accent-ink` | `text-accent-ink` | `#0064ac` | 4,62 : 1 | Hashtags und Erwähnungen in der Bildunterschrift |
-| `--cl-platform-like` | `text-like` | `#ed4956` | 3,94 : 1 | ausschließlich die Herzfläche, nie Text |
+| Welt | Kennzeichen | Eigentum |
+|---|---|---|
+| Gerät | dunkler Rahmen, OS-Status, Wallpaper, Home-Indikator | Demo-Kulisse |
+| Instagram | Foto-Feed, Haarlinien, randlose Medien, Plattformakzente | inoffizieller Mock |
+| Reddit | Forumshell, Karten, Community-/Vote-Terminologie, Reddit-Skin | inoffizieller Mock |
+| ETHOS | Teal-Familie, Linse, Assistenzstreifen, ruhige Panels | Assistenz |
 
-Im Feed überschreibt die Skin außerdem `--cl-alert` auf `#c62430` (hell) bzw.
-`#ff6b78` (dunkel), damit dieselbe Alarmfarbe im Feed zur Like-Familie passt und
-trotzdem als Text lesbar bleibt.
+ETHOS sieht über beiden Social Apps gleich aus. Host-Skins überschreiben Oberflächen-/Texttokens, nicht `--cl-assist-*` oder `--cl-sim-*`. Der sichtbare Mock-Hinweis trennt reale Plattformnamen von einer behaupteten Integration.
 
-`.platform-gradient` (Utility in `src/styles/index.css`) ist die Farbrampe für
-Wortmarke und Story-Ringe: `#feda75 → #fa7e1e → #d62976 → #962fbf → #4f5bd5`.
+## Grundprinzipien
 
-### 3.2 Text (`ink` / `muted` / `faint` / `inverse`)
-
-| CSS-Variable | Tailwind-Token | Utility | Hell | Dunkel | Verwendung |
-| --- | --- | --- | --- | --- | --- |
-| `--cl-text` | `--color-ink` | `text-ink` | `#121822` | `#e9eef3` | Fließtext, Überschriften |
-| `--cl-text-muted` | `--color-muted` | `text-muted` | `#55606f` | `#a3b1bf` | Erläuterungen, Sekundärtext |
-| `--cl-text-faint` | `--color-faint` | `text-faint` | `#77828f` | `#8593a1` | Metadaten, Labels, Platzhalter |
-| `--cl-text-inverse` | `--color-inverse` | `text-inverse` | `#ffffff` | `#0a0e13` | Text auf `bg-ink` (Primary-Button) |
-
-### 3.3 Assistenzschicht (`assist`)
-
-| CSS-Variable | Tailwind-Token | Utility | Hell | Dunkel | Verwendung |
-| --- | --- | --- | --- | --- | --- |
-| `--cl-assist` | `--color-assist` | `bg-assist`, `border-assist` | `#0d6e80` | `#5ed4e6` | Flächen, Logo, aktive Marker |
-| `--cl-assist-strong` | `--color-assist-strong` | `text-assist-strong` | `#0a5361` | `#96e6f2` | Assistenz-Text auf Tint |
-| `--cl-assist-tint` | `--color-assist-tint` | `bg-assist-tint` | `#e8f7fa` | `#0d2b33` | Assistenz-Panels, Streifen |
-| `--cl-assist-tint-2` | `--color-assist-tint-2` | `hover:bg-assist-tint-2` | `#d2eef4` | `#12414c` | Hover auf Tint-Flächen |
-| `--cl-assist-border` | `--color-assist-line` | `border-assist-line` | `#93cddb` | `#1f6577` | Panel- und Streifenränder |
-| `--cl-assist-on` | `--color-assist-on` | `text-assist-on` | `#ffffff` | `#062028` | Text auf `bg-assist` |
-
-Beachte die Umkehrung im Dunkelmodus: `assist` wird hell (Cyan), `assist-tint` wird
-dunkel, `assist-on` wird fast schwarz. Die Rollen bleiben identisch, nur die Helligkeit
-dreht.
-
-### 3.4 Ton-/Statusfamilien
-
-Diese Familien werden **nie allein** eingesetzt: jeder Status trägt zusätzlich ein
-Icon und einen Text (siehe Abschnitt 8).
-
-| Familie | CSS-Variablen | Tailwind-Tokens | Hell | Dunkel | Semantik im Prototyp |
-| --- | --- | --- | --- | --- | --- |
-| `info` | `--cl-info`, `--cl-info-tint` | `--color-info`, `--color-info-tint` | `#1d4ed8` / `#e8eeff` | `#9db6ff` / `#17203a` | **Selbstauskunft der Person**, Confidence „mittel", Alternativlesarten |
-| `positive` | `--cl-positive`, `--cl-positive-tint` | `--color-positive`, `--color-positive-tint` | `#146c43` / `#e6f4ec` | `#79d3a3` / `#10281d` | Humor/Übertreibung, Confidence „hoch", „abgeschlossen" |
-| `caution` | `--cl-caution`, `--cl-caution-tint` | `--color-caution`, `--color-caution-tint` | `#8a5300` / `#fdf1dc` | `#e8bd72` / `#2e2313` | Sarkasmus/Ironie, aktive Kamera, Repräsentativitätswarnung, Confidence „niedrig" |
-| `alert` | `--cl-alert`, `--cl-alert-tint` | `--color-alert`, `--color-alert-tint` | `#a4243d` / `#fdebef` | `#f2a0b0` / `#33161e` | Ragebait, hohe Polarisierung, Löschen-Buttons |
-| `neutral` | `--cl-neutral`, `--cl-neutral-tint` | `--color-neutral-ink`, `--color-neutral-tint` | `#4a5563` / `#eef1f5` | `#a9b6c3` / `#1c252f` | „inaktiv", „nicht eindeutig", ausgeschaltete Funktionen |
-
-> Das Token heißt bewusst `--color-neutral-ink` und nicht `--color-neutral`, weil
-> `neutral` in Tailwind bereits ein Paletten-Name ist.
-
-### 3.5 Simulationsmarker (`sim`)
-
-| CSS-Variable | Tailwind-Token | Utility | Hell | Dunkel |
-| --- | --- | --- | --- | --- |
-| `--cl-sim` | `--color-sim` | `text-sim`, `bg-sim` | `#6b3fa0` | `#c9aef0` |
-| `--cl-sim-tint` | `--color-sim-tint` | `bg-sim-tint` | `#f3edfb` | `#221a33` |
-| `--cl-sim-border` | `--color-sim-line` | `border-sim-line` | `#c9b1e6` | `#4d3a72` |
-
-Violett ist im Prototyp **ausschließlich** für „das hier ist erfunden" reserviert.
-Es kommt in keiner anderen Bedeutung vor.
-
-### 3.6 Fokus und Schatten
-
-| Variable | Hell | Dunkel | Verwendung |
-| --- | --- | --- | --- |
-| `--cl-focus` | `#0b4f5e` | `#8fe3f2` | `:focus-visible { outline: 3px solid var(--cl-focus) }` |
-| `--cl-shadow` | `15 24 34` (RGB-Tripel) | `0 0 0` | Basis für `.panel-shadow` |
-
----
-
-## 4. Das „simuliert"-Markierungssystem
-
-Drei Ebenen, die zusammenwirken:
-
-| Mittel | Was es ist | Wo es eingesetzt wird | Warum |
-| --- | --- | --- | --- |
-| **`SimulatedBadge`** | `Chip` mit `tone="sim"` und `FlaskConical`-Icon; Prop `label` überschreibt den Default `„Simuliert"`. | Landing, How-it-works, Onboarding (Schritt 3), beide Feeds (`„Erfundene Beiträge"`), `MediaPlaceholder` (`„Platzhalter"`), Sheet-Titel (`„simuliert"`), `AssistantCardBody`-Fuß (`„Diese Einschätzung ist vorab geschrieben, nicht berechnet"`), `CommunityReactions` (`„erfundene Werte"`), `ReactionTimeline` (`„erfundener Verlauf"`), Übersicht, Datenschutz, Research Mode, Einstellungen. | Eine Testperson soll nie im Zweifel sein, ob eine Zahl gemessen wurde. |
-| **`.sim-hatch`** | Utility in `index.css`: diagonale Schraffur aus `repeating-linear-gradient` mit `color-mix(in srgb, var(--cl-sim) 14%, transparent)`. | Nur in `MediaPlaceholder.tsx` als `absolute inset-0`-Overlay über dem Farbverlauf. | Ein Platzhalter darf auch flüchtig nie wie echtes Videomaterial aussehen. |
-| **`sim`-Tokenfamilie** | Siehe 3.5. | `Chip tone="sim"`, `ResearchBanner` (`bg-sim-tint`, `border-sim-line`, `text-sim`), Aufzählungspunkte im Datenschutz-Dashboard (`bg-sim`), Research-Mode-Statuschips. | Durchgehend dieselbe Farbe für „nicht echt", auch außerhalb von Badges. |
-
-Zusätzlich als Text-Markierung:
-
-- Das Logo trägt permanent die Unterzeile „Prototyp · simulierte Daten"
-  (`src/components/Logo.tsx`).
-- `MediaPlaceholder` hat eine sichtbare `figcaption`: „Simulierter Platzhalter. In
-  diesem Prototyp gibt es keine echten Bilder oder Videos."
-- Beide Feeds enden mit „Ende des simulierten Feeds."
-
----
-
-## 5. Typografie, Abstände, Radien, Elevation
-
-### Typografie
-
-| Aspekt | Wert | Fundstelle |
-| --- | --- | --- |
-| Schriftfamilie | `--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif` | `@theme inline` |
-| Basisgröße | `body { font-size: 1rem }` – alles skaliert in `rem` und folgt damit der Browser-Schriftgröße | `@layer base` |
-| Zeilenhöhe Fließtext | `1.55` | `@layer base` |
-| Zeilenhöhe Überschriften | `1.25` plus `text-wrap: balance` für `h1`–`h4` | `@layer base` |
-| Font-Smoothing | `-webkit-font-smoothing: antialiased`, `-webkit-text-size-adjust: 100%` | `@layer base` |
-| Formularelemente | `button, input, select, textarea { font: inherit; color: inherit }` | `@layer base` |
-
-Praktisch verwendete Größenstufen:
-
-| Rolle | Klassen | Beispiel |
-| --- | --- | --- |
-| Seiten-H1 | `text-2xl font-bold tracking-tight` (Landing: `text-3xl sm:text-4xl`) | Einstellungen, Übersicht, Datenschutz |
-| Feed-H1 | `text-xl font-bold tracking-tight` | Visual/Discussion Feed, Post-Detail |
-| Sheet-Titel | `text-lg font-semibold tracking-tight` | `Sheet` |
-| Karten-Headline | `text-lg font-bold tracking-tight` | `AssistantCardBody` |
-| Abschnitts-H2 | `text-base font-bold` / `text-lg font-bold tracking-tight` | Panels bzw. Settings-Gruppen |
-| Beitragstext | `text-[0.9375rem] leading-relaxed` (15 px) | Post-Body, Kurzbegründung |
-| Sekundärtext | `text-sm text-muted` | überall |
-| Metadaten | `text-xs text-faint` | Autorzeile, Zeitstempel |
-| `FieldLabel` | `text-xs font-bold uppercase tracking-wide text-faint` | Abschnittsköpfe in Karten und Sheets |
-| Mikro-Label | `text-[0.6875rem]` (11 px) | Logo-Unterzeile, Mobile-Nav, Timeline-Achse |
-| Zahlenwerte | zusätzlich `tabular-nums`, Zeitangaben `font-mono tabular-nums` | Übersicht, Timeline |
-
-### Abstände
-
-Es gibt kein eigenes Spacing-Token; die Tailwind-Standardskala wird benutzt, aber mit
-festen Rhythmen:
-
-| Rhythmus | Wert | Verwendung |
-| --- | --- | --- |
-| Innenabstand Panel | `p-3.5` (kompakt) / `p-4` (Standard) / `p-5` (Landing-Blöcke) | `Panel` |
-| Karten-Innenabstand | `px-4` horizontal durchgehend, vertikal `py-2.5`/`py-3` | Post-Karten |
-| Abschnittsabstand in Karten | `space-y-5` | `AssistantCardBody`, `OwnReactionControl`-Sheet |
-| Listenabstand Feed | `space-y-5` | Feed-Seiten |
-| Abstand Seitenabschnitte | `mt-6` / `mt-8` | Settings, Privacy, Overview, Post-Detail |
-| Chip-/Button-Reihen | `gap-2` bzw. `gap-2.5` / `gap-3` | überall |
-| Hauptbereich | `px-4 pb-28 pt-4 md:pb-12` – `pb-28` reserviert Platz für die Mobile-Bottom-Nav | `AppShell` |
-
-### Radien
-
-| Token / Klasse | Wert | Verwendung |
-| --- | --- | --- |
-| `--radius-panel` | `1rem` | `Panel`, Post-Karten (`rounded-[var(--radius-panel)]`) |
-| `--radius-sheet` | `1.25rem` | `Sheet`: mobil `rounded-t-[…]`, ab `sm` allseitig |
-| `rounded-lg` | `0.5rem` | Buttons, Links, Eingabefelder |
-| `rounded-xl` | `0.75rem` | `Toggle`-Container, `FeedModeSwitch`-Tabs, Fieldsets, Icon-Kacheln, Medien-Platzhalter |
-| `rounded-full` | – | Chips, Reaktions-Buttons, Avatare, Fortschritts-/Confidence-Balken |
-| Fokusring | `border-radius: 0.25rem` in der `:focus-visible`-Regel | global |
-
-### Elevation
-
-Es gibt genau **eine** Schattenstufe:
-
-```css
-.panel-shadow {
-  box-shadow:
-    0 1px 2px rgb(var(--cl-shadow) / 0.06),
-    0 8px 24px -12px rgb(var(--cl-shadow) / 0.14);
-}
-```
-
-Sie wird ausschließlich vom `Sheet` benutzt. Alle anderen Flächen werden über
-Rahmen (`border-line`, `border-assist-line`) statt über Schatten getrennt. Im
-Dunkelmodus ist `--cl-shadow: 0 0 0`, der Schatten wird also zu schwarzem Nebel
-statt zu einem farbigen Schlagschatten.
-
-Zusätzliche Ebenen-Kontrolle über `z-index`:
-
-| Ebene | z-index | Element |
-| --- | --- | --- |
-| Skip-Link (fokussiert) | `z-50` | `AppShell` |
-| Sheet (Backdrop + Dialog) | `z-50` | `Sheet` |
-| Sticky Header | `z-30` | `AppShell` |
-| Mobile Bottom-Nav | `z-30` | `AppShell` |
-
----
-
-## 6. Komponenten-Inventar
-
-### 6.1 `Button` — `src/components/primitives.tsx`
-
-**Zweck:** einziger Button-Baustein für Aktionen. Rendert immer ein echtes
-`<button>` mit `type="button"` als Default.
-
-| Prop | Werte | Default |
-| --- | --- | --- |
-| `variant` | `primary`, `assist`, `secondary`, `ghost`, `danger` | `secondary` |
-| `size` | `sm`, `md`, `lg` | `md` |
-| `fullWidth` | `boolean` | – |
-| … | alle `ButtonHTMLAttributes<HTMLButtonElement>` | – |
-
-| Variante | Klassen | Einsatz |
-| --- | --- | --- |
-| `primary` | `bg-ink text-inverse hover:opacity-90` | derzeit nirgends aktiv verwendet |
-| `assist` | `bg-assist text-assist-on hover:bg-assist-strong` | Hauptaktion der Assistenzschicht (Demo starten, Weiter, Export, Bewertung speichern) |
-| `secondary` | `bg-surface text-ink border-line-strong hover:bg-surface-2` | Standardaktion |
-| `ghost` | `bg-transparent border-transparent hover:bg-surface-2` | Zurück-Links, Onboarding-„Zurück" |
-| `danger` | `bg-surface text-alert border-alert/50 hover:bg-alert-tint font-semibold` | Löschen, Angabe entfernen |
-
-| Größe | Klassen |
-| --- | --- |
-| `sm` | `text-sm px-3 py-1.5 gap-1.5` |
-| `md` | `text-sm px-4 py-2 gap-2` |
-| `lg` | `text-base px-5 py-2.5 gap-2` |
-
-| Zustand | Verhalten |
-| --- | --- |
-| default | siehe Varianten-Tabelle |
-| hover | `transition-colors`, variantenspezifisch |
-| focus | globaler `:focus-visible`-Ring (3 px `--cl-focus`, Offset 2 px) |
-| active | keine gesonderte Behandlung |
-| disabled | `disabled:cursor-not-allowed disabled:opacity-50` (Onboarding „Zurück" auf Schritt 1, Research-Exporte ohne Ergebnisse, „Bewertung speichern" bis alle vier Fragen beantwortet sind) |
-
-Icons werden als Kind übergeben und tragen immer `aria-hidden="true"`; das Label
-steht als Text daneben.
-
-### 6.2 `Chip` — `src/components/primitives.tsx`
-
-**Zweck:** Inline-Status-Pille. Enthält laut Kommentar **immer lesbaren Text**, nie
-nur ein Icon.
-
-| Prop | Werte | Default |
-| --- | --- | --- |
-| `tone` (`ChipTone`) | `assist`, `info`, `positive`, `caution`, `alert`, `neutral`, `sim` | `neutral` |
-| `icon` | `ReactNode` (optional) | – |
-| `children` | Text | erforderlich |
-
-| Ton | Klassen |
-| --- | --- |
-| `assist` | `bg-assist-tint text-assist-strong border-assist-line` |
-| `info` | `bg-info-tint text-info border-info/30` |
-| `positive` | `bg-positive-tint text-positive border-positive/30` |
-| `caution` | `bg-caution-tint text-caution border-caution/40` |
-| `alert` | `bg-alert-tint text-alert border-alert/40` |
-| `neutral` | `bg-neutral-tint text-neutral-ink border-line-strong` |
-| `sim` | `bg-sim-tint text-sim border-sim-line` |
-
-Basis: `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs
-font-semibold leading-tight`. Der Chip ist nicht interaktiv, hat also keine Hover-,
-Focus- oder Disabled-Zustände.
-
-### 6.3 `SimulatedBadge` — `src/components/primitives.tsx`
-
-**Zweck:** Markiert alles vom Prototyp Erfundene.
-
-| Prop | Typ | Default |
-| --- | --- | --- |
-| `label` | `string` | `'Simuliert'` |
-| `className` | `string` | `''` |
-
-Implementiert als `<Chip tone="sim" icon={<FlaskConical className="size-3.5" />}>`.
-Ein einziger Zustand. Siehe Abschnitt 4 für die Einsatzorte.
-
-### 6.4 `Panel` — `src/components/primitives.tsx`
-
-**Zweck:** Flächen-Container mit `--radius-panel` und einem Rahmen.
-
-| Prop | Werte | Default |
-| --- | --- | --- |
-| `variant` | `plain`, `assist`, `muted` | `plain` |
-| `as` | `div`, `section`, `article`, `aside` | `div` |
-| `className` | `string` | `''` |
-
-| Variante | Klassen | Bedeutung |
-| --- | --- | --- |
-| `plain` | `bg-surface border-line` | neutraler Inhaltsblock |
-| `assist` | `bg-assist-tint border-assist-line` | gehört zur Assistenzschicht |
-| `muted` | `bg-surface-2 border-line` | zurückgenommen: Grenzen-Block, Hinweise, „nicht verfügbar"-Zustände |
-
-Kein Padding im Default – Padding wird über `className` gesetzt (`p-3.5`, `p-4`, `p-5`).
-
-### 6.5 `FieldLabel` — `src/components/primitives.tsx`
-
-**Zweck:** Abschnittskopf innerhalb von Karten und Sheets. Rendert ein `<h3>` mit
-`text-xs font-bold uppercase tracking-wide text-faint` und optionalem Icon
-(`icon`-Prop, immer `aria-hidden`). Keine Varianten, keine Zustände.
-
-### 6.6 `DefinitionRow` — `src/components/primitives.tsx`
-
-**Zweck:** Schlüssel/Wert-Zeile überall dort, wo Schätzung und Selbstauskunft
-gemeinsam erscheinen. Der Kommentar im Code nennt den Grund: „Keeping it in one
-component is what guarantees the two never merge visually."
-
-| Prop | Werte | Default |
-| --- | --- | --- |
-| `term` | `string` (wird `<dt>`) | erforderlich |
-| `children` | `ReactNode` (wird `<dd>`) | erforderlich |
-| `tone` | `plain`, `assist`, `self` | `plain` |
-
-| Ton | Linke Akzentlinie | Bedeutung |
-| --- | --- | --- |
-| `plain` | `border-line` | neutral |
-| `assist` | `border-assist` | Maschinenschätzung |
-| `self` | `border-info` | Angabe der Person |
-
-Layout: `border-l-2 … pl-3`, `dt` = `text-xs font-semibold uppercase tracking-wide
-text-faint`, `dd` = `text-sm font-medium text-ink`.
-
-### 6.7 `Sheet` — `src/components/Sheet.tsx`
-
-**Zweck:** Zugänglicher Dialog, immer als Bottom-Sheet. Die App läuft
-ausschließlich auf Telefonbreite – entweder auf einem echten Gerät oder im
-simulierten Rahmen –, deshalb gibt es kein zweites, breites Layout mehr.
-Bewusst handgebaut statt `<dialog>`, damit sich das Fokusverhalten im Browser und
-in jsdom identisch verhält (die Tests prüfen es).
-
-| Prop | Typ | Bedeutung |
-| --- | --- | --- |
-| `open` | `boolean` | bei `false` wird `null` gerendert |
-| `onClose` | `() => void` | Escape, Backdrop-Klick, Schließen-Button |
-| `title` | `string` | wird `<h2>` und `aria-labelledby` |
-| `description` | `string?` | wird `aria-describedby` |
-| `children` | `ReactNode` | scrollbarer Inhaltsbereich |
-| `footer` | `ReactNode?` | klebrige Aktionszeile unten (`border-t bg-surface-2`) |
-| `titleAdornment` | `ReactNode?` | Element neben dem Titel, in der Praxis `<SimulatedBadge label="simuliert" />` |
-
-ARIA und Verhalten:
-
-| Aspekt | Umsetzung |
-| --- | --- |
-| Rolle | `role="dialog" aria-modal="true"`, `tabIndex={-1}` am Panel |
-| Fokus rein | beim Öffnen auf das erste fokussierbare Element, sonst auf das Panel |
-| Fokusfalle | `Tab`/`Shift+Tab` zykliert innerhalb des Panels (Keydown-Listener in der Capture-Phase) |
-| Fokus zurück | Cleanup-Effekt fokussiert das zuvor aktive Element |
-| Escape | schließt und stoppt die Propagation |
-| Backdrop | `bg-black/45`, `aria-hidden="true"`, Klick schließt |
-| Scroll-Lock | `overflow: hidden` auf `document.body` **und** auf `#app-viewport` (im Geräterahmen scrollt der Telefonbildschirm, nicht das Dokument); alte Werte werden wiederhergestellt |
-| Höhe | `max-h-[90%]` – prozentual, nicht `dvh`: im Geräterahmen ist der Telefonbildschirm der umgebende Block |
-| Assistenz-Marke | 6 px `bg-assist`-Oberkante, `aria-hidden` |
-| Schließen-Button | Icon **und** Text „Schließen" |
-
-Zustände: nur `open` / geschlossen; `footer` und `titleAdornment` optional.
-
-### 6.8 `Toggle` — `src/components/Toggle.tsx`
-
-**Zweck:** Einwilligungsschalter. Basiert auf einem echten
-`<input type="checkbox" role="switch">`; Track und Knopf sind rein dekorativ
-(`aria-hidden`) darübergezeichnet.
-
-| Prop | Typ |
-| --- | --- |
-| `checked` | `boolean` |
-| `onChange` | `(next: boolean) => void` |
-| `label` | `string` (mit `htmlFor` verbunden) |
-| `description` | `ReactNode?` |
-| `activeNote` | `ReactNode?` – Zusatzhinweis nur wenn `checked` |
-| `disabled` | `boolean` (Default `false`) |
-| `disabledReason` | `string?` – Text in `text-caution` |
-
-| Zustand | Darstellung |
-| --- | --- |
-| **unchecked** | Container `border-line bg-surface`; Track `border-line-strong bg-surface-3`; Knopf links, `Minus`-Glyphe; Statuszeile „INAKTIV" |
-| **checked** | Container `border-assist-line bg-assist-tint`; Track `border-assist bg-assist`; Knopf rechts (`translate-x-[1.375rem]`), `Check`-Glyphe; Statuszeile „AKTIV"; optional `activeNote` in einem `bg-surface`-Kasten |
-| **disabled** | `opacity-60`, `cursor-not-allowed`; `disabledReason` als `text-caution`-Absatz |
-| **focus** | globaler `:focus-visible`-Ring auf dem echten Checkbox-Element |
-| **hover** | keine eigene Hover-Behandlung; `transition-colors` am Container |
-
-Barrierefreiheit: `aria-describedby` verweist auf den Block mit Beschreibung,
-Deaktivierungsgrund und Aktivnotiz. Der Zustand ist dreifach kodiert – Position,
-Glyphe (`Check`/`Minus`) und Wort („Aktiv"/„Inaktiv").
-
-### 6.9 `ConfidenceMeter` — `src/components/ConfidenceMeter.tsx`
-
-**Zweck:** Unsicherheit einer Analyse. Drei Kanäle transportieren denselben Wert:
-Wort, Stufenzahl, Balken. Farbe ist laut Kommentar der unwichtigste Kanal.
-
-| Prop | Typ | Default |
-| --- | --- | --- |
-| `confidence` | `'low' \| 'medium' \| 'high'` | erforderlich |
-| `showSentence` | `boolean` | `true` |
-
-| Wert | Wort (`CONFIDENCE_LABEL`) | Stufen (`CONFIDENCE_STEPS`) | Balkenfarbe |
-| --- | --- | --- | --- |
-| `low` | niedrig | 1 von 3 | `bg-caution` |
-| `medium` | mittel | 2 von 3 | `bg-info` |
-| `high` | hoch | 3 von 3 | `bg-positive` |
-
-Nicht gefüllte Stufen: `bg-surface-3`. Der Balkenblock ist `role="img"` mit
-`aria-label="Sicherheit {Wort}, {n} von 3 Stufen"`. Bei `showSentence` folgt ein
-Satz aus `CONFIDENCE_SENTENCE` mit `CircleHelp`-Icon.
-
-### 6.10 `StatusBar` — `src/components/StatusBar.tsx`
-
-**Zweck:** Dauerhafter Statusstreifen unter dem Header. Beantwortet jederzeit vier
-Fragen, ohne dass man in die Einstellungen muss. Container: `border-t border-line
-bg-surface-2`, innen `max-w-6xl`.
-
-| Chip | Bedingung | Ton | Icon | Text |
-| --- | --- | --- | --- | --- |
-| Analyse | `assistantPaused` | `caution` | `Pause` | „Assistent pausiert" |
-| Analyse | `contentAnalysis && !paused` | `assist` | `ScanText` | „Inhaltsanalyse aktiv" |
-| Analyse | sonst | `neutral` | `ScanText` | „Inhaltsanalyse aus" |
-| Kamera | `simulatedCameraCapture && !paused` | `caution` | `Camera` | „Simulierte Kamera aktiv" |
-| Kamera | sonst | `neutral` | `CameraOff` | „Kamera aus" |
-| Speicher | `storeReactionHistory` | `neutral` | `HardDrive` | „Speicherung: nur lokal" |
-| Speicher | sonst | `neutral` | `HardDrive` | „Keine Speicherung" |
-
-Der Kamera-Chip ist laut Codekommentar der wichtigste: Eine ausgeschaltete Kamera
-wird **ausgesprochen**, nicht bloß impliziert. Rechts ein Link „Status ändern" nach
-`/settings`. Vorangestellt: `<span class="sr-only">Aktueller Status der
-Assistenzfunktionen:</span>`.
-
-### 6.11 `Logo` — `src/components/Logo.tsx`
-
-| Prop | Typ | Default |
-| --- | --- | --- |
-| `asLink` | `boolean` | `true` (Link nach `/`) |
-
-Aufbau: `size-8`-Kachel `rounded-lg bg-assist text-assist-on` mit einem Inline-SVG
-(Außenring `r=8` + Fokuspunkt `r=2.5`) als Linse, daneben „ContextLens" (`text-sm
-font-bold`) und die permanente Unterzeile „Prototyp · simulierte Daten"
-(`text-[0.6875rem] text-faint`). Bewusst aus Tokens gezeichnet statt als Bilddatei,
-damit es dem Farbschema folgt. Zustände: `hover:opacity-80` nur als Link.
-
-### 6.12 `ContextAssistantButton` — `src/features/context-assistant/ContextAssistantButton.tsx`
-
-**Zweck:** Die „Kontext erklären"-Affordanz. Klein und leise gehalten – bis zum
-Antippen ist von der Analyse nichts zu sehen.
-
-| Prop | Typ | Default |
-| --- | --- | --- |
-| `postId` | `string` | erforderlich |
-| `label` | `string` | `'Kontext erklären'` |
-| `size` | `'default' \| 'inline'` | `'default'` |
-| `onOpened` | `() => void` | – (Feeds protokollieren damit `recordView(postId, true)`) |
-
-| Zustand | Ergebnis von `resolveAnalysis` | Darstellung |
-| --- | --- | --- |
-| **kein Eintrag** | `status: 'none'` | Komponente rendert `null` – keine tote Affordanz |
-| **verfügbar** | `status: 'available'` | Button; Sheet mit `VARIANT_TITLE[variant]` als Titel und `AssistantCardBody` |
-| **abgeschaltet** | `status: 'disabled'`, `reason` ∈ `paused`, `analysis-off`, `sarcasm-off`, `ragebait-off` | Sheet-Titel „Hinweis nicht verfügbar", `Panel variant="muted"` mit Erklärungstext aus `DISABLED_COPY` **und** Button „Zu den Einstellungen" |
-
-Stil: `border-assist-line bg-assist-tint text-assist-strong hover:bg-assist-tint-2`
-mit `Sparkles`-Icon; `inline` ist die kompakte Fassung (`text-xs`, `px-2 py-1`,
-`size-3.5`-Icon) für Kommentare.
-
-### 6.13 `AssistantCardBody` — `src/features/context-assistant/AssistantCardBody.tsx`
-
-**Zweck:** Inhalt der Assistenzkarte. Wird im Feed innerhalb eines `Sheet` gerendert
-und auf der Detailseite inline in einem `Panel variant="assist"`.
-
-| Prop | Typ |
-| --- | --- |
-| `analysis` | `ContentAnalysis` |
-| `variant` | `AssistantCardVariant` |
-
-Feste Reihenfolge (`space-y-5`):
-
-| # | Block | Bedingung | Bausteine |
-| --- | --- | --- | --- |
-| 1 | Überschrift | immer | Varianten-Icon in `size-10 rounded-xl bg-assist-tint`, `VARIANT_TITLE`, `Chip` im Varianten-Ton mit „Interpretation, keine Tatsache", `VARIANT_SUBTITLE` |
-| 2 | Sicherheit | immer | `Panel variant="muted"` + `ConfidenceMeter` |
-| 3 | Kurze Begründung | immer | `FieldLabel` + `analysis.explanation`; optional „Mögliche Absicht" mit `border-l-2 border-assist` |
-| 4 | „Warum wird das so eingeschätzt?" | auf Klick | `Button` mit `aria-expanded`; öffnet `Panel variant="assist"` mit `analysis.indicators`; bei leerer Liste ein erklärender Satz; immer Fußnote „In diesem Prototyp sind diese Punkte vorab geschrieben." |
-| 5 | Sichtbare/hörbare Signale | nur wenn `visibleFacialExpression` oder `toneOfVoice` vorhanden | `<dl>` mit `border-l-2 border-line` |
-| 6 | Emotionalisierende Formulierungen | nur wenn `emotionalLanguage.present` | Liste aus `Chip tone="caution"` |
-| 7 | Polarisierung | `mayShowPolarisation(settings)` **und** (`polarizationLevel !== 'low'` oder `possibleRagebait`) | Chip „Grad: …" (`alert` bei `high`, sonst `caution`), optional Chip „Könnte auf Reaktionen ausgerichtet sein", Sätze aus `POLARIZATION_SENTENCE` |
-| 8 | Grenzen | **immer** | `Panel variant="muted"`, `analysis.limitations` |
-| 9 | Andere Lesarten | erst nach „Andere Interpretation" | `analysis.alternativeReadings` mit `bg-info`-Punkten |
-| 10 | Feedback | immer | Buttons „Nicht hilfreich" und „Andere Interpretation"; Bestätigung in `<p role="status">`; abschließend `SimulatedBadge` |
-
-### 6.14 `VisualPostCard` — `src/features/feed/VisualPostCard.tsx`
-
-**Zweck:** Beitrag im Visual Feed. Die Struktur folgt bewusst den Konventionen
-einer Foto-Sharing-Oberfläche, damit Testpersonen das Format sofort
-wiedererkennen und ihre Aufmerksamkeit der Assistenzschicht widmen statt einer
-unbekannten UI. Kopiert wird nur die **Struktur** — keine Logos, keine
-Markennamen, keine übernommene Ikonografie, erfundene Konten und Zahlen.
-
-| Prop | Typ |
-| --- | --- |
-| `post` | `Post` |
-
-Aufbau von oben nach unten:
-
-1. `<header>`: Initialen-Avatar mit Verlaufsring aus `media.palette`
-   (`aria-hidden`, keine erfundene Person abgebildet), Handle fett, Klarname
-   darunter, rechts ein `MoreHorizontal`-Button mit `aria-label` und dem
-   ausdrücklichen Zusatz „im Prototyp ohne Funktion".
-2. `MediaPlaceholder` mit `variant="feed"` — randlos, Seitenverhältnis 4∶5,
-   darin als Overlay unten links das `OwnReactionControl`.
-3. **Aktionszeile**: Herz (`aria-pressed`, füllt sich, zählt hoch),
-   Sprechblase als Link zur Detailseite, `Send` (ohne Funktion, so benannt),
-   rechts abgesetzt `Bookmark` (`aria-pressed`). Alle Icon-Buttons tragen ein
-   `aria-label`; Herz und Sprechblase zeigen ihre Zahl zusätzlich als Text.
-4. **Bildunterschrift**: Handle fett, direkt gefolgt vom Beitragstext. Ab
-   120 Zeichen `line-clamp-2` mit „… mehr anzeigen".
-5. Link „Alle N Kommentare ansehen", darunter der Zeitstempel in
-   `text-[0.6875rem] uppercase tracking-wide`.
-6. **Assistenzstreifen** `border-t border-assist-line bg-assist-tint/50` mit
-   `ContextAssistantButton` und Link zur Detailseite („Reaktionsverlauf", wenn
-   eine Timeline existiert, sonst „Reaktionen") sowie – nur bei Beiträgen ohne
-   Medium – dem inline `OwnReactionControl`.
-
-Lokaler Zustand: `liked`, `saved`, `captionExpanded`. Bewusst nicht persistiert —
-es sind Plattform-Kulissen, keine Forschungsdaten.
-
-Nebenwirkung: `recordView(post.id, false)` genau einmal pro Mount (Ref-Guard).
-
-**Randlos auf dem Telefon:** `border-y` plus `sm:rounded-[var(--radius-panel)]
-sm:border-x`; die Feed-Seite hebt dafür das Seitenpadding mit `-mx-4 sm:mx-0`
-auf.
-
-### 6.15 `DiscussionPostCard` — `src/features/feed/DiscussionPostCard.tsx`
-
-**Zweck:** Beitrag im Discussion Feed samt Kommentarbaum. Form an Forensoftware
-angelehnt (Community-Label, Headline, Text, gerankte Kommentare), ohne eine
-konkrete Seite nachzubauen.
-
-| Prop | Typ | Default |
-| --- | --- | --- |
-| `post` | `Post` | erforderlich |
-| `showAllComments` | `boolean` | `false` – im Feed nur die ersten 2 Kommentare |
-
-| Zustand | Darstellung |
-| --- | --- |
-| Feed (`showAllComments=false`) | 2 Kommentare, darunter Link „n weitere Kommentare anzeigen" (mit korrekter Ein-/Mehrzahl) |
-| Detailseite (`showAllComments=true`) | alle Kommentare, kein „weitere"-Link |
-| Kommentar mit `hasAnalysis` | zusätzlich ein `ContextAssistantButton size="inline"` auf die Kommentar-ID |
-| ohne Kommentare | Kommentarsektion entfällt vollständig |
-
-Assistenzstreifen hier mit `border-y border-assist-line`, weil darunter noch die
-Kommentare folgen. Zustimmungen mit `ArrowBigUp` statt Herz, `sr-only`
-„Zustimmungen".
-
-### 6.16 `MediaPlaceholder` — `src/features/feed/MediaPlaceholder.tsx`
-
-**Zweck:** Das Bild eines Beitrags. Drei Quellen in dieser Reihenfolge: eine echte
-Datei aus `public/media/` (`media.src`), sonst die gezeichnete Szene (6.16b), sonst
-der reine Farbverlauf.
-
-| Prop | Typ |
-| --- | --- |
-| `media` | `SimulatedMedia` |
-| `onTimeChange` | `(seconds: number) => void` (optional) |
-| `children` | Overlay-Inhalt, in der Praxis `OwnReactionControl` |
-| `variant` | `'feed'` (randlos, 4∶5) · `'detail'` (gerahmt, 4∶5, ab `sm` 16∶9) |
-| `onDoubleTap` | Doppeltipp auf das Bild; löst zusätzlich das Herz `.heart-burst` aus |
-
-| Element | Umsetzung |
-| --- | --- |
-| Bild | `<PostScene>`, oder `<video muted loop playsInline>` bzw. `<img>` wenn `media.src` gesetzt ist |
-| Hintergrund | `linear-gradient` aus `media.palette[0/1]`, sichtbar nur dort, wo die Szene nichts zeichnet |
-| Vignette | `radial-gradient`-Overlay, damit weiße Overlays auf jedem Motiv lesbar bleiben |
-| Meme-Untertitel | `media.overlayText.top/bottom` in `.meme-caption` (Impact, weiße Füllung, schwarze Kontur über `-webkit-text-stroke` und `paint-order`), oben und unten im Bild, `aria-hidden` |
-| Dauer-Chip | oben links, `Video`-Icon + Laufzeit `mm:ss` auf `bg-black/50` (nur Video) |
-| Simulationsmarke | oben rechts, „SIMULIERTER PLATZHALTER" — bei gesetztem `src` stattdessen „BEISPIELCLIP". Verschwindet nie |
-| Overlay-Slot | unten links, `pointer-events-none` am Container und `pointer-events-auto` am Kind, damit ein leerer Slot nichts abfängt |
-| `figcaption` | `sr-only`, nennt Herkunft (gezeichnet oder Beispielclip) **und** `media.altText` |
-
-Seit E-020 liegt die Beschreibung in der `figcaption` statt in der Bildmitte, und
-die `.sim-hatch`-Schraffur entfällt hier: Eine flache Vektorzeichnung kann nicht für
-Filmmaterial gehalten werden, und die Schraffur hätte das Motiv zugedeckt.
-
-### 6.16b `PostScene` — `src/features/feed/PostScene.tsx`
-
-**Zweck:** Fünf gezeichnete Szenen als SVG (`viewBox="0 0 400 500"`,
-`preserveAspectRatio="slice"`), eine je Beitrag mit Medien. Kein externes Bild, kein
-Netzwerkzugriff, keine Rechtefrage. Begründung: `docs/decisions.md`, E-020.
-
-| `SceneId` | Beitrag | Motiv |
-| --- | --- | --- |
-| `kitchen-egg` | `v-humor` | Küche, Ei, entschuldigend gehobene Hand |
-| `rainy-platform` | `v-sarcasm` | Bahnsteig, Anzeigetafel voller Verspätungen, umgekippter Becher |
-| `talking-head` | `v-emotional` | Person nah vor der Kamera, neutraler Mund, gedämpftes Zimmer |
-| `street-rant` | `v-ragebait` | Sprechende Person mit erhobenen Händen, Verkehr im Hintergrund |
-| `empty-lot` | `v-lowcontext` | Leerer Parkplatz, ein Laternenmast |
-
-Bewegung: Die Klassen `.scene-wobble`, `.scene-drop`, `.scene-rain`,
-`.scene-breathe`, `.scene-gesture` und `.scene-pan` laufen nur, wenn das SVG
-`.scene-playing` trägt — gesetzt aus `useSimulatedPlayback`. Ein stehender Feed
-steht also wirklich still, und `prefers-reduced-motion` schaltet alles ab.
-
-### 6.16c `Caption` — `src/features/feed/Caption.tsx`
-
-**Zweck:** Bildunterschrift mit `#hashtags` und `@handles` in `text-accent-ink`.
-Bewusst **nicht** verlinkt: ein Tag, der wie ein Link aussieht und nirgendwohin
-führt, wäre ein weiteres funktionsloses Element im Tastaturpfad.
-
-| Zustand | Bedingung | Darstellung |
-| --- | --- | --- |
-| Bild | `kind === 'image'` | keine Wiedergabeleiste |
-| Video | `kind === 'video' && duration > 0` | Steuerleiste **unter** dem Medium auf `bg-black/85`: Play/Pause (Icon + Wort), `<input type="range">` mit `sr-only`-Label „Wiedergabeposition im simulierten Video", Zeitanzeige `mm:ss / mm:ss` in `font-mono tabular-nums` |
-| Wiedergabe | über `useSimulatedPlayback` | Timer mit 250 ms Takt; bei `prefers-reduced-motion` wird nicht automatisch vorgespult, das Scrubben bleibt möglich |
-
-### 6.16a `StoriesRow` — `src/features/feed/StoriesRow.tsx`
-
-**Zweck:** Horizontaler Kurzbeitrags-Streifen am Kopf des Visual Feed. Reine
-Kulisse, damit der Feed auf den ersten Blick als vertraute Foto-Oberfläche
-gelesen wird.
-
-**Bewusst nicht interaktiv.** Buttons hier würden fünf funktionslose
-Bedienelemente in den Tastaturpfad legen; ein Steuerelement, das nichts tut, ist
-schlechter als keines. Die Liste ist `aria-hidden` und wird für
-Screenreader-Nutzende durch **einen** erklärenden Satz ersetzt.
-
-Aufbau: erster Eintrag „Dein Beitrag" als gestrichelter Ring, danach je Beitrag
-ein Initialen-Kreis mit Verlaufsring aus `media.palette`. Horizontal scrollbar,
-Scrollbalken ausgeblendet.
-
-### 6.17 `FeedModeSwitch` — `src/features/feed/FeedModeSwitch.tsx`
-
-**Zweck:** Wechsel zwischen den beiden simulierten Inhaltsansichten. Bewusst zwei
-sichtbare Tabs statt eines Toggles, damit der zweite Modus auffindbar ist, ohne ihn
-erst zu bedienen.
-
-| Ziel | Label | Hinweis | Icon |
-| --- | --- | --- | --- |
-| `/feed/visual` | Visual Feed | Kurzvideos und Bilder | `Images` |
-| `/feed/discussion` | Discussion Feed | Textbeiträge und Threads | `MessagesSquare` |
-
-Seit der Umstellung auf die Telefonansicht ein **Segmented Control** in der
-Kopfzeile der simulierten App, nicht mehr zwei große Kacheln im Inhaltsbereich:
-
-| Zustand | Darstellung |
-| --- | --- |
-| aktiv | gefüllte Pille `bg-surface font-bold text-ink panel-shadow`, Icon mit `strokeWidth 2.5`, dazu `aria-current="page"` von `NavLink` |
-| inaktiv | transparent, `font-medium text-muted`, `hover:text-ink` |
-| focus | globaler Ring |
-
-Der aktive Zustand ist damit dreifach markiert (Fläche, Schriftschnitt, ARIA) und
-nie allein durch Farbe. Jeder Tab trägt zusätzlich einen `sr-only`-Zusatz mit dem
-Hinweistext („Kurzvideos und Bilder"), der auf dem Telefon keinen Platz mehr hat.
-
-Wrapper: `<nav aria-label="Ansicht wechseln">` mit `<ul>`, Tabs `flex-1` – zwei
-gleich breite Spalten.
-
-### 6.18 `OwnReactionControl` — `src/features/reactions/OwnReactionControl.tsx`
-
-**Zweck:** Die eigene Reaktion: ein leiser Chip plus Korrektur-Sheet. Erzwingt zwei
-Regeln: (1) Schätzung und Selbstauskunft stehen immer als zwei getrennt beschriftete
-Zeilen nebeneinander, eine Korrektur überschreibt die Schätzung nie; (2) die
-Schätzung beschreibt Sichtbares (`EXPRESSION_LABEL`), nur die Selbstauskunft benutzt
-Gefühlswörter (`SELF_REPORT_LABEL`).
-
-| Prop | Werte | Default |
-| --- | --- | --- |
-| `postId` | `string` | erforderlich |
-| `placement` | `'overlay'`, `'inline'` | `'inline'` |
-
-| Zustand | Darstellung |
-| --- | --- |
-| **Funktion aus** (`!simulatedCameraCapture` oder `assistantPaused`) | rendert `null` – es gibt keinen Codepfad, der ohne diesen Schalter eine Schätzung erzeugt |
-| **Schätzung, keine Angabe** | Chip „Geschätzt: {sichtbarer Ausdruck}" mit `ScanFace` und `Pencil` |
-| **Eigene Angabe vorhanden** | Chip „Deine Angabe: {Reaktionswort}" |
-| `placement="overlay"` | `bg-black/60 text-white rounded-full`, sitzt auf dem Medium |
-| `placement="inline"` | `border-line bg-surface-2 text-muted hover:bg-surface-3` |
-
-Sheet „Deine Reaktion":
-
-| Block | Inhalt |
-| --- | --- |
-| Vergleich | `Panel variant="muted"` mit zwei `DefinitionRow`: „Automatisch geschätzter Ausdruck" (`tone="assist"`, inkl. „Sicherheit n %") und „Von dir angegebene Reaktion" (`tone="self"`, `text-info`; leer: „Noch keine Angabe gemacht" in `text-faint`) |
-| Vorrang-Hinweis | erscheint nur, wenn eine Selbstauskunft existiert: „Deine Angabe hat Vorrang …" |
-| Auswahl | 9 Buttons in `SELF_REPORT_ORDER` mit `aria-pressed`; aktiv = `border-info bg-info-tint text-info` **plus** vorangestelltes „✓ " |
-| Freitext | nur bei `other`: beschriftetes `<input>` mit `maxLength={80}`, Speichern auf `blur`; das Sheet bleibt bei `other` offen |
-| Zurücknehmen | nur bei vorhandener Angabe: `Button variant="danger"` „Meine Angabe entfernen" |
-| Kamera-Hinweis | `Panel` mit `CameraOff`: „keine echte Kamera ausgewertet" |
-| Weitergabe | `Chip tone="caution"` „Anonyme Weitergabe ist aktiv …" bzw. `Chip tone="neutral"` „… ist ausgeschaltet" |
-
-### 6.19 `CameraPreview` — `src/features/reactions/CameraPreview.tsx`
-
-**Zweck:** Große lokale Kamera-Vorschau in den Einstellungen. Strikt nur Anzeige – die
-gesamte Kameralogik liegt in `useCameraStream` (`src/features/reactions/useCameraStream.ts`),
-der einzigen Stelle im Projekt mit `getUserMedia`: der Stream hängt an `<video>`-Elementen
-und sonst nirgends, kein Canvas, kein `drawImage`, kein `MediaRecorder`, kein Upload; beim
-Beenden oder Unmount werden alle Tracks gestoppt, damit die Kamera-Anzeige des Browsers
-ausgeht, wenn die UI „aus" sagt.
-
-| Zustand | Darstellung |
-| --- | --- |
-| **aus** | `Chip tone="neutral"` + `CameraOff` „Kamera aus"; Platzhalterfläche „Die Vorschau ist aus."; `Button variant="assist"` „Vorschau starten" |
-| **startet** | derselbe Rahmen, Platzhaltertext „Die Kamera wird gestartet …" |
-| **an** | `Chip tone="caution"` + `Camera` „Kamera läuft"; sichtbares, gespiegeltes `<video autoPlay muted playsInline aria-hidden>`; `Button` „Vorschau beenden" |
-| **Fehler** | `<p role="status">` auf `bg-caution-tint text-caution` mit `CircleAlert`; ein einziger, nicht technischer Text (deckt Ablehnung, fehlendes Gerät und belegtes Gerät gleichermaßen ab) |
-| **kein API-Support** | derselbe Fehlerkanal: „Dieser Browser stellt keine Kamera-Vorschau bereit." |
-
-Wird nur auf `/settings` gerendert, und dort nur wenn `settings.liveCameraPreview`
-gesetzt ist (was wiederum `simulatedCameraCapture` voraussetzt). Startet beim Mount
-von selbst — das Einschalten des Schalters *ist* die Zustimmung.
-
-### 6.19a `LiveSelfView` — `src/features/reactions/LiveSelfView.tsx`
-
-**Zweck:** Dasselbe echte Kamerabild, klein und dauerhaft über dem Feed
-(`fixed bottom-20 left-3`), als Gegenstück zum ContextLens-Knopf rechts. Es beantwortet
-die Frage „was nähme eine Kamera gerade von mir auf?" ohne Umweg über die Einstellungen.
-Begründung und Auflagen: `docs/decisions.md`, E-018.
-
-| Element | Darstellung |
-| --- | --- |
-| **Kopfzeile** | `bg-assist` mit pulsierendem Punkt (`.rec-pulse`) und „Kamera live" bzw. „Kein Bild" |
-| **Bild** | gespiegeltes `<video>` im Verhältnis 3∶4, `aria-hidden`; der zugängliche Name liegt auf dem umschließenden `<button>` |
-| **Gesichtsrahmen** | statischer, gestrichelter Rahmen – als Attrappe gekennzeichnet, folgt nichts und erkennt nichts |
-| **Fußzeile** | „wird nicht ausgewertet", schwarz hinterlegt, immer sichtbar |
-| **Panel** (Sheet) | großes Bild, Status-Chips, dreiteilige Liste *echt / simuliert / nicht vorhanden*, „Kamerabild ausschalten" und Weg in die Einstellungen |
-
-Sichtbar nur bei `liveCameraPreview && simulatedCameraCapture && !assistantPaused`;
-derselbe Ausdruck startet und stoppt den Stream.
-
-### 6.20 `CommunityReactions` — `src/features/analytics/CommunityReactions.tsx`
-
-**Zweck:** Aggregierte Community-Reaktionen zu einem Beitrag. Der Quellenschalter ist
-das Herzstück: Kamera-Schätzungen und aktive Selbstauskünfte sind zwei verschiedene
-Behauptungen über zwei verschiedene Dinge und bekommen deshalb zwei Datensätze, zwei
-Teilnehmerzahlen und einen Umschalter statt eines gestapelten Diagramms.
-
-| Prop | Typ |
-| --- | --- |
-| `summary` | `CommunityReactionSummary` |
-| `initialSource` | `CommunitySource`, Default `'estimated'` |
-| `embedded` | `boolean`, Default `false` – ohne eigenes `Panel` und ohne eigene Überschrift, wenn die Komponente bereits in einem betitelten Container sitzt (Sheet des Emoji-Knopfs) |
-
-| Zustand | Darstellung |
-| --- | --- |
-| `source = 'estimated'` (Default) | Balken in `var(--cl-assist)`; Teilnehmerzahl `participantCount`; Erklärtext „Automatische Schätzungen: … Diese Werte können falsch sein" |
-| `source = 'self-reported'` | Balken in `var(--cl-info)`; Zahl `selfReportedParticipantCount` „(von N insgesamt)"; Erklärtext „Aktive Selbstauskünfte: … Weniger Daten, aber von Menschen bestätigt" |
-| Kategorie `unclear` | immer `var(--cl-border-strong)` – „nicht eindeutig" ist keine Reaktion und teilt sich nicht die Datenfarbe |
-
-Umschalter: `role="radiogroup"` mit zwei `role="radio"`-Buttons, `aria-checked`,
-aktiv = `border-assist bg-assist-tint text-assist-strong` plus `sr-only`
-„(ausgewählt)".
-
-Diagramm: horizontales `recharts`-`BarChart`, `isAnimationActive={false}`, jeder
-Balken mit Prozent-`LabelList` rechts und Kategoriename an der Y-Achse. Der
-Chart-Container ist `aria-hidden="true"`; direkt davor steht eine **`sr-only`-Tabelle**
-mit `<caption>`, Spaltenköpfen „Reaktion" / „Anteil in Prozent" und `<th scope="row">`
-je Zeile. Höhe wird aus der Datenmenge berechnet (`data.length * 38 + 10`).
-
-Am Fuß: `FieldLabel` „Woher kommen diese Zahlen?" mit `summary.sourceExplanation`
-und ein `Chip tone="caution"` mit `summary.representativeWarning`.
-
-An der Y-Achse steht das Emoji vor dem Reaktionswort (`REACTION_EMOJI`). Die
-`sr-only`-Tabelle behält das reine Wort — der Emoji-Name einer Vorlesesoftware
-wäre dort nur Rauschen.
-
-### 6.20a `CommunityReactionButton` — `src/features/analytics/CommunityReactionButton.tsx`
-
-**Zweck:** Der zweite Knopf der Assistenzschicht an jedem Beitrag, neben
-„Kontext erklären": **ein Emoji** für die häufigste Reaktion anderer plus deren
-Prozentwert. Öffnet ein Sheet mit der vollständigen Auswertung. Warum das Emoji
-aus den Selbstauskünften stammt und welche Auflagen daran hängen:
-`docs/decisions.md`, E-017.
-
-| Zustand | Darstellung |
-| --- | --- |
-| **Normalfall** | Pille in der Assist-Familie (`bg-assist-tint`, `border-assist-line`), Emoji in `text-lg` plus `NN %` in `tabular-nums` |
-| **kleine Stichprobe** (< 30 Angaben) | statt des Prozentwerts die Anzahl, z. B. „9 Angaben"; im Sheet ein `Chip tone="caution"` „Sehr wenige Angaben." |
-| **ohne Einwilligung / pausiert / ohne Daten** | rendert `null`, wie `ContextAssistantButton` |
-
-Zugänglicher Name: „Reaktionen anderer ansehen. Am häufigsten *Wort*, *N* Prozent
-von *M* Selbstauskünften. Simulierte Werte." — Reaktion, Anteil, Stichprobe,
-Quelle und Simulationshinweis, weil ein Emoji nichts davon tragen kann.
-
-Sheet „So haben andere reagiert": Kopfblock mit großem Emoji, Reaktionswort,
-Prozentwert, Stichprobengröße und Zweitplatziertem; darunter ein
-`Chip tone="caution"` mit dem Gegenanteil („66 % haben etwas anderes angegeben"),
-dann `CommunityReactions` mit `embedded` und `initialSource="self-reported"`.
-
-Ableitungen (`communitySummary.ts`): `rankReactions` sortiert nach Anteil und
-bricht Gleichstände über `SELF_REPORT_ORDER` auf, damit dieselbe Sitzung nicht
-bei jedem Neuladen ein anderes Gesicht zeigt.
-
-### 6.21 `ReactionTimeline` — `src/features/analytics/ReactionTimeline.tsx`
-
-**Zweck:** Simulierter Reaktionsverlauf über die Länge eines Videos. Sitzt auf der
-Detailseite unter der Wiedergabeleiste, damit die Bänder mit der Zeitachse
-korrespondieren.
-
-| Prop | Typ |
-| --- | --- |
-| `segments` | `ReactionTimelineSegment[]` |
-| `durationSeconds` | `number` |
-| `currentTime` | `number?` |
-
-Farben pro Ausdruck (`SEGMENT_COLOR`, nie das einzige Signal):
-
-| Ausdruck | Farbe |
-| --- | --- |
-| `smile` | `var(--cl-positive)` |
-| `surprise` | `var(--cl-info)` |
-| `tense` | `var(--cl-caution)` |
-| `neutral` | `var(--cl-border-strong)` |
-| `unclear` | `var(--cl-neutral)` |
-
-| Zustand | Darstellung |
-| --- | --- |
-| Band | `role="img"` mit `aria-label`, das jeden Abschnitt als „mm:ss bis mm:ss Label" aufzählt; Segmentbreite proportional zur Dauer; Labeltext liegt sichtbar im Segment |
-| aktives Segment | `ring-2 ring-inset ring-ink` **plus** ein `<p role="status">` „Bei mm:ss: geschätzter Ausdruck …, Sicherheit n %" |
-| kein `currentTime` | kein Ring, kein Statussatz |
-| Legende | immer: farbiges Quadrat (`aria-hidden`), Zeitspanne, Label, Ausdruck und Sicherheit als Text |
-
-Kopfzeile mit `Timer`-Icon, Überschrift und `SimulatedBadge label="erfundener
-Verlauf"`; Fuß mit `Chip tone="caution"` „Ein Ausdruck kann viele Ursachen haben.
-Dieser Verlauf beweist nichts über dein Empfinden."
-
-### 6.22 `AppShell` — `src/app/AppShell.tsx`
-
-**Zweck:** Chrome der **ContextLens-App**. Auf dem simulierten Telefon laufen zwei
-Apps; diese ist die, in der die Assistenzschicht verwaltet wird (Übersicht,
-Datenschutz, Einstellungen, Research Mode). Durchgehend in der Assist-Familie.
-
-| Bereich | Umsetzung |
-| --- | --- |
-| Skip-Link | `<a href="#main" class="sr-only-focusable …">Direkt zum Inhalt springen</a>`, `z-50`, `bg-assist text-assist-on` – nur bei Fokus sichtbar |
-| Header | `sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur`, innen `max-w-[34rem]` |
-| Logo | links, `Logo` als Link auf den Startbildschirm `/phone` |
-| Theme-Button | `aria-pressed={isDark}`, Icon `Sun`/`Moon` **plus** Text „Hell" / „Dunkel" |
-| Statusleiste | `StatusBar` |
-| Research-Banner | `ResearchBanner` (nur bei laufendem Szenario) |
-| `<main id="main">` | `flex-1 pb-24`, innen `max-w-[34rem] px-3 pt-4` |
-| Tab-Leiste | `fixed inset-x-0 bottom-0` mit `border-t border-assist-line`; fünf gleich breite Einträge mit **sichtbarem Textlabel** unter dem Icon; aktiv zusätzlich durch einen Teal-Balken (`h-0.5 w-6 bg-assist`) markiert |
-| Scroll-Reset | `scrollAppToTop()` bei jedem `location.pathname`-Wechsel – innerhalb des Geräterahmens scrollt der Telefonbildschirm, nicht das Fenster |
-
-Es gibt nur noch **eine** Navigation, nicht mehr eine für Desktop und eine für
-Mobil: Das Layout ist telefonorientiert und ändert sich zwischen den Breakpoints
-nicht mehr. Ziele: `/feed/visual` (Feed – führt zurück in die simulierte App),
-`/overview` (Übersicht), `/privacy` (Datenschutz), `/settings` (Einstellungen),
-`/research` (Research).
-
-### 6.22a `DeviceLayout` — `src/features/device/DeviceFrame.tsx`
-
-**Zweck:** Das simulierte Telefon, in dem die gesamte Demo läuft. Begründung in
-`docs/decisions.md`, E-014.
-
-| Bereich | Umsetzung |
-| --- | --- |
-| Bühne | `.device-stage`: unter `lg` neutral, ab `lg` dunkler Radialverlauf, zentriertes Flex-Layout |
-| Gehäuse | ab `lg` `rounded-[3.1rem] bg-[#0d1117] p-[0.7rem] ring-1 ring-white/12` plus drei dekorative Tasten (`aria-hidden`) |
-| Bildschirm | `.device-screen`, ab `lg` `h-[min(50rem,84dvh)] w-[24.5rem] rounded-[2.5rem] overflow-hidden` |
-| Skin | trägt `platform-skin`, solange eine Route unter `/feed` oder `/post` aktiv ist – das OS-Chrome folgt der Vordergrund-App, wie auf einem echten Gerät |
-| Scrollfläche | `#app-viewport`, ab `lg` `flex-1 overflow-y-auto overscroll-contain` |
-| Beschriftung | `DeviceCaption`, nur ab `xl`: drei Sätze für die Vorführung |
-
-Zwei CSS-Regeln tragen das Konstrukt (`src/styles/index.css`, Block „Simuliertes
-Gerät"):
-
-- `.device-screen { transform: translateZ(0) }` ab `lg` – dadurch löst
-  `position: fixed` gegen den Telefonbildschirm auf statt gegen das Browserfenster.
-  Ohne diese Regel würden Tab-Leisten und Sheets aus dem Rahmen fallen.
-- `.device-screen .app-min-h { min-height: 100% }` – die Utility `.app-min-h`
-  bedeutet außerhalb des Rahmens `100dvh` und innerhalb „so hoch wie der
-  Telefonbildschirm".
-
-Unter `lg` rendert die Komponente nichts als ihre Kinder: Auf einem echten Telefon
-ist der Browser bereits das Gerät.
-
-### 6.22b `DeviceStatusBar` — `src/features/device/DeviceStatusBar.tsx`
-
-Betriebssystem-Statusleiste: Uhrzeit (echte Systemzeit, Aktualisierung alle 30 s),
-Dynamic Island als Attrappe, gezeichnete Symbole für Empfang, WLAN und Akku.
-
-Ein Element ist **nicht** Kulisse: die kleine Teal-Pille mit dem Linsensymbol.
-Sie erscheint genau dann, wenn `contentAnalysis && !assistantPaused` gilt, und
-trägt einen `sr-only`-Text („ContextLens ist als Systemerweiterung aktiv"). So
-meldet sich eine systemweite Erweiterung auf einem echten Telefon.
-
-### 6.22c `SocialAppShell` — `src/features/social-app/SocialAppShell.tsx`
-
-**Zweck:** Chrome der simulierten Plattform. Enthält **nichts** von ContextLens
-außer den beiden ausdrücklich gekennzeichneten Assistenz-Elementen.
-
-| Bereich | Umsetzung |
-| --- | --- |
-| Kopfzeile | `sticky top-0 z-30 bg-surface/95 backdrop-blur`, Wortmarke links, Herz- und Senden-Symbol rechts |
-| Wortmarke | `PlatformWordmark`: `.platform-gradient` als `bg-clip-text`, kursive Serifenschrift, daneben die Auszeichnung **„simuliert"** in `text-sim`; in `forced-colors` fällt der Verlauf auf `text-ink` zurück |
-| Ansichtswechsel | `FeedModeSwitch`, nur im Feed – eine Detailseite liegt eine Ebene tiefer und trägt ihren eigenen Rückweg |
-| Assistenzleiste | `PluginStatusStrip` |
-| Inhalt | `<main id="main" class="flex-1 pb-24">`, innen `max-w-[30rem]` |
-| Schwebender Knopf | `PluginOverlay` |
-| Tab-Leiste | `PlatformTabBar` |
-| Meldung | `role="status"`-Pille für Bedienelemente, die es im Prototyp nicht gibt |
-
-### 6.22d `PlatformTabBar` — `src/features/social-app/PlatformTabBar.tsx`
-
-Fünf Einträge, davon führt nur „Start" irgendwohin. Die anderen vier heißen
-zugänglich „Suche (im Prototyp ohne Funktion)" usw. und melden beim Antippen eine
-Statusmeldung, statt stillschweigend nichts zu tun. Labels bleiben sichtbar,
-obwohl die Gattung üblicherweise eine reine Icon-Leiste zeigt – ein Symbol allein
-ist keine Beschriftung, und diese Ähnlichkeit ist den Verzicht nicht wert.
-
-### 6.22e `PluginOverlay` und `PluginStatusStrip` — `src/features/plugin/PluginOverlay.tsx`
-
-Die Präsenz der Assistenzschicht über einer fremden App (`docs/decisions.md`,
-E-016).
-
-| Element | Umsetzung |
-| --- | --- |
-| Schwebender Knopf | `fixed bottom-20 right-3 z-40`; aktiv `bg-assist text-assist-on`, pausiert `bg-surface text-muted` mit `border-line-strong`. Beschriftung „ContextLens" als Text, nicht nur als Symbol |
-| Panel | `Sheet` mit Status-Chips, Hauptschalter „Assistenzschicht aktiv" (`Toggle` auf `assistantPaused`), vier Verweisen in die ContextLens-App und einem Absatz, der die Grenze der Erweiterung benennt |
-| Statusleiste | `border-b border-assist-line bg-assist-tint`, drei Fakten (Analyse, Kamera, Speicherung) als je eigenes Element, dazu ein Knopf „Pausieren" / „Fortsetzen" |
-
-Wortlaut und Zustand sind identisch mit `StatusBar` in der ContextLens-App; die
-Leiste ist eine Kurzfassung, keine zweite Wahrheit. Für Screenreader steht
-zusätzlich ein ausformulierter `sr-only`-Satz je Zustand darunter.
-
-### 6.23 `ResearchBanner` — `src/features/research-mode/ResearchBanner.tsx`
-
-Schmaler Streifen in der `sim`-Familie (`border-t border-sim-line bg-sim-tint`,
-Text `text-sim`) mit `FlaskConical`-Icon, Szenariotitel und Link „Aufgabe anzeigen".
-Wird nur gerendert, wenn ein Szenario aktiv ist **und** die aktuelle Route nicht
-`/research` ist.
-
----
-
-## 7. Die 7 Assistenzkarten-Varianten
-
-Quelle: `src/features/context-assistant/variantPresentation.ts`,
-`src/lib/labels.ts`, `src/types/index.ts`.
-
-| Variante | Icon (`lucide-react`) | Ton (`ChipTone`) | Titel (`VARIANT_TITLE`) | Untertitel (`VARIANT_SUBTITLE`) |
-| --- | --- | --- | --- | --- |
-| `sarcasm` | `MessageSquareQuote` | `caution` | Wahrscheinlich sarkastisch | Der Text ist vermutlich nicht wörtlich gemeint. |
-| `irony` | `MessageCircleQuestion` | `caution` | Möglicherweise ironisch gemeint | Die Aussage könnte das Gegenteil des Gesagten meinen. |
-| `emotional` | `HeartPulse` | `info` | Emotionaler Ton möglich | Die Formulierungen wirken emotional aufgeladen. |
-| `exaggeration` | `Laugh` | `positive` | Möglicherweise humorvolle Übertreibung | Die Übertreibung wirkt als Witz gemeint, nicht als Tatsache. |
-| `ragebait` | `Flame` | `alert` | Könnte auf Reaktionen ausgerichtet sein | Die Formulierung könnte gezielt Widerspruch und Empörung auslösen sollen. |
-| `ambiguous` | `Scale` | `neutral` | Analyse nicht eindeutig | Es gibt mehrere plausible Lesarten dieses Beitrags. |
-| `insufficient-context` | `ScanSearch` | `neutral` | Zu wenig Kontext für eine Einschätzung | Für eine belastbare Einschätzung fehlen Text, Ton oder Kontext. |
-
-Die Farbe ist hier **bewusst redundant**: Jede Karte zeigt den Variantentitel als
-Text und ein Icon mit eigener Silhouette. Der Ton ist nie der einzige Bedeutungsträger.
-
-### Die Variante wird abgeleitet, nicht gespeichert
-
-`deriveCardVariant(analysis)` in `src/features/simulation/mockEngine.ts` bestimmt die
-Variante rein aus den Analysedaten. Sie steht nirgends neben der Analyse in den
-Daten – dadurch **kann eine Überschrift ihren eigenen Daten nicht widersprechen**.
-
-Die Reihenfolge der Regeln ist bedeutsam und wird in `mockEngine.test.ts` geprüft:
-
-| Priorität | Bedingung | Ergebnis |
-| --- | --- | --- |
-| 1 | `indicators.length === 0` | `insufficient-context` |
-| 2 | `possibleRagebait === true` | `ragebait` |
-| 3 | `probableTone === 'sarcastic'` | `sarcasm` |
-| 3 | `probableTone === 'ironic'` | `irony` |
-| 4 | `probableTone === 'frustrated' \| 'aggressive'` | `emotional` |
-| 5 | `probableTone === 'humorous'` | `exaggeration` |
-| 6 | alles Übrige (`neutral`, `unclear`, Default) | `ambiguous` |
-
-Die Sichtbarkeit einer Karte hängt zusätzlich von den Einstellungen ab
-(`resolveAnalysis`): Bei `assistantPaused`, ausgeschalteter `contentAnalysis`,
-abgewählten `sarcasmHints` (betrifft `sarcasm`/`irony`) oder abgewählten
-`ragebaitHints` (betrifft `ragebait`) liefert die Funktion einen **benannten Grund**
-statt `null` – die UI kann dadurch sagen, *welcher* Schalter den Hinweis
-zurückhält, und direkt dorthin verlinken.
-
-Analog leitet `deriveContentCategory()` die Kategorie für die persönliche Übersicht
-ab (`humor`, `sarcasm`, `emotional`, `polarising`, `informational`) – ebenfalls
-abgeleitet, nie gespeichert.
-
----
-
-## 8. Barrierefreiheit als Systemregel
-
-Diese Regeln sind nicht Empfehlungen, sondern im Code umgesetzt.
-
-| Regel | Umsetzung | Fundstellen |
-| --- | --- | --- |
-| **Niemals nur Farbe** | Jeder Status trägt zusätzlich ein Icon **und** ein Wort. | `Toggle` („Aktiv"/„Inaktiv" + `Check`/`Minus`), `PrivacyPage` („aktiv"/„inaktiv"-Chips), `FeedModeSwitch` (Wort „aktiv"), `OwnReactionControl` („✓ " vor der aktiven Option), `StatusBar`, `ResearchModePage` („abgeschlossen"/„offen") |
-| **Sichtbarer Fokus** | Globale `:focus-visible`-Regel: `outline: 3px solid var(--cl-focus); outline-offset: 2px`. Extra-Regel für `[tabindex='0']`. | `index.css` `@layer base` |
-| **Echte Formularelemente unter gestylten Schaltern** | `Toggle` = echtes `<input type="checkbox" role="switch">`, Track/Knopf sind `aria-hidden`-Dekoration. Bewertungsskala im Research Mode = echte `<input type="radio" class="sr-only">` in `<label>`. Theme- und Hinweis-Optionen = echte Radios in `<fieldset>` mit `<legend>`. | `Toggle.tsx`, `ResearchModePage.tsx`, `SettingsPage.tsx` |
-| **Icons immer mit Textlabel** | Jedes Icon trägt `aria-hidden="true"`; die Bedeutung steht im begleitenden Text. Auch die Mobile-Navigation zeigt Textlabels („Labels stay visible – icons alone are not enough"). | durchgängig; `AppShell.tsx` |
-| **Reduzierte Bewegung** | `@media (prefers-reduced-motion: reduce)` setzt Animationen und Transitions auf `0.001ms` und `scroll-behavior: auto` – Bewegung wird entfernt, nicht bloß verkürzt. Zusätzlich spult `useSimulatedPlayback` dann nicht automatisch vor. | `index.css`, `useSimulatedPlayback.ts` |
-| **Skalierbare Typografie** | Alles in `rem` ab `body { font-size: 1rem }`; `-webkit-text-size-adjust: 100%`. Keine `px`-Fixierung von Fließtext. | `index.css` |
-| **Screenreader-Äquivalent für Diagramme** | Das Balkendiagramm ist `aria-hidden`; daneben steht eine vollständige `sr-only`-Tabelle mit `caption`, `scope="col"` und `scope="row"`. Timeline-Band und Confidence-Balken sind `role="img"` mit erschöpfendem `aria-label`. | `CommunityReactions.tsx`, `ReactionTimeline.tsx`, `ConfidenceMeter.tsx`, `OnboardingPage.tsx` (Fortschritt) |
-| **Live-Rückmeldungen** | Bestätigungen laufen über `<p role="status">` mit `min-h-5`, damit kein Layoutsprung entsteht. | `AssistantCardBody`, `PrivacyPage`, `ResearchModePage`, `ReactionTimeline`, `CameraPreview` |
-| **Skip-Link** | `.sr-only-focusable` blendet den Link erst bei Fokus ein (`:not(:focus):not(:focus-within)`). | `index.css`, `AppShell.tsx` |
-| **Fokusmanagement im Dialog** | Fokus rein, Fokusfalle, Fokus zurück, Escape, Scroll-Lock. | `Sheet.tsx` |
-| **Benannte Landmarks** | `<nav aria-label="Hauptnavigation">`, `<nav aria-label="Ansicht wechseln">`, `<section aria-labelledby="…">` auf allen längeren Seiten, `<section aria-label="Kommentare">`. | `AppShell`, `FeedModeSwitch`, Seiten |
-| **Sprechende Löschen-Labels** | `aria-label={'Eintrag zu „…" löschen'}`, damit eine Liste gleichnamiger Buttons unterscheidbar bleibt. | `OverviewPage.tsx` |
-| **Beschreibung statt verstecktem Alt-Text** | Die Medienbeschreibung ist sichtbarer Text – Screenreader-Nutzende bekommen dieselbe Information wie Sehende. | `MediaPlaceholder.tsx` |
-| **Sinnvolle `sr-only`-Ergänzungen** | Zahlen in der Engagement-Zeile bekommen ihre Bedeutung („Gefällt-mir-Angaben", „Zustimmungen", „Kommentare"); die StatusBar wird mit einem Satz eingeleitet. | Post-Karten, `StatusBar` |
-| **Sichtbare Ränder in beiden Schemata** | `* { border-color: var(--cl-border) }` als Basis, damit ein vergessener Rahmen nicht unsichtbar wird. | `index.css` |
-
----
-
-## 9. Dark-Mode-Strategie
-
-Drei Mechanismen greifen ineinander:
-
-1. **Systemvorgabe** – `@media (prefers-color-scheme: dark)` überschreibt alle
-   `--cl-*`-Werte, aber nur für `:root:not([data-theme='light'])`. Wer ausdrücklich
-   „Hell" gewählt hat, bleibt hell, auch wenn das System dunkel ist.
-2. **Ausdrückliche Wahl** – `[data-theme='dark']` setzt dieselben Werte noch einmal
-   unabhängig vom Systemzustand. Ein eigener `[data-theme='light']`-Block ist nicht
-   nötig, weil `:root` bereits die hellen Werte trägt und die Media-Query durch die
-   `:not()`-Bedingung ausgeschaltet wird.
-3. **Anwendung der Wahl** – `AppStateProvider` setzt bzw. entfernt das Attribut:
-   bei `theme === 'system'` wird `data-theme` vom `<html>`-Element **entfernt**,
-   sonst auf `'light'`/`'dark'` gesetzt.
-
-| Aspekt | Umsetzung |
-| --- | --- |
-| Einstellung | `settings.theme: 'system' \| 'light' \| 'dark'`, Default `'system'`, persistiert in `localStorage` |
-| Bedienung | Radiogruppe „Farbschema" auf `/settings` **und** ein Schnellschalter im Header (`aria-pressed`, Icon + Text) |
-| Browser-Hinweis | `color-scheme: light` bzw. `dark` auf `:root` – Scrollbars und native Steuerelemente folgen mit |
-| Umkehrung der Assistenzfarbe | Hell: dunkles Teal `#0d6e80` auf hellem Tint. Dunkel: helles Cyan `#5ed4e6` auf dunklem Tint `#0d2b33`; `assist-on` wird von Weiß zu `#062028` |
-| Statusfamilien | Im Dunkelmodus pastellige Vordergründe auf sehr dunklen Tints (z. B. `alert` `#f2a0b0` auf `#33161e`) statt einfach invertierter Helligkeit |
-| Schatten | `--cl-shadow` wird von `15 24 34` auf `0 0 0` gesetzt – im Dunkeln trennt der Rahmen, nicht der Schatten |
-| Fokusfarbe | wechselt von `#0b4f5e` zu `#8fe3f2`, bleibt in beiden Schemata deutlich sichtbar |
-
-Konsequenz für neue Komponenten: **Nie Rohfarben schreiben.** Wer `bg-surface`,
-`text-ink`, `border-line`, `bg-assist-tint` benutzt, ist automatisch dark-mode-fest.
-Die einzigen bewusst festen Farben im Prototyp sind die Medien-Farbverläufe aus
-`src/data/posts.ts` und die schwarzen Overlay-Flächen (`bg-black/55`, `bg-black/60`)
-auf den Medien-Platzhaltern, weil dort weiße Schrift in beiden Schemata gelesen
-werden muss.
+- **Auf Anfrage:** Analysen bleiben hinter `Kontext erklären`.
+- **Keine Diagnose:** Ausdrucksschätzungen beschreiben sichtbare Signale, nicht Gefühle.
+- **Quelle vor Zahl:** Demo-Profil, Sitzung, Selbstauskunft und automatische Schätzung sind sichtbar benannt.
+- **Nicht nur Farbe:** Status enthält Icon und Wort; Diagramme enthalten Label, Muster/Reihenfolge und semantische Daten.
+- **Mobile zuerst:** einspaltige Panels im Telefon; keine `sm:grid-cols-*` innerhalb app-interner Screens.
+- **Ehrliche Attrappe:** Plattformaktionen funktionieren oder melden ausdrücklich, dass sie im Mock fehlen.
+
+## Tokenfamilien
+
+| Familie | Tailwind-Nutzung | Zweck |
+|---|---|---|
+| Surface/Text | `bg-surface`, `bg-surface-2`, `text-ink`, `text-muted`, `text-faint` | allgemeine Oberfläche |
+| Border | `border-line`, `border-line-strong` | Struktur und Fokusabgrenzung |
+| Assist | `bg-assist`, `bg-assist-tint`, `text-assist-strong`, `border-assist-line` | ETHOS |
+| Simulation | `bg-sim-tint`, `text-sim-strong`, Schraffur | nicht gemessene Werte |
+| Status | `alert`, `unclear`, `self` | Warnung, Unsicherheit, Selbstauskunft |
+| Plattform | `accent`, `like`, `.platform-gradient`, `.reddit-skin` | Host-App-Konventionen |
+| Charts | `--cl-chart-*` | zugängliche Hell-/Dunkelpalette |
+
+Alle Text-/Flächenpaare des Basissystems bleiben auf WCAG-AA-Niveau. Das helle Plattform-Akzentblau wird nicht für kleinen Fließtext genutzt. Rohfarben bleiben auf gezeichnete Medien und kontrastierende Medienoverlays begrenzt.
+
+## Typografie und Geometrie
+
+- Systemschriftstack für UI; klare Gewichtshierarchie statt vieler Größen.
+- Mindesttext normalerweise 0,75 rem, Fließtext 0,875–1 rem.
+- Panels verwenden `--radius-panel`, Bedienelemente mindestens gerundete 44-px-Ziele, soweit die kompakte Host-Konvention es zulässt.
+- `panel-shadow` nur dort, wo Tiefe Fokus/Überlagerung erklärt; Dark Mode trennt primär per Rand.
+
+## Komponenten
+
+| Komponente | Varianten/Zustände |
+|---|---|
+| `Logo` | ETHOS-Linse, mit/ohne Link nach `/phone` |
+| `DeviceLayout` | rahmenlos mobil; Telefonrahmen ab `lg`; normaler und fokussierter Handy-Vollbild-Modus |
+| `SocialAppShell` | Instagram-Chrome und -Skin |
+| `RedditAppShell` | Forumshell und Reddit-Skin |
+| `AppShell` | ETHOS-Header, Status und Navigation |
+| `PluginStatusStrip` / `PluginOverlay` | aktiv, pausiert, Inhaltsanalyse aus; Hostname im Erklärungstext |
+| `VisualPostCard` | Like, gespeichert, Follow, Caption offen, Medien-/Timeline-Zustand |
+| `InstagramCommentsPage` | Original-Caption, Kommentar-Liste, lokaler Eingabezustand |
+| `DiscussionPostCard` | Upvote, gespeichert, Feed-/Detailkommentare, Text-/Medienzustand |
+| `RedditPostMedia` | beschriebenes Bild oder natives pausiertes 4:3-Video mit voller Kartenbreite, Controls und Ton |
+| `ContextAssistantButton` | sieben abgeleitete Kartenvarianten, gesperrt/pausiert |
+| `CommunityReactionButton` | häufigste Selbstauskunft sichtbar; Sheet, kleine Stichprobe, quellengetrennt |
+| `OwnReactionControl` | Estimate, aktive Selbstauskunft, Korrektur, Löschen |
+| `PersonalAnalyticsCharts` | Demo/Sitzung; Daten- und Leerzustände; Grafik plus Semantik |
+| `Toggle`, `Button`, `Panel`, `Chip`, `Sheet` | geteilte Zustands- und A11y-Verträge |
+
+Der entfernte `FeedModeSwitch` ist kein Bestandteil mehr: Instagram und Reddit sind eigenständige Apps.
+
+## Kontextkarten
+
+Die Kartenvariante wird aus Analysefeldern abgeleitet und nie als unabhängige Wahrheit gespeichert:
+
+| Variante | Leitidee |
+|---|---|
+| `sarcasm` | wahrscheinlicher Sarkasmus |
+| `irony` | mögliche Ironie |
+| `emotional` | emotionaler Ton des Inhalts |
+| `exaggeration` | Übertreibung |
+| `ragebait` | mögliche Empörungsorientierung |
+| `unclear` | mehrere plausible Lesarten |
+| `low-context` | zu wenig Kontext |
+
+Jede Karte enthält Simulations-/Interpretationshinweis, Konfidenz in Wort und Skala, Begründung, alternative Lesarten und Grenzen.
+
+## Persönliche Visualisierungen
+
+### Donut
+
+Die Segmentfarbe ist redundant zu Icon, stabiler Kategorie-Reihenfolge, Tooltip und Liste. Mitteltext nennt die Like-Gesamtzahl.
+
+### Emotionslandschaft
+
+Jede Kategorie ist ein eigener 100-%-Balken. Reaktionslabels stehen in stabiler Reihenfolge; die Tabelle nennt absolute Werte. Nur `selfReportedReaction` wird verwendet.
+
+### Plattformbalken
+
+Instagram und Reddit stehen als direkte Textlabels neben/über Balken und Wert. Die Vergleichsaussage ist ohne Farbe lesbar.
+
+Recharts-Animationen sind deaktiviert. Das Layout erhält feste Mindesthöhen und im Test gemockte Dimensionen, sodass weder Browser noch jsdom Warnungen erzeugen.
+
+## Zustände und Sprache
+
+- `Simuliert` markiert jedes nicht gemessene Ergebnis.
+- `Am häufigsten` ist die Standardformulierung; „Mehrheit“ wird bei Pluralitäten vermieden.
+- Kleine Stichproben erhalten eine eigene Warnung.
+- Pausiert, ausgeschaltet, fehlende Einwilligung und fehlende Daten sind verschiedene Leerzustände.
+- Automatische Ausdrucksschätzung, aktive Selbstauskunft und Community-Selbstauskunft besitzen verschiedene Labels und Definitionen.
+
+## Dark Mode und Reduced Motion
+
+`:root`, System-Media-Query und `[data-theme='dark']` liefern dieselben semantischen Tokenfamilien. Plattform-Skins besitzen eigene Dark-Overrides. Neue Komponenten verwenden Tokens statt Rohfarben.
+
+`prefers-reduced-motion: reduce` verkürzt Übergänge/Animationen global; Diagramme animieren unabhängig davon nicht. Das simulierte Video und Meme-Szenen folgen der bestehenden Reduced-Motion-Regel.
+
+## Accessibility-Vertrag
+
+- sichtbare Fokusindikatoren und logische DOM-Reihenfolge,
+- keine dekorativen Telefon-Icons im Tastaturpfad,
+- `aria-current` für Navigation, `aria-pressed` für persistente Aktionen,
+- getrennte Namen und Ziele für Host-Kommentare und `ETHOS-Auswertung`,
+- benannte Charts und darunter Listen/Tabellen,
+- Fokusfalle/Escape/Fokusrückgabe in `Sheet`,
+- Live-Status für nicht implementierte Mock-Aktionen und Research-Wechsel,
+- lesbares Layout bei 320 px und 200-%-Zoom.

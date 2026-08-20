@@ -1,4 +1,4 @@
-# Datenschutz-Review
+# Datenschutz-Review – ETHOS
 
 **Methode.** Manuelles Code-Audit des gesamten `src/`-Verzeichnisses, ergänzt um
 gezielte Suchläufe (ripgrep) nach Netzwerk-, Kamera- und Speicher-APIs. Kein
@@ -156,7 +156,7 @@ Der Fluss ist mehrstufig und wiederholt zugänglich:
 3. Onboarding-Schritt 5 ist die eigentliche Einwilligung, mit separaten
    Schaltern und der Kameraerfassung optisch abgesetzt in einem eigenen Block.
 4. Die StatusBar zeigt auf **jedem** Screen dauerhaft Analyse- und Kamerastatus.
-5. `/settings` und `/privacy` sind jederzeit über die Hauptnavigation erreichbar.
+5. `/ethos/settings` und `/ethos/privacy` sind jederzeit über die ETHOS-Navigation erreichbar.
 
 **Positiv hervorzuheben:** Ein abgeschalteter Zustand wird ausgesprochen
 („Kamera aus"), nicht nur durch Abwesenheit signalisiert. Wird ein Hinweis
@@ -210,3 +210,40 @@ wurden im Review korrigiert und sind nun durch automatisierte Tests abgesichert.
 Freitexte der Bewertung sind vor der Auswertung zu sichten (D-06), und im
 Debriefing ist offenzulegen, dass die Schätzung bei einem Beitrag absichtlich
 falsch ist (siehe `decisions.md`, E-007).
+
+---
+
+## 7. P-011-Nachprüfung: Plattformen, Engagements und Statistiken
+
+Stand: 20.08.2026.
+
+- Instagram und Reddit sind lokale Mocks. Es wurden keine Plattform-APIs,
+  Authentifizierung, externen Assets oder Tracking-Endpunkte ergänzt.
+- `PostEngagement` speichert Post-ID, Plattform, Like/Upvote, Saved und
+  Zeitstempel. Diese Daten sind im Dashboard gezählt und im lokalen JSON-Export
+  enthalten.
+- Einzellöschung eines Verlaufseintrags entfernt zugeordnete Reaktion und
+  Engagement. Gesamtlöschung und Reset leeren alle Engagements.
+- `storeReactionHistory=false` entfernt persistierte Verlauf-, Reaktions- und
+  Engagement-Schlüssel. Interaktionen bleiben nur bis zum Sitzungsende im
+  React-Arbeitsspeicher und werden auf ausdrücklichen Export trotzdem als
+  aktuelle Werte ausgegeben.
+- Das fiktive `DEMO_PROFILE` ist Quellcode, keine Beobachtung der Person und
+  wird nie mit `Diese Sitzung` addiert. Die Sitzung nutzt nur lokale
+  Engagements und aktive Selbstauskünfte; Ausdrucksschätzungen werden nicht als
+  Emotionen behandelt.
+- Der interne Präfix `contextlens.v1` bleibt zur Kompatibilität. Er begründet
+  keinen Netzwerk- oder Drittzugriff.
+
+Der ursprüngliche Netzwerk-/Bildanalyse-Sweep bleibt gültig. Zulässig bleiben
+nur `navigator.mediaDevices.getUserMedia` für die Vorschau sowie lokale
+`localStorage`- und Blob-Export-APIs.
+
+## 8. P-012-Nachprüfung: lokale Reddit-Medien
+
+`doom.mp4` und `kerle.jpg` werden ausschließlich über Pfade unter
+`/media/` geladen. Der native `<video>`-Player führt keine Analyse oder
+Telemetrie aus; Ton und Bild bleiben Browserwiedergabe derselben lokalen Datei.
+Das neue Instagram-Kommentarfeld schreibt nur in React-Zustand und wird weder
+persistiert noch exportiert. Für die Mediendateien selbst muss die
+Nutzungsberechtigung vor einer externen Weitergabe separat geklärt werden.

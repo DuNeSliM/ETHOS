@@ -1,4 +1,4 @@
-# Accessibility-Review
+# Accessibility-Review – ETHOS
 
 **Methode.** Manuelles Code-Audit gegen WCAG 2.1 AA, ergänzt um rechnerisch
 ermittelte Kontrastwerte für alle Farbtoken in beiden Farbschemata. Seit der
@@ -195,10 +195,10 @@ Fachbegriffe werden erklärt. Das ist für die Zielgruppe besonders relevant.
 |---|---|
 | Landing | Tab-Reihenfolge folgt der Leserichtung; beide Hauptaktionen erreichbar |
 | Onboarding | Fortschritt wird als Text angesagt; „Zurück" ist im ersten Schritt korrekt deaktiviert |
-| Startbildschirm | Drei Ziele im Tastaturpfad (simulierte App, ContextLens, Ausstiegslink) plus die zwei Widget-Knöpfe; die neun Kulissensymbole werden übersprungen |
+| Startbildschirm | Instagram, Reddit, ETHOS, Ausstiegslink und Widget-Aktionen im Tastaturpfad; Kulissensymbole werden übersprungen |
 | Geräterahmen | Bringt selbst kein Bedienelement mit; Gehäuse, Tasten und Home-Indikator sind `aria-hidden`. Die Statusleiste trägt nur einen `sr-only`-Text zum Zustand der Erweiterung |
 | Simulierte App | Kopfzeile → Ansichtswechsel → Assistenzleiste (inkl. „Pausieren") → Feed → schwebender Knopf → Tab-Leiste. Die vier funktionslosen Tabs sind erreichbar und sagen beim Auslösen, dass es sie nicht gibt |
-| Assistenz-Panel | Wie jedes `Sheet`: Fokus hinein, Fokusfalle, Escape, Fokusrückgabe. Enthält Hauptschalter und vier Verweise in die ContextLens-App |
+| Assistenz-Panel | Wie jedes `Sheet`: Fokus hinein, Fokusfalle, Escape, Fokusrückgabe. Enthält Hauptschalter und vier Verweise in die ETHOS-App |
 | Visual Feed | Pro Beitrag: Abspielen → Scrubber → „Kontext erklären" → Detail-Link; Reaktions-Chip nur bei aktiver Erfassung |
 | Discussion Feed | Beitrag, dann Kommentare; kompakte Assistenzbuttons an Kommentaren erreichbar |
 | Post-Detail | Feste Reihenfolge Inhalt → Analyse → Verlauf → Community; Quellen-Umschalter als `role="radiogroup"` |
@@ -225,3 +225,59 @@ Fachbegriffe werden erklärt. Das ist für die Zielgruppe besonders relevant.
 5. **`aria-live` beim Quellenwechsel** der Community-Ansicht erwägen: Der
    Diagrammwechsel wird derzeit nicht angesagt, die Teilnehmerzahl daneben
    ändert sich jedoch sichtbar.
+
+---
+
+## 6. P-011-Nachprüfung: drei Apps und persönliche Diagramme
+
+Stand: 20.08.2026. Dieser Abschnitt ersetzt die historische Beschreibung von
+zwei Apps und dem früheren Feed-Umschalter.
+
+| Bereich | Ergebnis |
+|---|---|
+| Telefon-Home | Drei eindeutige App-Links Instagram, Reddit und ETHOS; dekorative Icons ohne Tastaturziel |
+| App-Shells | Jede Shell besitzt einen benannten Home-Weg nach `/phone`; aktive Navigation nutzt `aria-current` |
+| Mock-Hinweise | Sichtbarer Text und zusätzlicher Screenreader-Kontext, nicht nur Farbe oder Logo |
+| Instagram | Like/Save mit `aria-pressed`; bestehende Medien- und Sheet-Tastaturpfade erhalten |
+| Reddit | Upvote/Save als Buttons mit Zustand; Kommentare semantisch gruppiert; Mock-Navigation meldet Status |
+| Community-Knopf | sichtbares `Am häufigsten`; Emoji nur redundant; zugänglicher Name enthält Reaktion, Anteil, n und Quelle |
+| Quellenwahl | zwei klar beschriftete Buttons mit gedrücktem Zustand; Erklärung, dass Quellen nicht gemischt werden |
+| Donut | benannte Grafik plus stabile Kategorie-/Werteliste |
+| Emotionslandschaft | benannte 100-%-Grafik plus semantische Tabelle mit absoluten Werten |
+| Plattformvergleich | direkte Textlabels und Werte; ohne Farbwahrnehmung verständlich |
+| Bewegung | Recharts-Animationen deaktiviert; globale Reduced-Motion-Regel bleibt |
+| Dark Mode | neue `--cl-chart-*`-Tokens besitzen Hell-/Dunkelwerte |
+| Telefonbreite | Statistikmetriken und Plattformvergleich einspaltig; keine neuen `sm:grid-cols-*` in der ETHOS-App |
+
+Automatisierte Tests prüfen Rollen, Namen, sichtbare Alternativen,
+Quellenauswahl und Datenwechsel. Weiter manuell erforderlich: NVDA/VoiceOver,
+320 px, 200-%-Zoom und Farb-/Fokusprüfung in beiden Themes. Diese offenen
+Prüfungen verhindern, dass das Code-Audit als vollständiger WCAG-
+Konformitätsnachweis ausgegeben wird.
+
+---
+
+## 7. P-012-Nachprüfung: Kommentare und Reddit-Medien
+
+- Die Instagram-Kommentarseite besitzt eine sichtbare `h1`, semantische Liste,
+  eindeutig beschriftetes Eingabefeld, deaktivierten Leer-Submit und
+  `role="status"` für den rein lokalen Kommentar.
+- Normale Kommentarlinks und `ETHOS-Auswertung` haben unterschiedliche Namen
+  und Ziele; Analyseblöcke erscheinen nicht in der nativen Kommentarsektion.
+- Das Reddit-Video besitzt einen zugänglichen Namen, native Controls und einen
+  erklärenden Untertitel. Es startet ohne Autoplay und ohne `muted`.
+- Das Kerle-Meme verwendet ein semantisches `img` mit ausführlichem `altText`;
+  der eingebrannte Text wird darin ebenfalls genannt.
+- Native Video-Controls, erster Frame, Ton, 320 px, Zoom und Screenreader bleiben
+  zusätzlich im echten Browser beziehungsweise mit Assistenztechnik zu prüfen.
+
+## 8. P-013-Nachprüfung: fokussierte Geräteansicht
+
+- `Handy-Vollbild` ist ein echtes `button`-Element mit Zustandswert über
+  `aria-pressed` und einem eindeutigen Namen für Ein- beziehungsweise Ausschalten.
+- Der Schalter bleibt außerhalb des transformierten Telefonrahmens sichtbar;
+  die fokussierte Ansicht ist ohne Escape-Sonderlogik jederzeit umkehrbar.
+- Auf kleinen Bildschirmen ist der Desktop-Schalter verborgen, weil die App dort
+  bereits den Browser ausfüllt und kein erklärender Seitenbereich existiert.
+- Das 4:3-Video erhält weiterhin seinen zugänglichen Namen, Controls und die
+  Screenreader-Bildbeschreibung; nur die unnötige visuelle Letterbox entfällt.

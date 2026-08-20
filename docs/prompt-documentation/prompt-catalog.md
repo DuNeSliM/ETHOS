@@ -1,4 +1,4 @@
-# Prompt-Katalog P-001 bis P-013
+# Prompt-Katalog P-001 bis P-023
 
 Stand: 20.08.2026. Dieses Dokument ist der **kanonische Prompt-Nachweis** des Projekts. Wo ein historischer Originaltext nicht im Repository vorliegt, ist das ehrlich gekennzeichnet und die verfügbare Aufgabenbeschreibung wird wiedergegeben. Der vollständige Chat bleibt in diesen Fällen nur über den manuellen Export rekonstruierbar.
 
@@ -267,6 +267,130 @@ Ergebnis: eigene SVG-Szenen und Meme-Untertitel statt fremder Downloads, Weg fü
 - Browserprüfung: Video und Kartenbreite jeweils 351 px, 0 px Seitenspalt, pausierter erster Frame; fokussiertes Telefon 456 px breit und horizontal mittig; keine Konsolenfehler.
 - Typprüfung, 133/133 Tests und Produktionsbuild erfolgreich.
 
+## P-014 bis P-019 – ETHOS-App-Icon entwickeln und kanonisieren
+
+**Datum / Werkzeug:** 20.08.2026 · OpenAI Codex · GPT-5
+**Vollständiger Sitzungswortlaut:**
+[`exports/P-014-P-022-icon-security-session.md`](exports/P-014-P-022-icon-security-session.md#p-014)
+
+### Nutzerprompts im Wortlaut
+
+- **P-014:** „create an icon for the ethos app"
+- **P-015:** „The icon should be some kind of mixtrue between a camera, a watchfull eye, and emotions."
+- **P-016:** „this is to chrome like, maybe also a bit inspired by glados so some tech apocalybsy surveillance state"
+- **P-017:** „it should still be like simplegfied so it should match the other app icons"
+- **P-018:** „can you remove the 3 dots beneth the eye and change the backround from this dark blue to the light blue shading ove rinto more dark like in v1 and v2"
+- **P-019:** „perfect, delete all otehr versions and everywhere in the project where still the old icon is used change it to this new one, for example in the topbar of the smartpoine etc."
+
+### Umsetzung und Ergebnis
+
+- Fünf nachvollziehbare Bildgenerationen/-bearbeitungen führten vom abstrakten
+  Linsenmotiv über Kamera/Auge/Emotion und eine dystopische Industrievariante
+  zum vereinfachten mechanischen Kameraauge mit teal-blauem Verlauf.
+- Die P-016-Moodreferenz liegt unter
+  `exports/assets/P-016-glados-reference.webp`; Figuren, Flaggen, Layout und
+  geschützte Markenbestandteile wurden nicht kopiert.
+- `public/ethos-app-icon.png` ist die einzige kanonische Projektdatei. Frühere
+  Varianten wurden aus `public/` entfernt.
+- `EthosIcon` verwendet das Asset in App-Raster, ETHOS-Header,
+  Smartphone-Statusleiste, Home-Widget, Overlay und Statusstreifen. Favicon und
+  Apple-Touch-Icon zeigen dasselbe Asset.
+- Der medienbezogene Smoke-Test zählt gezielt Bilder in Post-Figures, damit
+  dekorative Produkticons nicht als Feed-Medien gelten. 133/133 Tests und Build
+  erfolgreich.
+
+## P-020 – Moderate npm-Advisories untersuchen
+
+**Datum / Werkzeug:** 20.08.2026 · OpenAI Codex · GPT-5
+**Vollständiger Sitzungswortlaut:**
+[`exports/P-014-P-022-icon-security-session.md`](exports/P-014-P-022-icon-security-session.md#p-020)
+
+### Nutzerprompt im Wortlaut
+
+> when i do npm i it says 2 moderate serverity vulnerabilites can you check what theses are
+
+### Umsetzung und Ergebnis
+
+- `npm audit` und der Abhängigkeitsbaum führten beide Meldungen auf
+  `react-router-dom@6.30.6` und `react-router@6.30.6` zurück.
+- Dokumentiert wurden der Backslash/Open-Redirect-Befund und die ausschließlich
+  SSR-/Hydration-bezogene Constructor-Injection.
+- ETHOS nutzt deklaratives Client-Routing ohne SSR. Die Open-Redirect-Fläche
+  wurde gegen alle aktuellen `Link`-/`Navigate`-/`useNavigate`-Ziele geprüft;
+  es wurde kein aktuell extern kontrollierbares Navigationsziel gefunden.
+- Für einen vollständig grünen Audit blieb dennoch die separat zu testende
+  Major-Migration auf mindestens Router 7.18.0 erforderlich.
+
+## P-021 – React Router 7.18.2 migrieren
+
+**Datum / Werkzeug:** 20.08.2026 · OpenAI Codex · GPT-5
+**Vollständiger Sitzungswortlaut:**
+[`exports/P-014-P-022-icon-security-session.md`](exports/P-014-P-022-icon-security-session.md#p-021)
+
+### Nutzerprompt im Wortlaut
+
+> can you do this?
+
+### Umsetzung und Ergebnis
+
+- `react-router-dom` und `react-router` wurden auf 7.18.2 aktualisiert.
+- Die in v7 obsoleten `future`-Props an `BrowserRouter` und `MemoryRouter`
+  wurden entfernt; Routen und Redirects blieben unverändert.
+- Dokumentation und Lockfile wurden nachgezogen.
+- `npm audit`: null bekannte Schwachstellen; Typprüfung, 133/133 Tests und
+  Produktionsbuild erfolgreich.
+
+## P-022 – Aktive Sitzung vollständig dokumentieren
+
+**Datum / Werkzeug:** 20.08.2026 · OpenAI Codex · GPT-5
+**Vollständiger Sitzungswortlaut:**
+[`exports/P-014-P-022-icon-security-session.md`](exports/P-014-P-022-icon-security-session.md#p-022)
+
+### Nutzerprompt im Wortlaut
+
+> add all prompts and respoines from this chat into the docs/prompt-documentation
+
+### Umsetzung und Ergebnis
+
+- Nutzerprompts, sichtbare Assistant-Arbeitsupdates und finale Antworten der
+  aktiven Sitzung wurden als P-014 bis P-022 zusammengeführt.
+- Absolute lokale Pfade wurden für die Abgabe auf relative Repository-Pfade
+  normalisiert; verdeckte Überlegungen und Rohdaten der Werkzeugaufrufe sind
+  ausdrücklich nicht Teil des Transkripts.
+- Katalog, Register, Export-Checkliste, Verzeichnis-README, Projekt-README und
+  `AGENTS.md` wurden konsistent auf P-022 erweitert.
+
+## P-023 – Drei-App-Sitzung vollständig dokumentieren
+
+**Datum / Werkzeug:** 20.08.2026 · OpenAI Codex · GPT-5
+**Vollständiger Sitzungswortlaut:**
+[`chat-transcript-2026-08-20.md`](chat-transcript-2026-08-20.md)
+
+### Nutzerprompt im Wortlaut
+
+> add all prompts and respoines from this chat into the docs/prompt-documentation
+
+### Umsetzung und Ergebnis
+
+- Der vollständige lesbare Drei-App-Task wurde chronologisch ausgewertet.
+- `chat-transcript-2026-08-20.md` enthält alle sichtbaren Nutzerprompts,
+  freigegebenen Pläne, Zwischenupdates und Abschlussantworten von P-011 bis
+  P-013 sowie P-023. Die beiden zu P-013 bereitgestellten Bilder sind mit ihren
+  lokalen Dateireferenzen protokolliert.
+- Die IDs P-014 bis P-022 gehören zu einem getrennten, parallel dokumentierten
+  Icon-/Security-Task. P-023 ist deshalb die nächste projektweit freie ID.
+- System- und Entwickleranweisungen, interne Begründungsprotokolle,
+  Werkzeugaufrufe und Werkzeugausgaben wurden bewusst nicht in die
+  Nutzer-/Assistentenkommunikation gemischt.
+- Prompt-Katalog, Register, Verzeichnis-README, Export-Checkliste, Projekt-README
+  und `AGENTS.md` wurden auf den neuen Nachweis aktualisiert.
+
 ## Manuelle Exportpflicht
 
-Der Chat-Export kann nicht durch den Prototyp erzeugt werden. Vor Abgabe sind die in `prompt-register.md` und `export-checklist.md` genannten Dateien manuell aus den jeweiligen Oberflächen zu exportieren. Besonders P-001 ist nötig, weil dessen historischer Master-Prompt nicht vollständig im Repository dupliziert wurde.
+Der Chat-Export kann nicht durch den Prototyp erzeugt werden. P-014 bis P-022
+sowie P-011 bis P-013 und P-023 sind während der aktiven Sitzungen als sichtbare
+Transkripte dokumentiert worden.
+Für die älteren Sitzungen sind die in `prompt-register.md` und
+`export-checklist.md` genannten Dateien weiterhin manuell aus den jeweiligen
+Oberflächen zu exportieren. Besonders P-001 ist nötig, weil dessen historischer
+Master-Prompt nicht vollständig im Repository dupliziert wurde.

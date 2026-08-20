@@ -124,7 +124,8 @@ Die zentralen Dokumente sind:
 - [`docs/test-plan.md`](docs/test-plan.md)
 - [`docs/known-limitations.md`](docs/known-limitations.md)
 - [`docs/decisions.md`](docs/decisions.md)
-- [`docs/prompt-documentation/prompt-catalog.md`](docs/prompt-documentation/prompt-catalog.md) – kanonischer Prompt-Katalog P-001 bis P-013
+- [`docs/prompt-documentation/prompt-catalog.md`](docs/prompt-documentation/prompt-catalog.md) – kanonischer Prompt-Katalog P-001 bis P-023
+- [`docs/prompt-documentation/chat-transcript-2026-08-20.md`](docs/prompt-documentation/chat-transcript-2026-08-20.md) – sichtbares Transkript des Drei-App-Codex-Tasks
 - [`AGENTS.md`](AGENTS.md) – KI-Einsatz und historische Rollenverteilung
 
 ## Verifikation und bewusste Grenzen

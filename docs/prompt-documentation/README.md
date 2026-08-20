@@ -11,10 +11,11 @@ ETHOS-Prototypen (historisch ContextLens). Es erfüllt die Vorgabe aus dem Proje
 | Datei | Zweck |
 |---|---|
 | `README.md` | Dieses Dokument: Aufbau und Vorgehen |
-| `prompt-catalog.md` | **Kanonischer Katalog** mit verfügbarem Wortlaut/Zusammenfassungen P-001 bis P-013 |
-| `prompt-register.md` | Tabellarisches Register aller Prompts (P-001 bis P-013) |
+| `prompt-catalog.md` | **Kanonischer Katalog** mit verfügbarem Wortlaut/Zusammenfassungen P-001 bis P-023 |
+| `prompt-register.md` | Tabellarisches Register aller Prompts (P-001 bis P-023) |
+| `chat-transcript-2026-08-20.md` | Vollständiges sichtbares Transkript des Drei-App-Tasks (P-011 bis P-013 und P-023) |
 | `export-checklist.md` | Checkliste für den manuellen Export der Chatverläufe |
-| `exports/` | **Manuell anzulegen** — hier gehören die exportierten Chats hinein |
+| `exports/` | Manuelle historische Exporte und während aktiver Sitzungen erstellte sichtbare Transkripte |
 
 Der verfügbare **Wortlaut** und die ehrliche Kennzeichnung historischer Lücken
 stehen kanonisch in `prompt-catalog.md`. `AGENTS.md` enthält zusätzlich die
@@ -25,17 +26,21 @@ historische Rollenverteilung und Korrekturen nach dem Agent-Review.
 1. **Während der Arbeit:** Jeder eingesetzte Prompt erhält eine ID (`P-00x`) und
    wird im Register eingetragen — mit Zweck, erzeugten Dateien und der Angabe,
    ob das Ergebnis übernommen, teilweise übernommen oder verworfen wurde.
-2. **Nach der Arbeit:** Die zugehörigen Chatverläufe werden manuell exportiert
-   und unter `exports/` abgelegt. Siehe `export-checklist.md`.
+2. **Nach der Arbeit:** Historische Chatverläufe werden manuell exportiert und
+   unter `exports/` abgelegt. Ist die Sitzung noch aktiv, darf zusätzlich ein
+   sichtbares Transkript erstellt werden; dessen Grenzen müssen im Dateikopf
+   benannt sein. Siehe `export-checklist.md`.
 3. **Vor der Abgabe:** Die Checkliste wird vollständig abgehakt, und das
    Register wird gegen die tatsächlich vorhandenen Exportdateien geprüft.
 
 ## Wichtiger Hinweis
 
-Die Exportdateien können **nicht** automatisch erzeugt werden — der Export eines
-Chatverlaufs ist eine manuelle Handlung in der jeweiligen Oberfläche. Das
-Register verweist deshalb auf Dateinamen, die erst beim Export entstehen. Die
-Checkliste existiert genau dafür: damit dieser Schritt nicht vergessen wird.
+Ein originaler Oberflächenexport kann **nicht** durch den Prototyp erzeugt
+werden. P-014 bis P-022 sowie der getrennte Drei-App-Task P-011 bis P-013 und
+P-023 wurden während der aktiven Sitzungen als sichtbare Transkripte
+rekonstruiert. Diese Dateien enthalten keine verdeckten Überlegungen oder rohen
+Werkzeugausgaben. Für ältere Sitzungen verweist das Register weiterhin auf
+Dateinamen, die erst beim manuellen Export entstehen.
 
 ## Einordnung für die Studienarbeit
 

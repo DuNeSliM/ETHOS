@@ -6,7 +6,7 @@ Prompts. Es dient der
 Nachvollziehbarkeit für die Studienarbeit.
 
 - **Werkzeuge/Modelle:** P-001 bis P-010: Claude Code / Claude Opus 5;
-  P-011: OpenAI Codex / GPT-5
+  P-011 bis P-023: OpenAI Codex / GPT-5
 - **Datum der Sitzungen:** 30.07.2026, 31.07.2026, 03.08.2026 und 20.08.2026
 - **Branches:** ursprünglich `feat/contextlens-prototype`, P-011 auf
   `feat/reddit-and-so`
@@ -442,6 +442,78 @@ in der Mitte zeigt.
 Kartenbreite. `DeviceLayout` besitzt einen umkehrbaren und zugänglichen
 `Handy-Vollbild`-Präsentationsmodus ohne Browser-Berechtigung. Typprüfung,
 133/133 Tests, Produktionsbuild und visuelle Browserprüfung erfolgreich.
+
+---
+
+### P-014 bis P-019 — ETHOS-App-Icon
+
+**Ausführender:** OpenAI Codex / GPT-5 · **Sitzung:** 20.08.2026
+**Vollständige Prompts und Antworten:**
+`docs/prompt-documentation/exports/P-014-P-022-icon-security-session.md`,
+Anker P-014 bis P-019.
+
+**Kernauftrag.** Ein ETHOS-App-Icon iterativ entwickeln: zunächst teal-farbene
+Linse, dann Kamera plus wachsames Auge plus Emotion, anschließend eine
+dystopische Tech-Apokalypse-/Surveillance-Anmutung, danach Vereinfachung für den
+Smartphone-Icon-Raster, Entfernen der drei Statuspunkte und Rückkehr zum
+hell-dunklen Teal-Verlauf. Abschließend alle älteren Varianten löschen und das
+finale Icon überall einsetzen.
+
+**Ergebnis.** `public/ethos-app-icon.png` ist das einzige kanonische Asset.
+`EthosIcon` bindet es in Smartphone-Topbar, App-Raster, Home-Widget,
+ETHOS-Header, Plugin-Overlay und Statusstreifen ein; Favicon und Touch-Icon
+verwenden dieselbe Datei. Frühere Varianten wurden aus dem Projekt entfernt.
+Die P-016-Bildreferenz ist für die Prompt-Transparenz unter
+`docs/prompt-documentation/exports/assets/` gesichert. Typprüfung, 133 Tests und
+Build erfolgreich.
+
+---
+
+### P-020 und P-021 — Dependency-Audit und React Router 7
+
+**Ausführender:** OpenAI Codex / GPT-5 · **Sitzung:** 20.08.2026
+**Vollständige Prompts und Antworten:**
+`docs/prompt-documentation/exports/P-014-P-022-icon-security-session.md`,
+Anker P-020 und P-021.
+
+**Kernauftrag.** Zwei moderate Meldungen nach `npm install` untersuchen und
+anschließend beheben.
+
+**Ergebnis.** Die Meldungen wurden auf React Router 6.30.6 zurückgeführt und
+gegen die deklarative Client-Routing-Architektur geprüft. Danach erfolgte die
+separat getestete Migration auf `react-router-dom`/`react-router` 7.18.2; die
+obsoleten v6-Future-Props wurden entfernt. `npm audit` meldet null bekannte
+Schwachstellen; Typprüfung, 133/133 Tests und Produktionsbuild sind grün.
+
+---
+
+### P-022 — Aktive Sitzung dokumentieren
+
+**Ausführender:** OpenAI Codex / GPT-5 · **Sitzung:** 20.08.2026
+**Vollständiger Prompt und Antwort:**
+`docs/prompt-documentation/exports/P-014-P-022-icon-security-session.md#p-022`.
+
+**Kernauftrag und Ergebnis.** Alle Nutzerprompts, sichtbaren Arbeitsupdates und
+finalen Antworten dieser Sitzung wurden mit Einzelankern dokumentiert. Lokale
+absolute Pfade sind für die Abgabe normalisiert; verdeckte Überlegungen und rohe
+Werkzeugausgaben bleiben ausgeschlossen. Katalog, Register, Checkliste und
+Querverweise reichen nun bis P-022.
+
+---
+
+### P-023 — Drei-App-Sitzung vollständig dokumentieren
+
+**Ausführender:** OpenAI Codex / GPT-5 · **Sitzung:** 20.08.2026
+**Vollständige Prompts und Antworten:**
+`docs/prompt-documentation/chat-transcript-2026-08-20.md`.
+
+**Kernauftrag und Ergebnis.** Alle sichtbaren Nutzerprompts, Pläne,
+Arbeitsupdates und Abschlussantworten des getrennten Drei-App-Tasks wurden
+chronologisch dokumentiert. Das Transkript umfasst P-011 bis P-013 und P-023;
+die projektweit bereits im parallelen Icon-/Security-Task vergebenen IDs P-014
+bis P-022 bleiben getrennt. System-/Entwickleranweisungen, interne Begründungen
+und Werkzeugprotokolle sind kein Bestandteil des Nutzer-/Assistentenverlaufs.
+Katalog, Register, Checkliste und Querverweise reichen nun bis P-023.
 
 ---
 

@@ -1,11 +1,13 @@
 # Export-Checkliste für Chatverläufe
 
-Die Chatverläufe können nicht automatisch abgelegt werden. Diese Checkliste
-stellt sicher, dass der manuelle Export vor der Abgabe vollständig erfolgt.
+Historische Chatverläufe müssen aus ihren jeweiligen Oberflächen exportiert
+werden. Die aktiven Codex-Sitzungen P-014 bis P-022 sowie P-011 bis P-013/P-023
+wurden dagegen während der Arbeit als sichtbare Transkripte abgelegt. Diese
+Checkliste hält beide Fälle auseinander.
 
 ## Vorbereitung
 
-- [ ] Verzeichnis `docs/prompt-documentation/exports/` anlegen
+- [x] Verzeichnis `docs/prompt-documentation/exports/` anlegen
 - [ ] Dateinamensschema festlegen und einhalten:
       `P-<ID>-<agent>.<md|pdf|json>`
 
@@ -24,6 +26,8 @@ stellt sicher, dass der manuelle Export vor der Abgabe vollständig erfolgt.
 | P-011 | OpenAI Codex (vierte Sitzung) | `exports/P-011-three-apps-ethos.md` | [ ] | Vollständiger Auftrag, Klärungen, genehmigter Plan, Implementierung und Verifikation vom 20.08.2026 |
 | P-012 | OpenAI Codex (vierte Sitzung) | `exports/P-012-comments-reddit-media.md` | [ ] | Native Instagram-Kommentare, getrennte ETHOS-Details sowie Reddit-Bild und -Video vom 20.08.2026 |
 | P-013 | OpenAI Codex (vierte Sitzung) | `exports/P-013-video-phone-fullscreen.md` | [ ] | Doom-Videoformat, entfernter Demo-Text und fokussierter Handy-Modus vom 20.08.2026 |
+| P-014–P-022 | OpenAI Codex (aktive Sitzung) | `exports/P-014-P-022-icon-security-session.md` | [x] | Wortgetreues sichtbares Transkript mit Einzelankern; lokale Pfade normalisiert; P-016-Referenz unter `exports/assets/`; verdeckte Überlegungen und rohe Tool-Ausgaben nicht enthalten |
+| P-023 mit P-011–P-013 | OpenAI Codex (Drei-App-Task) | `chat-transcript-2026-08-20.md` | [x] | Alle sichtbaren Nutzerprompts, Pläne, Zwischenupdates und Abschlussantworten des Drei-App-Tasks; P-013-Bilder als Dateireferenzen; interne Begründungen und Werkzeugprotokolle nicht enthalten |
 
 P-005 hat keinen eigenen Verlauf: die Simulationsarbeit lief als Arbeitsphase im
 Hauptchat und ist in `P-001-master.md` enthalten.

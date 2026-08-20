@@ -58,11 +58,11 @@ export function CommunityReactionButton({ postId }: { postId: string }) {
           hover:bg-assist-tint-2
         "
       >
-        <span aria-hidden="true" className="text-lg leading-none">
-          {headline.emoji}
-        </span>
-        <span aria-hidden="true" className="tabular-nums">
-          {thin ? `${people} Angaben` : `${headline.value} %`}
+        <span className="text-xs font-medium">Am häufigsten:</span>
+        <span aria-hidden="true" className="text-lg leading-none">{headline.emoji}</span>
+        <span className="font-bold">{headline.label}</span>
+        <span className="tabular-nums">
+          · {thin ? `${people} Angaben` : `${headline.value} %`}
         </span>
       </button>
 

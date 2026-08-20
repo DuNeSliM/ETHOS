@@ -1,54 +1,42 @@
-import { Info, ScanFace, Trash2, UserCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Info, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useAppState } from '@/app/AppStateProvider';
-import {
-  Button,
-  Chip,
-  DefinitionRow,
-  FieldLabel,
-  Panel,
-  SimulatedBadge,
-} from '@/components/primitives';
+import { Button, Chip, Panel, SimulatedBadge } from '@/components/primitives';
+import { DEMO_PROFILE } from '@/data/demoProfile';
 import { getPost } from '@/data/posts';
+import { PersonalAnalyticsCharts } from '@/features/analytics/PersonalAnalyticsCharts';
 import {
   COMPARISON_LABEL,
   compareEstimateWithSelfReport,
   type ComparisonVerdict,
 } from '@/features/analytics/comparison';
-import {
-  CONTENT_CATEGORY_LABEL,
-  EXPRESSION_LABEL,
-  SELF_REPORT_LABEL,
-} from '@/lib/labels';
-import type { ContentCategory } from '@/types';
+import { buildSessionAnalytics } from '@/features/analytics/personalAnalytics';
+import { CONTENT_CATEGORY_LABEL, SELF_REPORT_LABEL } from '@/lib/labels';
+import type { AnalyticsSource } from '@/types';
 
-/**
- * Personal overview.
- *
- * Reports counts and nothing else. There are deliberately no interpretations of
- * the participant as a person here - no "you react negatively a lot", no mood
- * scores, no trends over time. The brief rules those out, and they would also
- * be indefensible given that every input is a scripted guess.
- */
 export function OverviewPage() {
-  const { history, reactions, deleteHistoryEntry, deleteAllData, settings } =
-    useAppState();
+  const {
+    deleteAllData,
+    deleteHistoryEntry,
+    engagements,
+    history,
+    reactions,
+    settings,
+  } = useAppState();
+  const [source, setSource] = useState<AnalyticsSource>('demo-profile');
   const [confirmingDeleteAll, setConfirmingDeleteAll] = useState(false);
 
-  const sorted = useMemo(
-    () => [...history].sort((a, b) => b.viewedAt - a.viewedAt),
-    [history],
+  const sessionSnapshot = useMemo(
+    () => buildSessionAnalytics(engagements, reactions),
+    [engagements, reactions],
   );
-
-  const categoryCounts = useMemo(() => {
-    const counts = new Map<ContentCategory, number>();
-    history.forEach((entry) => {
-      counts.set(entry.contentCategory, (counts.get(entry.contentCategory) ?? 0) + 1);
-    });
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
-  }, [history]);
+  const snapshot = source === 'demo-profile' ? DEMO_PROFILE : sessionSnapshot;
+  const sessionEmpty =
+    sessionSnapshot.likedPostCount === 0 &&
+    sessionSnapshot.savedPostCount === 0 &&
+    sessionSnapshot.selfReportCount === 0;
 
   const comparison = useMemo(() => {
     const tally: Record<ComparisonVerdict, number> = {
@@ -68,276 +56,122 @@ export function OverviewPage() {
     return tally;
   }, [reactions]);
 
-  const selfReportCount = Object.values(reactions).filter(
-    (reaction) => reaction.selfReportedReaction,
-  ).length;
   const comparableTotal = comparison.aligned + comparison.diverged;
-
-  if (history.length === 0) {
-    return (
-      <div className="mx-auto max-w-2xl">
-        <h1 className="text-2xl font-bold tracking-tight text-ink">
-          Persönliche Übersicht
-        </h1>
-        <Panel variant="muted" className="mt-5 p-5">
-          <h2 className="text-base font-semibold text-ink">
-            Noch keine Einträge
-          </h2>
-          <p className="mt-1.5 text-sm text-muted">
-            Sobald du Beiträge im Feed ansiehst, erscheinen sie hier. Alles bleibt
-            lokal in diesem Browser.
-          </p>
-          <Link to="/feed/visual" className="mt-4 inline-block">
-            <Button variant="assist">Zum Feed</Button>
-          </Link>
-        </Panel>
-      </div>
-    );
-  }
+  const sortedHistory = useMemo(
+    () => [...history].sort((a, b) => b.viewedAt - a.viewedAt),
+    [history],
+  );
 
   return (
     <div className="mx-auto max-w-2xl">
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-2xl font-bold tracking-tight text-ink">
-          Persönliche Übersicht
-        </h1>
-        <SimulatedBadge label="Schätzungen sind simuliert" />
+        <h1 className="text-2xl font-bold tracking-tight text-ink">ETHOS-Statistiken</h1>
+        <SimulatedBadge label="alle Auswertungen sind simuliert" />
       </div>
       <p className="mt-2 text-muted">
-        Eine Zusammenfassung dessen, was in diesem Browser gespeichert ist. Hier
-        stehen nur Zählungen – keine Bewertung deiner Person.
+        Sieh, welche Arten von Beiträgen geliked wurden und welche Reaktionen
+        aktiv angegeben wurden. ETHOS bewertet daraus keine Persönlichkeit.
       </p>
 
-      {!settings.storeReactionHistory ? (
-        <Chip tone="caution" className="mt-3">
-          Speicherung ist ausgeschaltet. Diese Liste verschwindet beim Neuladen.
-        </Chip>
-      ) : null}
-
-      {/*
-        Counters as stacked rows rather than a three-column grid: the app is
-        laid out for a phone screen, where three columns would leave each
-        label three words wide.
-      */}
-      <div className="mt-6 grid gap-2">
-        <Panel className="flex items-baseline gap-3 p-3">
-          <p className="w-10 shrink-0 text-2xl font-bold tabular-nums text-ink">
-            {history.length}
-          </p>
-          <p className="text-sm text-muted">
-            {history.length === 1 ? 'Beitrag' : 'Beiträge'} angesehen
-          </p>
-        </Panel>
-        <Panel className="flex items-baseline gap-3 p-3">
-          <p className="w-10 shrink-0 text-2xl font-bold tabular-nums text-ink">
-            {selfReportCount}
-          </p>
-          <p className="text-sm text-muted">eigene Angaben gemacht</p>
-        </Panel>
-        <Panel className="flex items-baseline gap-3 p-3">
-          <p className="w-10 shrink-0 text-2xl font-bold tabular-nums text-ink">
-            {history.filter((entry) => entry.openedAssistant).length}
-          </p>
-          <p className="text-sm text-muted">Mal „Kontext erklären“ geöffnet</p>
-        </Panel>
+      <div className="mt-5 grid grid-cols-2 gap-1 rounded-xl border border-line bg-surface-2 p-1" role="group" aria-label="Datenquelle der Statistik">
+        <button
+          type="button"
+          onClick={() => setSource('demo-profile')}
+          aria-pressed={source === 'demo-profile'}
+          className={`rounded-lg px-3 py-2 text-sm font-semibold ${source === 'demo-profile' ? 'bg-surface text-assist-strong panel-shadow' : 'text-muted hover:text-ink'}`}
+        >
+          Simuliertes Profil
+        </button>
+        <button
+          type="button"
+          onClick={() => setSource('current-session')}
+          aria-pressed={source === 'current-session'}
+          className={`rounded-lg px-3 py-2 text-sm font-semibold ${source === 'current-session' ? 'bg-surface text-assist-strong panel-shadow' : 'text-muted hover:text-ink'}`}
+        >
+          Diese Sitzung
+        </button>
       </div>
 
-      {/* ---- estimate vs. self report -------------------------------- */}
-      <Panel as="section" className="mt-6 p-4">
-        <h2 className="text-base font-bold text-ink">
-          Automatische Schätzung und deine eigene Angabe
-        </h2>
+      {source === 'demo-profile' ? (
+        <Chip tone="caution" className="mt-3">
+          Fiktives Langzeitprofil mit vorbereiteten Zahlen. Es beschreibt nicht dich und wird nie mit deiner Sitzung vermischt.
+        </Chip>
+      ) : (
+        <Chip tone={settings.storeReactionHistory ? 'assist' : 'caution'} className="mt-3">
+          {settings.storeReactionHistory
+            ? 'Nur bewusste Aktionen aus diesem Browser; lokal gespeichert.'
+            : 'Speicherung ist aus. Diese Sitzungsdaten verschwinden beim Neuladen.'}
+        </Chip>
+      )}
 
-        {comparableTotal === 0 ? (
-          <p className="mt-2 text-sm text-muted">
-            Es gibt noch keinen Vergleich. Sobald du bei einem Beitrag deine
-            eigene Reaktion angibst und dafür auch eine Schätzung vorlag, steht
-            hier, wie oft beides in dieselbe Richtung zeigte.
+      {source === 'current-session' && sessionEmpty ? (
+        <Panel variant="muted" className="mt-5 p-5">
+          <h2 className="text-base font-semibold text-ink">Noch keine Sitzungsstatistik</h2>
+          <p className="mt-1.5 text-sm text-muted">
+            Like oder speichere einen Beitrag in Instagram, gib einem Reddit-Beitrag ein Upvote oder trage deine Reaktion aktiv ein.
           </p>
-        ) : (
-          <>
-            <dl className="mt-3 grid gap-3">
-              <DefinitionRow term={COMPARISON_LABEL.aligned} tone="assist">
-                {comparison.aligned} von {comparableTotal}
-              </DefinitionRow>
-              <DefinitionRow term={COMPARISON_LABEL.diverged} tone="self">
-                {comparison.diverged} von {comparableTotal}
-              </DefinitionRow>
-            </dl>
-            {comparison['not-comparable'] > 0 ? (
-              <p className="mt-2 text-sm text-faint">
-                {comparison['not-comparable']} Angabe(n) waren nicht vergleichbar
-                (unklare Schätzung oder „andere Reaktion“).
-              </p>
-            ) : null}
-          </>
-        )}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link to="/instagram"><Button variant="assist">Instagram öffnen</Button></Link>
+            <Link to="/reddit"><Button>Reddit öffnen</Button></Link>
+          </div>
+        </Panel>
+      ) : (
+        <PersonalAnalyticsCharts snapshot={snapshot} />
+      )}
 
-        <p className="mt-3 flex gap-2 text-sm text-muted">
-          <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-          <span>
-            Eine Abweichung bedeutet nicht, dass du oder die Schätzung „falsch“
-            wart. Derselbe Gesichtsausdruck kann zu sehr unterschiedlichen
-            Empfindungen gehören. Deine Angabe gilt immer.
-          </span>
-        </p>
-      </Panel>
+      {source === 'current-session' && comparableTotal > 0 ? (
+        <Panel as="section" className="mt-5 p-4">
+          <h2 className="text-base font-bold text-ink">Automatische Schätzung und deine Angabe</h2>
+          <dl className="mt-3 grid gap-2">
+            <div className="rounded-lg bg-assist-tint p-3"><dt className="text-xs font-semibold text-assist-strong">{COMPARISON_LABEL.aligned}</dt><dd className="mt-1 text-xl font-bold tabular-nums text-ink">{comparison.aligned} von {comparableTotal}</dd></div>
+            <div className="rounded-lg bg-info-tint p-3"><dt className="text-xs font-semibold text-info">{COMPARISON_LABEL.diverged}</dt><dd className="mt-1 text-xl font-bold tabular-nums text-ink">{comparison.diverged} von {comparableTotal}</dd></div>
+          </dl>
+          <p className="mt-3 flex gap-2 text-sm text-muted"><Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><span>Eine Kamera-Schätzung ist keine Aussage über dein Gefühl. Deine aktive Angabe bleibt separat und hat Vorrang.</span></p>
+        </Panel>
+      ) : null}
 
-      {/* ---- categories --------------------------------------------- */}
-      <Panel as="section" className="mt-6 p-4">
-        <h2 className="text-base font-bold text-ink">
-          Häufige Inhaltskategorien
-        </h2>
-        <p className="mt-1 text-sm text-muted">
-          Wie die angesehenen Beiträge von der simulierten Analyse einsortiert
-          wurden.
-        </p>
-        <ul className="mt-3 space-y-2">
-          {categoryCounts.map(([category, count]) => (
-            <li key={category}>
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="font-medium text-ink">
-                  {CONTENT_CATEGORY_LABEL[category]}
-                </span>
-                <span className="tabular-nums text-muted">
-                  {count} {count === 1 ? 'Beitrag' : 'Beiträge'}
-                </span>
-              </div>
-              <div
-                aria-hidden="true"
-                className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-3"
-              >
-                <div
-                  className="h-full rounded-full bg-assist"
-                  style={{ width: `${(count / history.length) * 100}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Panel>
-
-      {/* ---- entries ------------------------------------------------ */}
-      <section className="mt-6" aria-labelledby="entries-heading">
-        <h2
-          id="entries-heading"
-          className="text-base font-bold tracking-tight text-ink"
-        >
-          Zuletzt betrachtete Beiträge
-        </h2>
-
-        <ul className="mt-3 space-y-2.5">
-          {sorted.map((entry) => {
-            const post = getPost(entry.postId);
-            const reaction = reactions[entry.postId];
-            return (
-              <li key={entry.id}>
-                <Panel className="p-3.5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-ink">
-                        {post?.title ?? post?.body ?? entry.postId}
-                      </p>
-                      <p className="mt-0.5 text-xs text-faint">
-                        {post ? `${post.author} · ` : ''}
-                        {new Date(entry.viewedAt).toLocaleString('de-DE', {
-                          dateStyle: 'short',
-                          timeStyle: 'short',
-                        })}
-                        {' · '}
-                        {CONTENT_CATEGORY_LABEL[entry.contentCategory]}
-                      </p>
+      {source === 'current-session' && sortedHistory.length > 0 ? (
+        <section className="mt-7" aria-labelledby="history-heading">
+          <h2 id="history-heading" className="text-base font-bold text-ink">Zuletzt betrachtete Beiträge</h2>
+          <ul className="mt-3 space-y-2">
+            {sortedHistory.map((entry) => {
+              const post = getPost(entry.postId);
+              const selfReport = reactions[entry.postId]?.selfReportedReaction;
+              return (
+                <li key={entry.id}>
+                  <Panel className="p-3.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <Link to={post ? `/${post.platform}/post/${post.id}` : '#'} className="block truncate text-sm font-semibold text-ink hover:underline">
+                          {post?.title ?? post?.body ?? entry.postId}
+                        </Link>
+                        <p className="mt-0.5 text-xs text-faint">{post?.platform === 'reddit' ? 'Reddit' : 'Instagram'} · {CONTENT_CATEGORY_LABEL[entry.contentCategory]}{selfReport ? ` · deine Angabe: ${SELF_REPORT_LABEL[selfReport]}` : ''}</p>
+                      </div>
+                      <Button variant="danger" size="sm" onClick={() => deleteHistoryEntry(entry.id)} aria-label={`Verlaufseintrag zu ${post?.title ?? post?.author ?? entry.postId} löschen`}>
+                        <Trash2 aria-hidden="true" className="size-4" />
+                        Löschen
+                      </Button>
                     </div>
+                  </Panel>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => deleteHistoryEntry(entry.id)}
-                      aria-label={`Eintrag zu „${
-                        post?.title ?? post?.author ?? entry.postId
-                      }“ löschen`}
-                    >
-                      <Trash2 aria-hidden="true" className="size-4" />
-                      Löschen
-                    </Button>
-                  </div>
-
-                  {reaction ? (
-                    <dl className="mt-3 grid gap-2.5 border-t border-line pt-3">
-                      <DefinitionRow
-                        term="Automatisch geschätzter Ausdruck"
-                        tone="assist"
-                      >
-                        <span className="inline-flex items-center gap-1.5">
-                          <ScanFace aria-hidden="true" className="size-3.5" />
-                          {EXPRESSION_LABEL[reaction.estimatedExpression]}
-                        </span>
-                      </DefinitionRow>
-                      <DefinitionRow term="Von dir angegebene Reaktion" tone="self">
-                        {reaction.selfReportedReaction ? (
-                          <span className="inline-flex items-center gap-1.5 text-info">
-                            <UserCheck aria-hidden="true" className="size-3.5" />
-                            {SELF_REPORT_LABEL[reaction.selfReportedReaction]}
-                            {reaction.selfReportedNote
-                              ? ` – „${reaction.selfReportedNote}“`
-                              : ''}
-                          </span>
-                        ) : (
-                          <span className="font-normal text-faint">
-                            keine Angabe
-                          </span>
-                        )}
-                      </DefinitionRow>
-                    </dl>
-                  ) : null}
-                </Panel>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
-      {/* ---- delete all --------------------------------------------- */}
       <Panel variant="muted" as="section" className="mt-8 p-4">
-        <FieldLabel>Daten löschen</FieldLabel>
+        <h2 className="text-sm font-bold text-ink">Lokale Sitzungsdaten löschen</h2>
         {confirmingDeleteAll ? (
-          <>
-            <p className="mt-2 text-sm text-ink">
-              Wirklich alle lokal gespeicherten Einträge, Reaktionen und
-              Testergebnisse löschen? Das lässt sich nicht rückgängig machen.
-              Deine Einstellungen bleiben erhalten.
-            </p>
+          <div className="mt-2">
+            <p className="text-sm text-muted">Verlauf, Reaktionen, Likes, Upvotes, gespeicherte Beiträge und Research-Ergebnisse löschen? Einstellungen bleiben erhalten.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button
-                variant="danger"
-                onClick={() => {
-                  deleteAllData();
-                  setConfirmingDeleteAll(false);
-                }}
-              >
-                <Trash2 aria-hidden="true" className="size-4" />
-                Ja, alles löschen
-              </Button>
-              <Button onClick={() => setConfirmingDeleteAll(false)}>
-                Abbrechen
-              </Button>
+              <Button variant="danger" onClick={() => { deleteAllData(); setConfirmingDeleteAll(false); }}><Trash2 aria-hidden="true" className="size-4" />Ja, alles löschen</Button>
+              <Button onClick={() => setConfirmingDeleteAll(false)}>Abbrechen</Button>
             </div>
-          </>
+          </div>
         ) : (
-          <>
-            <p className="mt-2 text-sm text-muted">
-              Löscht den Verlauf, deine Angaben und die Research-Mode-Ergebnisse
-              aus diesem Browser.
-            </p>
-            <Button
-              variant="danger"
-              className="mt-3"
-              onClick={() => setConfirmingDeleteAll(true)}
-            >
-              <Trash2 aria-hidden="true" className="size-4" />
-              Alle Daten löschen
-            </Button>
-          </>
+          <Button variant="danger" className="mt-3" onClick={() => setConfirmingDeleteAll(true)}><Trash2 aria-hidden="true" className="size-4" />Alle Sitzungsdaten löschen</Button>
         )}
       </Panel>
     </div>

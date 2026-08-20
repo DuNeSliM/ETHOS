@@ -15,7 +15,7 @@ export function ResearchBanner() {
   const { active } = useResearchSession();
   const location = useLocation();
 
-  if (!active || location.pathname === '/research') return null;
+  if (!active || location.pathname === '/ethos/research') return null;
 
   const scenario = getScenario(active.scenarioId);
   if (!scenario) return null;
@@ -31,7 +31,7 @@ export function ResearchBanner() {
           {scenario.title}
         </span>
         <Link
-          to="/research"
+          to="/ethos/research"
           className="
             ml-auto rounded-md px-2 py-1 text-xs font-semibold text-sim underline
             decoration-sim-line underline-offset-2 hover:bg-surface

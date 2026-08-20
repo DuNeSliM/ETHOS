@@ -159,6 +159,52 @@ export const COMMUNITY: Record<string, CommunityReactionSummary> = {
     sourceExplanation: SOURCE_ESTIMATED_AND_SELF,
   },
 
+  'd-doom-video': {
+    postId: 'd-doom-video',
+    participantCount: 2541,
+    selfReportedParticipantCount: 604,
+    estimatedReactions: {
+      interested: 31,
+      surprised: 25,
+      amused: 18,
+      neutral: 14,
+      annoyed: 7,
+      unclear: 5,
+    },
+    selfReportedReactions: {
+      interested: 33,
+      surprised: 24,
+      amused: 16,
+      annoyed: 12,
+      neutral: 9,
+      other: 6,
+    },
+    representativeWarning: REPRESENTATIVE_WARNING,
+    sourceExplanation: SOURCE_ESTIMATED_AND_SELF,
+  },
+
+  'd-kerle-meme': {
+    postId: 'd-kerle-meme',
+    participantCount: 1872,
+    selfReportedParticipantCount: 481,
+    estimatedReactions: {
+      amused: 58,
+      neutral: 17,
+      interested: 9,
+      surprised: 8,
+      unclear: 8,
+    },
+    selfReportedReactions: {
+      amused: 66,
+      interested: 12,
+      neutral: 11,
+      surprised: 6,
+      other: 5,
+    },
+    representativeWarning: REPRESENTATIVE_WARNING,
+    sourceExplanation: SOURCE_ESTIMATED_AND_SELF,
+  },
+
   'd-irony': {
     postId: 'd-irony',
     participantCount: 287,

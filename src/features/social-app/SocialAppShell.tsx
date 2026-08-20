@@ -1,29 +1,27 @@
-import { Heart, Send } from 'lucide-react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Heart, House, Send } from 'lucide-react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 
-import { FeedModeSwitch } from '@/features/feed/FeedModeSwitch';
 import { PluginOverlay, PluginStatusStrip } from '@/features/plugin/PluginOverlay';
 import { PlatformTabBar } from '@/features/social-app/PlatformTabBar';
 import { PlatformWordmark } from '@/features/social-app/PlatformWordmark';
-import { PLATFORM_NAME } from '@/features/social-app/platform';
+import { SOCIAL_PLATFORMS } from '@/lib/identity';
 import { LiveSelfView } from '@/features/reactions/LiveSelfView';
 import { ResearchBanner } from '@/features/research-mode/ResearchBanner';
 import { scrollAppToTop } from '@/lib/viewport';
 
 /**
  * Chrome of the simulated platform: everything a photo-sharing app puts around
- * its content, and nothing of ContextLens.
+ * its content, and nothing of ETHOS.
  *
  * The separation is the point. The header, the tab bar and the feed underneath
- * belong to `Momento`; the strip below the header and the floating button
+ * belong to the Instagram mock; the strip below the header and floating button
  * belong to the assistance layer and keep the teal token family in a screen
  * that is otherwise black on white. A participant should be able to say which
  * pixels belong to whom without being told.
  */
 export function SocialAppShell() {
   const location = useLocation();
-  const isFeed = location.pathname.startsWith('/feed');
   const [notice, setNotice] = useState<string | null>(null);
   const noticeTimer = useRef<number | undefined>(undefined);
 
@@ -59,6 +57,13 @@ export function SocialAppShell() {
       <div className="sticky top-0 z-30">
         <header className="bg-surface/95 backdrop-blur">
           <div className="mx-auto flex max-w-[30rem] items-center gap-1 px-3 py-2">
+            <Link
+              to="/phone"
+              aria-label="Zum Smartphone-Startbildschirm"
+              className="mr-1 rounded-md p-1.5 text-ink hover:bg-surface-2"
+            >
+              <House aria-hidden="true" className="size-5" />
+            </Link>
             <PlatformWordmark />
 
             <button
@@ -79,13 +84,6 @@ export function SocialAppShell() {
             </button>
           </div>
 
-          {/* The view switch belongs to the feed. A detail page is one level
-              deeper and carries its own way back. */}
-          {isFeed ? (
-            <div className="mx-auto max-w-[30rem] px-3 pb-2">
-              <FeedModeSwitch />
-            </div>
-          ) : null}
         </header>
 
         {/* Assistance layer, between the platform and the participant. */}
@@ -105,7 +103,7 @@ export function SocialAppShell() {
         right is the way into the extension.
       */}
       <LiveSelfView />
-      <PluginOverlay />
+      <PluginOverlay platform="instagram" />
 
       {/*
         One live region that is always mounted - swapping the element in and
@@ -130,8 +128,7 @@ export function SocialAppShell() {
       <PlatformTabBar onUnavailable={reportUnavailable} />
 
       <p className="sr-only">
-        {PLATFORM_NAME} ist eine erfundene App. Alle Beiträge, Konten und Zahlen
-        darin sind Beispieldaten dieses Prototyps.
+        {SOCIAL_PLATFORMS.instagram.mockNotice}.
       </p>
     </div>
   );

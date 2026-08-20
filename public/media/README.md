@@ -45,8 +45,19 @@ also stehen bleiben, damit der Beitrag auch ohne Datei funktioniert.
   geschrieben und wird nicht aus der Datei berechnet. Passt der neue Clip
   inhaltlich nicht zur hinterlegten Einschätzung, muss der Text in
   `analyses.ts` mitgeändert werden, sonst widerspricht die Demo sich selbst.
-- Videos laufen `muted` und `loop`; die Wiedergabeleiste unter dem Beitrag
-  steuert weiterhin die simulierte Zeitachse für den Reaktionsverlauf.
+- Instagram-Videos laufen im simulierten Player `muted` und `loop`; dessen
+  Wiedergabeleiste steuert die feste Reaktionszeitachse.
+- Reddit-Medien werden von `RedditPostMedia` nativ gerendert. Das Video läuft
+  nicht automatisch, ist nicht stummgeschaltet und bietet Browser-Controls;
+  ein minimaler Seek dekodiert den ersten Frame für die pausierte Vorschau.
+
+## Aktuelle Reddit-Demodateien
+
+- `doom.mp4`: Video für den zweiten Feed-Post aus `r/marvel`.
+- `kerle.jpg`: Bild/Meme für den dritten Feed-Post aus `r/de`.
+
+Beide Dateien wurden für diesen Projektstand bereitgestellt. Vor Veröffentlichung
+oder externer Weitergabe muss die jeweilige Nutzungsberechtigung geprüft werden.
 
 ## Rechte
 

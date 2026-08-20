@@ -1,122 +1,72 @@
-﻿# Fortschritt
+# Fortschritt
 
-Stand: 03.08.2026 · Branch `feat/contextlens-prototype`
-**Build:** erfolgreich · **Tests:** 121 / 121 grün
+Stand: 20.08.2026 · Branch `feat/reddit-and-so`
+**Typprüfung:** erfolgreich · **Tests:** 133/133 grün · **Build:** erfolgreich
 
-## Phasenübersicht
+## Meilensteine
 
-| Phase | Inhalt | Status |
+| Phase | Ergebnis | Status |
 |---|---|---|
-| 1 | Product Skeleton: Setup, Routing, Landing, Onboarding, Navigation, Design-Tokens, erste Feed-Ansicht | **abgeschlossen** |
-| 2 | Context Assistant: Button, Karten, Unsicherheit, Ragebait-Hinweis, Erklärung | **abgeschlossen** |
-| 3 | Viewer Reaction Simulation: Anzeige, Korrektur, Kamera-UI, Trennung Schätzung/Selbstauskunft | **abgeschlossen** |
-| 4 | Transparency and Analytics: Community, Verlauf, persönliche Übersicht, Speicherung, Löschen | **abgeschlossen** |
-| 5 | Research Mode: drei Aufgaben, Bewertung, lokale Speicherung, JSON-/CSV-Export | **abgeschlossen** |
-| 6 | Polish and QA: Responsive, Tastatur, Kontraste, Texte, Build, Tests, Leerzustände, Reset | **abgeschlossen** |
-| 7 | Produktrahmung: simuliertes Telefon, Startbildschirm, eigenständige Plattform-App, Assistenz als Erweiterung darüber | **abgeschlossen** |
-| 8 | Echtes Kamerabild über dem Feed, Emoji-Knopf für Community-Reaktionen, genauere Feed-Konventionen | **abgeschlossen** |
-| 9 | Gezeichnete Szenen statt grauer Platzhalter, Meme-Untertitel, Farbwelt der Vorlage, Weg für echte Clips | **abgeschlossen** |
+| 1–7 | ursprünglicher ContextLens-Prototyp, Mock-Engine, Feeds, Einwilligung, Research, Reviews | abgeschlossen |
+| 8 | simuliertes Telefon und getrennte Plattform-/Assistenzrahmung | abgeschlossen |
+| 9 | lokale Kameravorschau, Community-Reaktionsknopf, Feed-Realismus | abgeschlossen |
+| 10 | eigene SVG-Beispielinhalte und Plattform-Farbwelt | abgeschlossen |
+| 11 | drei Apps: Instagram, Reddit, ETHOS; Engagements; persönliche Visualisierungen; Rebranding | abgeschlossen |
+| 12 | native Instagram-Kommentare; getrennte ETHOS-Details; Reddit-Bild und -Video | abgeschlossen |
+| 13 | randloses Doom-Video und fokussierter Handy-Vollbild-Modus | abgeschlossen |
 
-## Was funktioniert
+## P-013 umgesetzt
 
-**Inhalt und Feeds**
-- 9 Beispielbeiträge (5 Visual Feed, 4 Discussion Feed) mit Kommentar-Threads
-- Sichtbarer Umschalter zwischen beiden Ansichten
-- Gezeichnete SVG-Szene je Beitrag statt grauer Platzhalter; Teile davon
-  bewegen sich, solange die simulierte Wiedergabe läuft
-- Meme-Untertitel im Bild, Hashtags in der Bildunterschrift
-- Echte Dateien können jede Zeichnung ersetzen (`public/media/README.md`)
-- Simulierter Video-Scrubber mit Abspielen/Pause
+- Doom-Erklärabsatz aus dem Reddit-Post entfernt.
+- Videoformat auf das echte 4:3-Seitenverhältnis gesetzt: volle Kartenbreite, keine seitlichen schwarzen Ränder.
+- Desktop-Schalter `Handy-Vollbild` ergänzt; blendet die Demo-Erklärung aus und vergrößert/zentriert das Telefon.
+- Beenden-Schalter und `aria-pressed` machen den Modus jederzeit umkehrbar und tastaturbedienbar.
+- Browserprüfung bestätigt 0 px Seitenspalt am Video, mittiges 456-px-Telefon im fokussierten Modus und keine Konsolenfehler.
 
-**Context Assistant**
-- „Kontext erklären" an jedem Beitrag und an zwei ausgewählten Kommentaren
-- Alle sieben Kartenvarianten erreichbar (Sarkasmus, Ironie, emotionaler Ton,
-  Übertreibung, Ragebait, nicht eindeutig, unzureichender Kontext)
-- Unsicherheit in drei Stufen als Wort, Zahl und Balken
-- „Warum wird das so eingeschätzt?", „Nicht hilfreich", „Andere Interpretation"
-- Grenzen-Block auf jeder Karte, sprachlich abgeschwächte Formulierungen
-- Wird ein Hinweis durch eine Einstellung zurückgehalten, wird genau diese
-  Einstellung benannt und verlinkt
+## P-012 umgesetzt
 
-**Eigene Reaktion**
-- Simulierte Schätzung, standardmäßig aus
-- Korrektur über neun Reaktionsoptionen plus Freitext
-- Schätzung und Selbstauskunft dauerhaft getrennt sichtbar
-- Optionale lokale Kamera-Vorschau (nur Anzeige, Tracks werden gestoppt)
-- Echtes Selbstbild über dem Feed, solange beide Kameraschalter an sind, mit
-  Panel, das echtes Bild und simulierte Auswertung auseinanderhält
+- Normale Instagram-Kommentar-Controls öffnen eine vertraute Kommentarsektion statt der ETHOS-Analyse.
+- Normale Reddit-Kommentarwege öffnen den vollständigen Reddit-Thread.
+- Die bisherige kombinierte Analyse bleibt unter separaten `/ethos`-Routen und ist als `ETHOS-Auswertung` erreichbar.
+- Alle Reddit-Communities verwenden `r/`.
+- Zweiter Reddit-Post: `r/marvel`, „Doctor Doom Wins in Avengers: Doomsday“, lokales `doom.mp4`.
+- Dritter Reddit-Post: `r/de`, Bild-/Meme-Post mit `kerle.jpg` und Bildbeschreibung.
+- Nativer Video-Player startet pausiert, dekodiert den ersten Frame und lässt Wiedergabe samt Ton zu.
+- Datenintegrität, Routing, Trennung der Ansichten und Media-Attribute sind automatisiert geprüft.
 
-**Transparenz und Auswertung**
-- Community-Reaktionen mit Quellenumschalter, getrennten Teilnehmerzahlen,
-  Repräsentativitätswarnung und Quellenerklärung
-- Emoji-Knopf an jedem Beitrag: häufigste Selbstauskunft plus Prozentwert,
-  dahinter die vollständige Auswertung (E-017)
-- Reaktionsverlauf für drei Videos, synchron zum Scrubber
-- Persönliche Übersicht ohne Bewertung der Person, mit Einzel- und
-  Gesamtlöschung
-- Datenschutz-Dashboard mit Zustandsliste, JSON-Export, Löschen, Demo-Reset
+## P-011 umgesetzt
 
-**Research Mode**
-- Drei geführte Szenarien mit Banner, das den Rückweg offenhält
-- Vier Bewertungsfragen (1–5) mit ausgeschriebenen Skalenenden plus Freitext
-- Lokale Speicherung, Export als JSON und CSV
+- Zentrale sichtbare Identität **ETHOS**; alte `contextlens.v1.*`-Speicherschlüssel bewusst kompatibel.
+- Drei App-Symbole auf `/phone`, generische Icons, Home-Steuerung pro Shell.
+- Kanonische Instagram-, Reddit- und ETHOS-Routen mit historischen Redirects.
+- Instagram behält fünf visuelle Posts; Feed-Umschalter entfernt.
+- Eigene Reddit-Shell und scrollbarer Start-Feed, in P-012 auf sechs Text-/Bild-/Video-Posts erweitert.
+- Deutliche inoffizielle Mock-Hinweise und keine offiziellen Logos/Assets/APIs.
+- ETHOS-Status, Overlay, Kontext und Community-Auswertung auf beiden Social Apps.
+- Community-Knopf benennt häufigste freiwillige Selbstauskunft sichtbar und behauptet keine Mehrheit unter 50 Prozent.
+- `SocialPlatform` ersetzt Feed-Modus; `PostEngagement` speichert Like/Upvote und Saved gemeinsam.
+- Engagements in Persistenz, Export, Einzellöschung, Gesamtlöschung und Reset; Speicher-Opt-out bleibt in-memory nutzbar.
+- Fiktives Demo-Profil und strikt getrennte Sitzungsableitung.
+- Donut, 100-%-Emotionslandschaft und direkt beschriftete Plattformbalken mit Listen/Tabellen.
+- Recharts 3.10.1, React 18 `react-is`, React Router 6.30.6 und kompatible Security-Patches.
+- Saubere Tests durch Router-Future-Flags, Scroll-/Chart-Mocks und renderzeitfreie Research-Benachrichtigung.
+- Prompt-Katalog P-001 bis P-013 und alle Projektdokumente aktualisiert.
 
-**Produktrahmung (Phase 7)**
-- Simuliertes Telefon ab 1024 px: Gehäuse, Betriebssystem-Statusleiste mit echter
-  Uhrzeit, Home-Indikator; darunter läuft dieselbe Ansicht bildschirmfüllend
-- Startbildschirm mit ContextLens-Widget, zwei benutzbaren App-Symbolen und
-  Kulissensymbolen ohne Funktion
-- Simulierte Foto-App „Momento" mit eigener Wortmarke, Segmented Control,
-  Tab-Leiste und eigener Farbwelt (`.platform-skin`, schwarz auf weiß)
-- ContextLens erscheint dort nur als Erweiterung: Statusleiste unter der
-  Kopfzeile und schwebender Knopf mit Panel (Hauptschalter plus Verweise)
-- Bedienelemente der Plattform, die es im Prototyp nicht gibt, sagen das beim
-  Antippen, statt stumm zu bleiben
+## Qualitätsstand
 
-**Querschnitt**
-- Hell-/Dunkelmodus, telefonorientiertes Layout von 320 px aufwärts
-- Tastaturbedienung, Fokusfalle im Dialog, Skip-Link
-- Kein Status wird nur über Farbe kommuniziert
-- StatusBar zeigt durchgehend Analyse-, Kamera- und Speicherstatus
-
-## Meilensteinprotokoll
-
-| Schritt | Ergebnis |
+| Prüfung | Ergebnis |
 |---|---|
-| Branch angelegt | `feat/contextlens-prototype` |
-| Präsentation ausgewertet | Folie 10 produktrelevant; Folien 11–21 gehören zu einer anderen Aufgabe und wurden nicht verwendet |
-| Setup | React 18, TS strict, Vite 6, Tailwind 4, Router 6, Recharts 2, Vitest 3 |
-| Erster Build | 3 Konfigurationsfehler behoben (CSS-Typen, `node:url`, Vitest-Typkonflikt durch Vite-5/6-Doppelung → Vitest 3) |
-| Testsuite | 89 Tests; 3 Fehlschläge behoben — davon einer ein **echter Inhaltsfehler** (zwei Erklärungen nicht abgeschwächt) |
-| Subagents | 5 gestartet, 1 erfolgreich (Designsystem), 4 wegen Sitzungslimit abgebrochen; deren Deliverables im Hauptchat erstellt |
-| Review-Korrekturen | 8 Befunde behoben, siehe `AGENTS.md` Abschnitt 3 |
-| Kontrastprüfung | Alle Textpaare erreichen AA; zwei Token korrigiert |
-| Visual Feed überarbeitet | Struktur einer Foto-Sharing-Oberfläche: Stories-Streifen, randlose 4∶5-Medien, Aktionszeile, Handle-Caption. Nur Struktur übernommen, keine Marke |
-| Visual Feed überarbeitet (2. Durchgang) | Feed randlos, Trennung nur durch Haarlinie, Story-Ringe aus der Plattformrampe |
-| Telefonrahmen ergänzt | `features/device/`, `#app-viewport` als Scrollfläche, `transform`-Regel für `position: fixed` |
-| Apps getrennt | Zwei Shells statt einer: `SocialAppShell` (Plattform) und `AppShell` (ContextLens) |
-| Mehrspaltige Desktop-Layouts entfernt | `sm:grid-cols-*` in der Übersicht und das breite Sheet-Layout ersetzt – Begründung in `docs/known-limitations.md` |
-| Feed-Konventionen geschärft | Aktionszeile nur mit Symbolen, „Gefällt N Personen"-Zeile darunter, Doppeltipp-Herz (vergibt, nimmt nie zurück), Story-Ring am Profilbild |
-| Echtes Kamerabild ergänzt | `useCameraStream` als einzige `getUserMedia`-Stelle; `LiveSelfView` über dem Feed; E-018 |
-| Emoji-Knopf ergänzt | Häufigste Selbstauskunft je Beitrag, Sheet mit vollständiger Auswertung; E-017 |
-| Bilder gezeichnet | Fünf SVG-Szenen (`PostScene.tsx`), Meme-Untertitel, `src`-Feld für echte Dateien; E-020 |
-| Farbwelt der Vorlage übernommen | Verlaufsrampe, Akzentblau, Like-Rot; E-019 revidiert E-015 teilweise |
-| Abschlussprüfung | Build erfolgreich, 121/121 Tests grün |
+| `npm run typecheck` | erfolgreich |
+| `npm test` | 8 Dateien, 133 Tests, alle grün |
+| `npm run build` | erfolgreich |
+| Datenintegrität | Demo-Totale, Plattformmapping, Kategorien und Reaktionsquellen getestet |
+| Dependency-Audit | keine hohe/kritische Schwachstelle; zwei moderate Router-v6-Advisories dokumentiert |
+| Netzwerk-/Erkennungsgarantie | keine neue Netzwerk-/Backend-/Bildanalysefunktion |
 
-## Offene Punkte
+## Bewusst offen
 
-**Vor dem ersten Nutzertest**
-- Manuelle Geräteprüfung (echtes Smartphone, echter Desktop-Browser)
-- Kamera-Vorschau auf echter Hardware prüfen (M-25 bis M-27 im Testplan)
-- Exportdateien in einer Tabellenkalkulation gegenprüfen
-
-**Nachgelagert**
-- Screenreader-Test (NVDA, VoiceOver)
-- Automatisierter A11y-Scan (axe oder Lighthouse)
-- Playwright-E2E-Smoke-Test (optionales Stretch Goal, nicht umgesetzt)
-- Chatverläufe manuell exportieren
-  (`docs/prompt-documentation/export-checklist.md`)
-
-**Bewusst nicht umgesetzt**
-- Alles unter „Ausdrücklich nicht enthalten" in `docs/product-brief.md`
-- Die verworfenen Ideen aus der Präsentation, siehe `docs/decisions.md`
+- Playwright in echten Browsern und automatisierte 320-px-/200-%-Zoom-Screenshots.
+- Globale Error Boundary.
+- View-Tracking per IntersectionObserver statt Mount.
+- Container Queries für app-interne responsive Komponenten.
+- React Router 7 inklusive manueller Migrationsprüfung.

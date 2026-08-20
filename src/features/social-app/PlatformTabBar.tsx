@@ -29,7 +29,7 @@ export function PlatformTabBar({
   onUnavailable: (label: string) => void;
 }) {
   const { pathname } = useLocation();
-  const homeActive = pathname.startsWith('/feed') || pathname.startsWith('/post');
+  const homeActive = pathname.startsWith('/instagram');
 
   return (
     <nav
@@ -39,7 +39,7 @@ export function PlatformTabBar({
       <ul className="mx-auto flex max-w-[30rem] items-stretch">
         <li className="flex-1">
           <NavLink
-            to="/feed/visual"
+            to="/instagram"
             aria-current={homeActive ? 'page' : undefined}
             className={`${ITEM} ${homeActive ? 'text-ink' : 'text-faint'}`}
           >

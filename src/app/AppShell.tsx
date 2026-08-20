@@ -1,6 +1,6 @@
 import {
   ClipboardList,
-  LayoutList,
+  House,
   Moon,
   ScanFace,
   Settings2,
@@ -14,7 +14,6 @@ import { useAppState } from '@/app/AppStateProvider';
 import { StatusBar } from '@/components/StatusBar';
 import { Logo } from '@/components/Logo';
 import { ResearchBanner } from '@/features/research-mode/ResearchBanner';
-import { PLATFORM_NAME } from '@/features/social-app/platform';
 import { scrollAppToTop } from '@/lib/viewport';
 
 /**
@@ -23,18 +22,18 @@ import { scrollAppToTop } from '@/lib/viewport';
  * a post detail page too, otherwise the whole nav reads as "nothing selected".
  */
 const NAV_ITEMS = [
-  { to: '/feed/visual', match: ['/feed', '/post'], label: 'Feed', icon: LayoutList },
-  { to: '/overview', match: ['/overview'], label: 'Übersicht', icon: ClipboardList },
-  { to: '/privacy', match: ['/privacy'], label: 'Datenschutz', icon: ShieldCheck },
-  { to: '/settings', match: ['/settings'], label: 'Einstellungen', icon: Settings2 },
-  { to: '/research', match: ['/research'], label: 'Research', icon: ScanFace },
+  { to: '/phone', match: ['/phone'], label: 'Apps', icon: House },
+  { to: '/ethos/overview', match: ['/ethos/overview'], label: 'Übersicht', icon: ClipboardList },
+  { to: '/ethos/privacy', match: ['/ethos/privacy'], label: 'Datenschutz', icon: ShieldCheck },
+  { to: '/ethos/settings', match: ['/ethos/settings'], label: 'Einstellungen', icon: Settings2 },
+  { to: '/ethos/research', match: ['/ethos/research'], label: 'Research', icon: ScanFace },
 ] as const;
 
 /**
- * Chrome of the ContextLens app itself.
+ * Chrome of the ETHOS app itself.
  *
- * Two apps run on the simulated phone. `SocialAppShell` is the platform the
- * assistance layer lies over; this one is where the participant manages the
+ * Three apps run on the simulated phone. The two social shells are the hosts
+ * the assistance layer lies over; this one is where the participant manages the
  * assistance layer - history, privacy, consent switches, research mode. It
  * wears the teal `assist` family throughout, so switching between the two is
  * unmistakable even at a glance from the back of a room.
@@ -109,7 +108,7 @@ export function AppShell() {
         active tab carries a bar under it so the state is not colour-only.
       */}
       <nav
-        aria-label="Navigation von ContextLens"
+        aria-label="Navigation von ETHOS"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-assist-line bg-surface/98 backdrop-blur"
       >
         <ul className="mx-auto flex max-w-[34rem] items-stretch">
@@ -146,9 +145,7 @@ export function AppShell() {
           })}
         </ul>
 
-        <p className="sr-only">
-          Der erste Eintrag führt zurück in die simulierte App {PLATFORM_NAME}.
-        </p>
+        <p className="sr-only">Der erste Eintrag führt zum Startbildschirm des simulierten Smartphones.</p>
       </nav>
     </div>
   );

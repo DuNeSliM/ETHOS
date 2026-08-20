@@ -206,6 +206,58 @@ export const ANALYSES: Record<string, ContentAnalysis> = {
     ],
   },
 
+  'd-doom-video': {
+    postId: 'd-doom-video',
+    probableTone: 'humorous',
+    confidence: 'low',
+    explanation:
+      'Der Titel wirkt wie eine bewusst dramatische Fan-Zuspitzung. Ohne gesicherten Ursprung oder Kontext könnte der Clip ebenso ein Zusammenschnitt, eine Parodie oder eine spekulative Szene sein.',
+    indicators: [
+      'Titel verrät ein extremes Handlungsergebnis',
+      'Video wird in einer Fan-Community geteilt',
+      'Der Beitrag liefert keine Quelle oder Einordnung zum Clip',
+    ],
+    polarizationLevel: 'medium',
+    possibleRagebait: false,
+    limitations: [
+      'Die Analyse kann Echtheit, Rechteinhaber und Entstehung des Videos nicht prüfen.',
+      'Der Clip kann Spoiler, Fan-Montage oder inszeniertes Material enthalten.',
+      'Aus Titel und Bildmaterial lässt sich keine offizielle Filmhandlung ableiten.',
+    ],
+    possibleIntent:
+      'Möchte vermutlich unterhalten und eine Diskussion über eine dramatische Fan-Theorie auslösen.',
+    alternativeReadings: [
+      'Könnte eine ernst gemeinte Zusammenfassung einer Szene sein.',
+      'Könnte eine Parodie oder ein Fan-Edit sein.',
+      'Könnte absichtlich wie ein Spoiler formuliert sein, um Klicks zu bekommen.',
+    ],
+  },
+
+  'd-kerle-meme': {
+    postId: 'd-kerle-meme',
+    probableTone: 'humorous',
+    confidence: 'high',
+    explanation:
+      'Der Beitrag ist wahrscheinlich als wiederkehrender Mittwochs-Witz gemeint. Die feierliche Anrede und das absurde Tiermotiv wirken wie eine bewusst übertriebene Grußformel.',
+    indicators: [
+      'Bekräftigende Bildunterschrift „Es ist Mittwoch meine Kerle“',
+      'Absurde Kombination aus Tierfigur, Hut und Bierflasche',
+      'Kurzer Gruß ohne sachliche Behauptung oder Aufforderung',
+    ],
+    polarizationLevel: 'low',
+    possibleRagebait: false,
+    limitations: [
+      'Die Analyse kennt die Herkunft und frühere Verwendung des Bildes nicht.',
+      'Ob einzelne Personen den Insiderwitz verstehen oder lustig finden, kann sie nicht wissen.',
+    ],
+    possibleIntent:
+      'Möchte vermutlich mit einem bekannten Wochenritual unterhalten und Gemeinschaft erzeugen.',
+    alternativeReadings: [
+      'Könnte einfach als freundlicher Wochengruß ohne Insiderbezug gemeint sein.',
+      'Könnte ein wiederverwendetes Bild ohne besondere persönliche Bedeutung sein.',
+    ],
+  },
+
   'd-irony': {
     postId: 'd-irony',
     probableTone: 'ironic',

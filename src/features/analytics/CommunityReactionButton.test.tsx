@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { COMMUNITY } from '@/data/community';
@@ -86,11 +86,12 @@ describe('CommunityReactionButton', () => {
 
     // Reaction word, share, sample size, source and "simuliert" - none of
     // which an emoji can carry on its own.
-    expect(
-      screen.getByRole('button', {
+    const button = screen.getByRole('button', {
         name: /am häufigsten genervt, 34 prozent von 742 selbstauskünften\. simulierte werte/i,
-      }),
-    ).toBeInTheDocument();
+      });
+    expect(button).toBeInTheDocument();
+    expect(within(button).getByText(/am häufigsten:/i)).toBeVisible();
+    expect(within(button).getByText(/genervt/i)).toBeVisible();
   });
 
   it('opens the full breakdown and names the source of the number', async () => {

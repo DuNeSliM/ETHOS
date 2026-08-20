@@ -32,8 +32,15 @@ import { downloadFile, snapshotAll, timestampSlug } from '@/lib/storage';
  * about the system rather than as controls.
  */
 export function PrivacyPage() {
-  const { settings, deleteAllData, resetDemo, history, reactions, research } =
-    useAppState();
+  const {
+    settings,
+    deleteAllData,
+    resetDemo,
+    history,
+    reactions,
+    engagements,
+    research,
+  } = useAppState();
   const [confirming, setConfirming] = useState<null | 'data' | 'demo'>(null);
   const [status, setStatus] = useState('');
 
@@ -61,10 +68,10 @@ export function PrivacyPage() {
     },
     {
       icon: HardDrive,
-      label: 'Speicherung des Reaktionsverlaufs',
+      label: 'Lokale Speicherung von Verlauf und Interaktionen',
       active: settings.storeReactionHistory,
       detail:
-        'Speichert Verlauf und eigene Angaben im localStorage dieses Browsers. Kein Server beteiligt.',
+        'Speichert Verlauf, eigene Angaben, Likes, Upvotes und gemerkte Beiträge im localStorage dieses Browsers. Kein Server beteiligt.',
     },
     {
       icon: Share2,
@@ -79,12 +86,20 @@ export function PrivacyPage() {
     const payload = {
       exportedAt: new Date().toISOString(),
       note:
-        'Export aus dem ContextLens-Prototyp. Alle Analyse- und Schätzwerte sind simuliert und wurden nicht gemessen.',
+        'Export aus dem ETHOS-Prototyp. Alle Analyse- und Schätzwerte sind simuliert und wurden nicht gemessen.',
       settings,
-      data: snapshotAll(),
+      // The live values are included even when persistence is disabled. The
+      // stored snapshot additionally retains feedback and onboarding metadata.
+      data: {
+        ...snapshotAll(),
+        history,
+        reactions,
+        engagements,
+        research,
+      },
     };
     downloadFile(
-      `contextlens-daten-${timestampSlug()}.json`,
+      `ethos-daten-${timestampSlug()}.json`,
       JSON.stringify(payload, null, 2),
       'application/json',
     );
@@ -166,7 +181,7 @@ export function PrivacyPage() {
           ))}
         </ul>
 
-        <Link to="/settings" className="mt-3 inline-block">
+        <Link to="/ethos/settings" className="mt-3 inline-block">
           <Button>Einstellungen ändern</Button>
         </Link>
       </section>
@@ -189,8 +204,9 @@ export function PrivacyPage() {
           ))}
         </ul>
         <p className="mt-3 text-sm text-muted">
-          Echt sind nur: deine Einstellungen, dein Verlauf, deine eigenen
-          Angaben und deine Research-Mode-Antworten – alle lokal.
+          Echt sind nur: deine Einstellungen, dein Verlauf, deine Likes,
+          Upvotes und gespeicherten Beiträge, deine eigenen Angaben und deine
+          Research-Mode-Antworten – alle lokal.
         </p>
       </Panel>
 
@@ -200,6 +216,7 @@ export function PrivacyPage() {
         <ul className="mt-2 space-y-1 text-sm text-muted">
           <li>{history.length} Verlaufseinträge</li>
           <li>{Object.keys(reactions).length} Reaktionsdatensätze</li>
+          <li>{Object.keys(engagements).length} Interaktionsdatensätze</li>
           <li>{research.length} Research-Mode-Ergebnisse</li>
         </ul>
       </Panel>
@@ -243,7 +260,7 @@ export function PrivacyPage() {
             </h3>
             <p className="mt-1.5 text-sm text-muted">
               {confirming === 'data'
-                ? 'Verlauf, eigene Angaben und Testergebnisse werden entfernt. Deine Einstellungen bleiben erhalten.'
+                ? 'Verlauf, eigene Angaben, Likes, Upvotes, gemerkte Beiträge und Testergebnisse werden entfernt. Deine Einstellungen bleiben erhalten.'
                 : 'Setzt zusätzlich alle Einstellungen auf die Standardwerte zurück und zeigt das Onboarding erneut. Damit ist die Kameraerfassung wieder ausgeschaltet.'}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">

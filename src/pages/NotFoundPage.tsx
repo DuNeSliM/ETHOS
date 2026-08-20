@@ -16,7 +16,7 @@ export function NotFoundPage() {
         </p>
       </div>
       <div className="flex flex-wrap justify-center gap-3">
-        <Link to="/feed/visual">
+        <Link to="/instagram">
           <Button variant="assist">Zum Feed</Button>
         </Link>
         <Link to="/">

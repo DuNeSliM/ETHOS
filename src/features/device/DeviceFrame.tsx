@@ -1,3 +1,5 @@
+import { Maximize2, Minimize2 } from 'lucide-react';
+import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import { DeviceStatusBar } from '@/features/device/DeviceStatusBar';
@@ -5,7 +7,7 @@ import { DeviceStatusBar } from '@/features/device/DeviceStatusBar';
 /**
  * The simulated phone the whole demo runs inside.
  *
- * Why a device frame at all: ContextLens is pitched as an assistance layer
+ * Why a device frame at all: ETHOS is pitched as an assistance layer
  * that sits *over* someone else's app on a phone. Shown as a normal web page
  * that claim stays abstract - a reviewer sees one website with a feed in it.
  * Inside a phone, with an OS status bar above it, a home screen behind it and
@@ -26,14 +28,38 @@ import { DeviceStatusBar } from '@/features/device/DeviceStatusBar';
  */
 export function DeviceLayout() {
   const { pathname } = useLocation();
+  const [phoneFullscreen, setPhoneFullscreen] = useState(false);
 
-  const isPlatform =
-    pathname.startsWith('/feed') || pathname.startsWith('/post');
+  const isInstagram = pathname.startsWith('/instagram');
+  const isReddit = pathname.startsWith('/reddit');
   const isHomeScreen = pathname === '/phone';
 
   return (
-    <div className="device-stage app-min-h lg:flex lg:items-center lg:justify-center lg:gap-10 lg:p-8">
-      <DeviceCaption />
+    <div
+      className={`device-stage app-min-h lg:flex lg:items-center lg:justify-center ${
+        phoneFullscreen ? 'lg:p-3' : 'lg:gap-10 lg:p-8'
+      }`}
+    >
+      <button
+        type="button"
+        onClick={() => setPhoneFullscreen((current) => !current)}
+        aria-pressed={phoneFullscreen}
+        aria-label={
+          phoneFullscreen
+            ? 'Handy-Vollbild beenden und Demo-Erklärung einblenden'
+            : 'Handy im Vollbild anzeigen'
+        }
+        className="fixed right-5 top-5 z-[70] hidden items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-[#121822] shadow-xl hover:bg-white/90 focus-visible:outline-white lg:inline-flex"
+      >
+        {phoneFullscreen ? (
+          <Minimize2 aria-hidden="true" className="size-4" />
+        ) : (
+          <Maximize2 aria-hidden="true" className="size-4" />
+        )}
+        {phoneFullscreen ? 'Vollbild beenden' : 'Handy-Vollbild'}
+      </button>
+
+      {phoneFullscreen ? null : <DeviceCaption />}
 
       <div
         className="
@@ -58,9 +84,14 @@ export function DeviceLayout() {
         <div
           className={`
             device-screen bg-canvas
-            lg:flex lg:h-[min(50rem,84dvh)] lg:w-[24.5rem] lg:flex-col
-            lg:overflow-hidden lg:rounded-[2.5rem]
-            ${isPlatform ? 'platform-skin' : ''}
+            lg:flex lg:flex-col lg:overflow-hidden lg:rounded-[2.5rem]
+            ${
+              phoneFullscreen
+                ? 'lg:h-[min(58rem,94dvh)] lg:w-[min(28.5rem,calc(100vw-4rem))]'
+                : 'lg:h-[min(50rem,84dvh)] lg:w-[24.5rem]'
+            }
+            ${isInstagram ? 'platform-skin' : ''}
+            ${isReddit ? 'reddit-skin' : ''}
           `}
         >
           <DeviceStatusBar onWallpaper={isHomeScreen} />
@@ -103,14 +134,14 @@ function DeviceCaption() {
         Demo-Aufbau
       </p>
       <h2 className="mt-3 text-2xl font-bold leading-tight">
-        ContextLens läuft als Erweiterung über einer fremden App
+        ETHOS läuft als Erweiterung über zwei fremden Apps
       </h2>
       <ul className="mt-5 space-y-3 text-sm text-white/70">
         <li className="flex gap-2.5">
           <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-white/40" />
           <span>
-            Auf dem Telefon liegt eine simulierte Foto-App. Sie gehört nicht zu
-            ContextLens und weiß nichts von ihm.
+            Auf dem Telefon liegen inoffizielle Instagram- und Reddit-Mocks.
+            Beide sind von ETHOS klar getrennt.
           </span>
         </li>
         <li className="flex gap-2.5">

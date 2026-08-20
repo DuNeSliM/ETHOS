@@ -1,7 +1,7 @@
 import type { Post } from '@/types';
 
 /**
- * Simulated demo content for ContextLens.
+ * Simulated demo content for ETHOS.
  *
  * Every post is invented. Handles, communities and numbers do not refer to
  * real accounts or platforms. Each visual post names a drawn scene
@@ -17,7 +17,7 @@ export const POSTS: Post[] = [
   /* ---------------------------------------------------------------- */
   {
     id: 'v-humor',
-    mode: 'visual',
+    platform: 'instagram',
     kind: 'video',
     author: 'Mira Falk',
     authorHandle: '@mirakocht',
@@ -41,7 +41,7 @@ export const POSTS: Post[] = [
   },
   {
     id: 'v-sarcasm',
-    mode: 'visual',
+    platform: 'instagram',
     kind: 'image',
     author: 'Jonas Reiter',
     authorHandle: '@jonasunterwegs',
@@ -64,7 +64,7 @@ export const POSTS: Post[] = [
   },
   {
     id: 'v-emotional',
-    mode: 'visual',
+    platform: 'instagram',
     kind: 'video',
     author: 'Elif Kaya',
     authorHandle: '@elifspricht',
@@ -89,7 +89,7 @@ export const POSTS: Post[] = [
   },
   {
     id: 'v-ragebait',
-    mode: 'visual',
+    platform: 'instagram',
     kind: 'video',
     author: 'Klartext Daily',
     authorHandle: '@klartext.daily',
@@ -115,7 +115,7 @@ export const POSTS: Post[] = [
   },
   {
     id: 'v-lowcontext',
-    mode: 'visual',
+    platform: 'instagram',
     kind: 'video',
     author: 'noa.clips',
     authorHandle: '@noa.clips',
@@ -141,9 +141,9 @@ export const POSTS: Post[] = [
   /* ---------------------------------------------------------------- */
   {
     id: 'd-sarcasm',
-    mode: 'discussion',
+    platform: 'reddit',
     kind: 'text-post',
-    community: 'c/heimwerken',
+    community: 'r/heimwerken',
     author: 'brettundschraube',
     authorHandle: 'u/brettundschraube',
     title: 'Anleitung sagt "in 20 Minuten aufgebaut"',
@@ -181,10 +181,103 @@ export const POSTS: Post[] = [
       'Sarkastischer Beitrag im Textformat, hohe Konfidenz. Vergleichsfall zu v-sarcasm.',
   },
   {
+    id: 'd-doom-video',
+    platform: 'reddit',
+    kind: 'video',
+    community: 'r/marvel',
+    author: 'multiverse_mock',
+    authorHandle: 'u/multiverse_mock',
+    title: 'Doctor Doom Wins in Avengers: Doomsday',
+    body: '',
+    postedAgo: 'vor 4 Std.',
+    likes: 12743,
+    commentCount: 318,
+    media: {
+      kind: 'video',
+      altText:
+        'Lokal bereitgestellter Marvel-Fanclip zum fiktiven Beitrag „Doctor Doom Wins in Avengers: Doomsday“.',
+      palette: ['#31546f', '#111827'],
+      durationSeconds: 212.1,
+      scene: 'street-rant',
+      src: '/media/doom.mp4',
+    },
+    comments: [
+      {
+        id: 'd-doom-c1',
+        author: 'u/latveria_archive',
+        body: 'Der erste Frame als Vorschau ist schon eine ziemlich starke Ansage.',
+        upvotes: 1204,
+        hasAnalysis: false,
+      },
+      {
+        id: 'd-doom-c2',
+        author: 'u/spoiler_shield',
+        body: 'Danke für den klaren Titel – ich starte das Video lieber erst später.',
+        upvotes: 486,
+        hasAnalysis: false,
+      },
+      {
+        id: 'd-doom-c3',
+        author: 'u/frame_by_frame',
+        body: 'Als lokaler Demo-Clip funktioniert das überraschend gut.',
+        upvotes: 213,
+        hasAnalysis: false,
+      },
+    ],
+    researchNote:
+      'Nativer Reddit-Video-Post. Prüft pausierte Vorschau, bedienbare Wiedergabe und Ton ohne Autoplay.',
+  },
+  {
+    id: 'd-kerle-meme',
+    platform: 'reddit',
+    kind: 'image',
+    community: 'r/de',
+    author: 'mittwochsgruss',
+    authorHandle: 'u/mittwochsgruss',
+    title: 'Es ist Mittwoch, meine Kerle',
+    body: 'Einen schönen Mittwoch euch allen.',
+    postedAgo: 'vor 5 Std.',
+    likes: 8954,
+    commentCount: 146,
+    media: {
+      kind: 'image',
+      altText:
+        'Meme mit einer gezeichneten Schildkröte oder einem Frosch in Hut und Mantel, Bierflasche und dem Text „Es ist Mittwoch meine Kerle“.',
+      palette: ['#74664a', '#27332c'],
+      scene: 'empty-lot',
+      src: '/media/kerle.jpg',
+    },
+    comments: [
+      {
+        id: 'd-kerle-c1',
+        author: 'u/wochenteilung',
+        body: 'Endlich ist die Mitte der Woche offiziell bestätigt.',
+        upvotes: 711,
+        hasAnalysis: false,
+      },
+      {
+        id: 'd-kerle-c2',
+        author: 'u/donnerstagwartet',
+        body: 'Meine Kerle, wir haben es fast geschafft.',
+        upvotes: 388,
+        hasAnalysis: false,
+      },
+      {
+        id: 'd-kerle-c3',
+        author: 'u/bildbeschreibung',
+        body: 'Der Hut macht das Bild komplett.',
+        upvotes: 95,
+        hasAnalysis: false,
+      },
+    ],
+    researchNote:
+      'Nativer Reddit-Bild-/Meme-Post. Prüft lokale Bildmedien und eine verständliche Bildbeschreibung.',
+  },
+  {
     id: 'd-irony',
-    mode: 'discussion',
+    platform: 'reddit',
     kind: 'text-post',
-    community: 'c/nahverkehr',
+    community: 'r/nahverkehr',
     author: 'tramfahrerin',
     authorHandle: 'u/tramfahrerin',
     title: 'Der neue Fahrplan ist ein echter Gewinn für alle Beteiligten',
@@ -222,9 +315,9 @@ export const POSTS: Post[] = [
   },
   {
     id: 'd-aggressive-headline',
-    mode: 'discussion',
+    platform: 'reddit',
     kind: 'text-post',
-    community: 'c/stadtpolitik',
+    community: 'r/stadtpolitik',
     author: 'nordstadt_notizen',
     authorHandle: 'u/nordstadt_notizen',
     title: 'Schluss mit dem Chaos: Diese Verwaltung ruiniert unser Viertel!',
@@ -262,9 +355,9 @@ export const POSTS: Post[] = [
   },
   {
     id: 'd-polarising',
-    mode: 'discussion',
+    platform: 'reddit',
     kind: 'thread',
-    community: 'c/arbeitswelt',
+    community: 'r/arbeitswelt',
     author: 'homeoffice_debatte',
     authorHandle: 'u/homeoffice_debatte',
     title: 'Wer im Büro arbeiten will, hat entweder kein Zuhause oder keine Argumente',
@@ -315,8 +408,8 @@ export const POSTS_BY_ID: Record<string, Post> = Object.fromEntries(
   POSTS.map((post) => [post.id, post]),
 );
 
-export function getPostsForMode(mode: Post['mode']): Post[] {
-  return POSTS.filter((post) => post.mode === mode);
+export function getPostsForPlatform(platform: Post['platform']): Post[] {
+  return POSTS.filter((post) => post.platform === platform);
 }
 
 export function getPost(postId: string): Post | undefined {

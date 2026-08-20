@@ -13,17 +13,17 @@ import {
 import { Link } from 'react-router-dom';
 
 import { useAppState } from '@/app/AppStateProvider';
-import { PLATFORM_NAME } from '@/features/social-app/platform';
+import { PRODUCT_NAME } from '@/lib/identity';
 
 /**
  * Home screen of the simulated phone.
  *
  * It exists for one reason: an assistance layer that is only ever seen inside
  * one app looks like a feature of that app. Starting on a home screen, with a
- * separate icon for the platform and a separate icon for ContextLens, makes
- * the two obviously different pieces of software before the feed is even open.
+ * separate icons for Instagram, Reddit and ETHOS makes the ownership of each
+ * surface obvious before a social feed is even open.
  *
- * Only two icons lead anywhere. The rest is scenery and is marked
+ * Only the three named apps lead anywhere. The rest is scenery and is marked
  * `aria-hidden` rather than wired up as buttons that do nothing - the same
  * rule the stories strip in the feed follows.
  */
@@ -47,7 +47,7 @@ export function PhoneHomePage() {
     >
       <p className="text-center text-sm font-medium text-white/70">{today}</p>
 
-      {/* ---- ContextLens status widget ------------------------------- */}
+      {/* ---- ETHOS status widget ------------------------------------- */}
       <section
         aria-labelledby="lens-widget-heading"
         className="mt-4 rounded-3xl border border-white/15 bg-black/35 p-4 backdrop-blur-md"
@@ -63,7 +63,7 @@ export function PhoneHomePage() {
             id="lens-widget-heading"
             className="text-sm font-bold leading-tight text-white"
           >
-            ContextLens
+            {PRODUCT_NAME}
             <span className="block text-[0.6875rem] font-medium text-white/60">
               Systemerweiterung · simuliert
             </span>
@@ -89,13 +89,13 @@ export function PhoneHomePage() {
 
         <div className="mt-3 flex flex-wrap gap-2">
           <Link
-            to="/feed/visual"
+            to="/instagram"
             className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#10203f] hover:bg-white/90"
           >
-            {PLATFORM_NAME} öffnen
+            Instagram öffnen
           </Link>
           <Link
-            to="/settings"
+            to="/ethos/settings"
             className="rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10"
           >
             Erweiterung verwalten
@@ -108,14 +108,18 @@ export function PhoneHomePage() {
 
       <div className="mt-7 grid grid-cols-4 gap-x-4 gap-y-6">
         <AppIcon
-          to="/feed/visual"
-          label={PLATFORM_NAME}
+          to="/instagram"
+          label="Instagram"
           className="platform-gradient text-white"
         >
           <Camera aria-hidden="true" className="size-7" />
         </AppIcon>
 
-        <AppIcon to="/overview" label="ContextLens" className="bg-assist text-assist-on">
+        <AppIcon to="/reddit" label="Reddit" className="bg-[#ff4500] text-white">
+          <MessageCircle aria-hidden="true" className="size-7" />
+        </AppIcon>
+
+        <AppIcon to="/ethos/overview" label={PRODUCT_NAME} className="bg-assist text-assist-on">
           <LensGlyph className="size-7" />
         </AppIcon>
 
@@ -140,7 +144,7 @@ export function PhoneHomePage() {
       </div>
 
       <p className="sr-only">
-        Bis auf {PLATFORM_NAME} und ContextLens sind alle Symbole auf diesem
+        Bis auf Instagram, Reddit und {PRODUCT_NAME} sind alle Symbole auf diesem
         Startbildschirm dekorativ und haben keine Funktion.
       </p>
 
@@ -157,8 +161,8 @@ export function PhoneHomePage() {
             <Music className="size-7" />
           </DecorativeIcon>
           <AppIcon
-            to="/feed/visual"
-            label={PLATFORM_NAME}
+            to="/instagram"
+            label="Instagram"
             inDock
             className="platform-gradient text-white"
           >
@@ -179,7 +183,7 @@ export function PhoneHomePage() {
   );
 }
 
-/** A lens: outer ring plus focal dot. Matches the ContextLens wordmark. */
+/** A lens: outer ring plus focal dot. Matches the ETHOS wordmark. */
 function LensGlyph({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">

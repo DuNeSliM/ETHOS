@@ -1,4 +1,4 @@
-import { getPostsForMode } from '@/data/posts';
+import { getPostsForPlatform } from '@/data/posts';
 
 /**
  * The horizontal "stories" strip at the top of the visual feed.
@@ -13,7 +13,7 @@ import { getPostsForMode } from '@/data/posts';
  * single explanatory sentence for screen reader users.
  */
 export function StoriesRow() {
-  const authors = getPostsForMode('visual');
+  const authors = getPostsForPlatform('instagram');
 
   return (
     <section className="border-b border-line bg-surface py-3">

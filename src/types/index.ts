@@ -1,5 +1,5 @@
 /**
- * Central domain types for the ContextLens prototype.
+ * Central domain types for the ETHOS prototype.
  *
  * Naming rule enforced throughout the codebase:
  *  - `...Analysis`      -> a statement about the CONTENT of a post.
@@ -78,7 +78,7 @@ export type ContentAnalysis = {
 /* Posts                                                               */
 /* ------------------------------------------------------------------ */
 
-export type FeedMode = 'visual' | 'discussion';
+export type SocialPlatform = 'instagram' | 'reddit';
 
 export type PostKind = 'video' | 'image' | 'text-post' | 'thread';
 
@@ -129,7 +129,7 @@ export type Comment = {
 
 export type Post = {
   id: string;
-  mode: FeedMode;
+  platform: SocialPlatform;
   kind: PostKind;
   author: string;
   authorHandle: string;
@@ -232,7 +232,7 @@ export type Settings = {
   liveCameraPreview: boolean;
   shareAnonymousReaction: boolean;
   showCommunityReactions: boolean;
-  /** Persist the reaction history to localStorage. */
+  /** Persist reaction history, self-reports and social engagements locally. */
   storeReactionHistory: boolean;
   /** Assistant hints appear collapsed (default) or auto-expanded. */
   hintVisibility: 'on-demand' | 'subtle-auto';
@@ -264,6 +264,31 @@ export type ContentCategory =
   | 'emotional'
   | 'polarising'
   | 'informational';
+
+/** Local interaction state shared by the two simulated social apps. */
+export type PostEngagement = {
+  postId: string;
+  platform: SocialPlatform;
+  liked: boolean;
+  saved: boolean;
+  /** Epoch ms of the most recent change. */
+  updatedAt: number;
+};
+
+export type AnalyticsSource = 'demo-profile' | 'current-session';
+
+export type PersonalAnalyticsSnapshot = {
+  source: AnalyticsSource;
+  likedPostCount: number;
+  savedPostCount: number;
+  selfReportCount: number;
+  likesByCategory: Record<ContentCategory, number>;
+  likesByPlatform: Record<SocialPlatform, number>;
+  selfReportsByCategory: Record<
+    ContentCategory,
+    Record<SelfReportedReaction, number>
+  >;
+};
 
 /* ------------------------------------------------------------------ */
 /* Research mode                                                       */

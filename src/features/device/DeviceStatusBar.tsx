@@ -7,7 +7,7 @@ import { useSettings } from '@/app/AppStateProvider';
  *
  * Scenery, with one functional exception: the small lens pill on the left is
  * how a system-wide extension announces itself on a real phone, and it is what
- * makes ContextLens legible as a *plugin over* the platform rather than as a
+ * makes ETHOS legible as a *plugin over* the platform rather than as a
  * feature of it. It mirrors the same state the assistance layer reports
  * everywhere else, so it can never claim the analysis is running when it is
  * paused.
@@ -49,14 +49,14 @@ export function DeviceStatusBar({ onWallpaper = false }: { onWallpaper?: boolean
         {lensActive ? (
           <span
             className="flex items-center gap-1 rounded-full bg-assist px-1.5 py-0.5 text-assist-on"
-            title="ContextLens ist als Systemerweiterung aktiv"
+            title="ETHOS ist als Systemerweiterung aktiv"
           >
             <svg viewBox="0 0 24 24" className="size-3" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="3" />
               <circle cx="12" cy="12" r="3" fill="currentColor" />
             </svg>
             <span className="sr-only">
-              ContextLens ist als Systemerweiterung aktiv
+              ETHOS ist als Systemerweiterung aktiv
             </span>
           </span>
         ) : null}

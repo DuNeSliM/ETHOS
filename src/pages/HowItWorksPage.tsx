@@ -54,7 +54,7 @@ export function HowItWorksPage() {
           So funktioniert es
         </h1>
         <p className="mt-3 text-lg text-muted">
-          ContextLens unterscheidet strikt zwischen vier Ebenen. Diese Trennung
+          ETHOS unterscheidet strikt zwischen vier Ebenen. Diese Trennung
           ist der Kern der Idee: Eine Aussage über einen Beitrag ist etwas
           völlig anderes als eine Aussage über einen Menschen.
         </p>
@@ -79,7 +79,7 @@ export function HowItWorksPage() {
             Sarkasmus lässt sich im Text nicht sicher erkennen. Ein
             Gesichtsausdruck sagt nicht, was jemand fühlt. Ob ein Beitrag auf
             Empörung ausgelegt ist, lässt sich von außen nicht beweisen.
-            Deshalb formuliert ContextLens Vermutungen und nennt bei jeder Karte,
+            Deshalb formuliert ETHOS Vermutungen und nennt bei jeder Karte,
             was sie nicht wissen kann.
           </p>
         </Panel>

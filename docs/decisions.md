@@ -1,4 +1,4 @@
-# Produktentscheidungen
+# Produktentscheidungen – ETHOS (historisch ContextLens)
 
 Zentrale Entscheidungen für den ContextLens-Prototypen. Jede Entscheidung nennt
 Kontext, Entscheidung, Begründung und Konsequenz. Neue Entscheidungen werden
@@ -415,3 +415,110 @@ Netzwerkzugriff.
 - Echte Dateien sind vorgesehen, nicht ausgeschlossen: `media.src` ersetzt die
   Zeichnung, die Markierung wechselt dann auf „Beispielclip". Anleitung und
   Rechtehinweis in `public/media/README.md`.
+
+---
+
+## E-021: Drei echte App-Namen, aber ausschließlich inoffizielle Mocks
+
+**Kontext.** Das Smartphone sollte Instagram, Reddit und ETHOS als drei sofort
+verständliche Ziele zeigen. `Momento` und ein Feed-Umschalter vermittelten diese
+Architektur nicht.
+
+**Entscheidung.** Die Host-Apps heißen sichtbar Instagram und Reddit. Beide
+tragen einen prominenten Hinweis auf inoffiziellen Mock, erfundene Accounts,
+Inhalte und Statistiken sowie fehlende Plattformverbindung. Offizielle Logos,
+Assets, Authentifizierung und APIs werden nicht verwendet. E-015/E-019 bleiben
+historisch, sind für die aktuelle Benennung aber teilweise revidiert.
+
+**Konsequenz.** Drei Shells, drei Home-Wege und kanonische Routen. Der alte
+Feed-Umschalter ist entfernt; Legacy-URLs redirecten für alte Research-Links.
+
+---
+
+## E-022: ContextLens wird sichtbar ETHOS, interne Speicher-IDs bleiben
+
+**Kontext.** Die Produktbezeichnung soll ETHOS sein. Gleichzeitig können aus
+früheren Tests Daten unter `contextlens.v1.*` existieren.
+
+**Entscheidung.** Alle sichtbaren Produkttexte und zentralen Metadaten werden zu
+ETHOS. Interne Eventnamen und `localStorage`-Präfixe bleiben kompatibel und
+werden transparent dokumentiert.
+
+**Konsequenz.** Kein stiller Datenverlust durch Rebranding. Neue Exportdateien
+beginnen mit `ethos-`, gespeicherte Schlüssel bleiben `contextlens.v1.*`.
+
+---
+
+## E-023: Demo-Profil und Sitzung sind zwei unvereinbare Quellen
+
+**Kontext.** Eine sofort aussagekräftige Statistik braucht mehr Daten, als ein
+kurzer Rundgang erzeugt. Eine Addition würde erfundene Werte als eigene
+Aktivität darstellen.
+
+**Entscheidung.** `Simuliertes Profil` ist die voreingestellte, explizit
+fiktive Quelle. `Diese Sitzung` wird separat aus Likes/Upvotes, Saves und
+aktiven Selbstauskünften abgeleitet. Ausdrucksschätzungen zählen nicht als
+Emotion; Quellen werden nie verschmolzen.
+
+**Konsequenz.** Ein Quellenwähler steuert denselben Chart-Vertrag. Leere
+Sitzungsdaten werden ehrlich erklärt. Integritätstests halten Totale,
+Plattformmapping und Quellentrennung fest.
+
+---
+
+## E-024: Pluralität statt behaupteter Mehrheit
+
+**Kontext.** Ein führender Community-Wert von 34 Prozent ist keine Mehrheit.
+
+**Entscheidung.** Der Post-Knopf sagt sichtbar `Am häufigsten` plus Emoji,
+Reaktionswort und Prozent. Er verwendet freiwillige simulierte
+Selbstauskünfte, nie Kamera-Schätzungen. Das Detail zeigt beide Quellen getrennt
+sowie n und Warnungen.
+
+**Konsequenz.** Die Hilfe bleibt direkt, ohne Konsens zu behaupten. Kleine
+Stichproben und Pause-/Opt-out-Zustände erhalten eigene Texte.
+
+---
+
+## E-025: Sicherheits-Patches ohne Router-7-Migration
+
+**Kontext.** Recharts 2 war veraltet; Nano ID und Router benötigten Patches.
+Die vollständige Router-Behebung verlangt eine Major-Migration, die parallel zur
+neuen App-Architektur mehr Risiko erzeugt hätte.
+
+**Entscheidung.** Recharts 3.10.1, `react-is` 18.3.1, React Router 6.30.6 und
+kompatible transitive Patches werden übernommen. Zwei moderate Router-v6-
+Advisories bleiben bis zur separat getesteten v7-Migration dokumentiert.
+
+**Konsequenz.** Keine hohe/kritische Schwachstelle; Router 7, Playwright, Error
+Boundary und viewportgenaues Tracking bleiben Folgemaßnahmen.
+
+---
+
+## E-026: Plattform-Kommentare und ETHOS-Auswertung sind getrennte Ziele
+
+**Kontext.** Kommentar-Symbol und ETHOS-Streifen verwiesen auf dieselbe kombinierte Detailansicht. Dadurch wirkte die Assistenzanalyse wie die Kommentarsektion von Instagram beziehungsweise Reddit.
+
+**Entscheidung.** `/instagram/post/:id` ist ausschließlich die Instagram-Kommentarsektion; `/reddit/post/:id` der vollständige Reddit-Thread. Die kombinierte Assistenzansicht liegt jeweils unter `/ethos` und ist im optisch getrennten ETHOS-Streifen eindeutig so beschriftet.
+
+**Konsequenz.** Plattformkonventionen bleiben erwartbar, und die Herkunft von Analyse, Reaktionsverlauf und Community-Statistik ist navigativ wie visuell nachvollziehbar.
+
+---
+
+## E-027: Reddit-Medien verwenden native Browserwiedergabe
+
+**Kontext.** Der Reddit-Mock sollte neben Text mindestens ein lokales Bild/Meme und ein Video mit funktionierendem Ton enthalten. Der Instagram-Player ist absichtlich simuliert und stumm, weil er eine feste Reaktionszeitachse steuert.
+
+**Entscheidung.** Reddit rendert lokale Bilddateien als semantisches `img` und Videos als natives `video` mit Controls, ohne Autoplay und ohne `muted`. Ein Seek auf 0,001 Sekunden nach dem Laden der Metadaten stellt den ersten dekodierten Frame als pausierte Vorschau bereit.
+
+**Konsequenz.** `doom.mp4` bleibt bedienbar und hörbar; `kerle.jpg` erhält eine ausführliche Bildbeschreibung. Die große Videodatei und externe Rechteklärung sind als Grenzen dokumentiert.
+
+---
+
+## E-028: Fokussierter Handy-Modus statt Browser-Fullscreen
+
+**Kontext.** Auf breiten Präsentationsbildschirmen nahm die seitliche Erklärung viel Raum ein, während das Telefon relativ klein blieb. Gleichzeitig sollte das native 4:3-Doom-Video ohne durch ein 16:9-Zielformat erzeugte schwarze Seitenränder erscheinen.
+
+**Entscheidung.** Ein Desktop-Schalter `Handy-Vollbild` blendet `DeviceCaption` aus und vergrößert/zentriert den Telefonrahmen innerhalb der Seite. Er nutzt keinen sicherheitsgeschützten Browser-Fullscreen und bleibt deshalb immer direkt umkehrbar. Das Doom-Video verwendet sein echtes 4:3-Seitenverhältnis; sein rein technischer Demo-Absatz entfällt.
+
+**Konsequenz.** Die Projektionsansicht konzentriert sich auf das Gerät, ohne Berechtigungsdialog oder verlorenen Ausgang. Das Video füllt die Karte ohne seitliche Letterbox, während native Controls, pausierter Start, Ton und Textalternative erhalten bleiben.

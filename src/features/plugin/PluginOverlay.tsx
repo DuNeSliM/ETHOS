@@ -13,50 +13,52 @@ import { useAppState } from '@/app/AppStateProvider';
 import { Sheet } from '@/components/Sheet';
 import { Toggle } from '@/components/Toggle';
 import { Chip, SimulatedBadge } from '@/components/primitives';
-import { PLATFORM_NAME } from '@/features/social-app/platform';
+import { PRODUCT_NAME, getPlatformMeta } from '@/lib/identity';
+import type { SocialPlatform } from '@/types';
 
 /**
  * The assistance layer's presence on top of a foreign app.
  *
  * A floating button pinned over the platform, plus the panel it opens. This is
- * the piece that makes the product claim concrete: ContextLens is not a feature
+ * the piece that makes the product claim concrete: ETHOS is not a feature
  * of the feed underneath, it is a separate thing lying over it, reachable at
  * any moment, and switchable off from there in one tap.
  *
  * Everything the panel offers already exists elsewhere in the app. It is a
  * shortcut, never the only way to reach a setting - a participant who never
- * finds the bubble can still do everything from the ContextLens app.
+ * finds the bubble can still do everything from the ETHOS app.
  */
 const SHORTCUTS = [
   {
-    to: '/overview',
+    to: '/ethos/overview',
     label: 'Persönliche Übersicht',
     hint: 'Was du angesehen hast, lokal gespeichert',
     icon: ClipboardList,
   },
   {
-    to: '/privacy',
+    to: '/ethos/privacy',
     label: 'Datenschutz',
     hint: 'Was aktiv ist, exportieren, löschen',
     icon: ShieldCheck,
   },
   {
-    to: '/settings',
+    to: '/ethos/settings',
     label: 'Einstellungen',
     hint: 'Jede Funktion einzeln schaltbar',
     icon: Settings2,
   },
   {
-    to: '/research',
+    to: '/ethos/research',
     label: 'Research Mode',
     hint: 'Drei geführte Testaufgaben',
     icon: ScanFace,
   },
 ] as const;
 
-export function PluginOverlay() {
+export function PluginOverlay({ platform }: { platform: SocialPlatform }) {
   const { settings, updateSetting } = useAppState();
   const [open, setOpen] = useState(false);
+  const platformMeta = getPlatformMeta(platform);
 
   const paused = settings.assistantPaused;
   const analysisActive = settings.contentAnalysis && !paused;
@@ -66,10 +68,11 @@ export function PluginOverlay() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="ContextLens öffnen"
+        aria-label={`${PRODUCT_NAME} öffnen`}
         className={`
           fixed bottom-20 right-3 z-40 flex items-center gap-2 rounded-full
           border py-2 pl-2.5 pr-3.5 text-sm font-bold panel-shadow
+          max-[360px]:size-11 max-[360px]:justify-center max-[360px]:p-0
           ${
             paused
               ? 'border-line-strong bg-surface text-muted'
@@ -89,14 +92,14 @@ export function PluginOverlay() {
             <circle cx="12" cy="12" r="2.5" fill="currentColor" />
           </svg>
         </span>
-        ContextLens
+        <span className="max-[360px]:sr-only">{PRODUCT_NAME}</span>
       </button>
 
       <Sheet
         open={open}
         onClose={() => setOpen(false)}
-        title="ContextLens"
-        description={`Assistenzschicht über ${PLATFORM_NAME}. Sie gehört nicht zu dieser App.`}
+        title={PRODUCT_NAME}
+        description={`Assistenzschicht über ${platformMeta.name}. Sie gehört nicht zu dieser App.`}
         titleAdornment={<SimulatedBadge label="Systemerweiterung, simuliert" />}
       >
         <div className="flex flex-wrap gap-1.5">
@@ -129,14 +132,14 @@ export function PluginOverlay() {
         <div className="mt-4">
           <Toggle
             label="Assistenzschicht aktiv"
-            description={`Aus bedeutet: keine Hinweise, keine Schätzungen, kein Symbol über ${PLATFORM_NAME}. Deine Einstellungen bleiben erhalten.`}
+            description={`Aus bedeutet: keine Hinweise, keine Schätzungen, kein Symbol über ${platformMeta.name}. Deine Einstellungen bleiben erhalten.`}
             checked={!paused}
             onChange={(next) => updateSetting('assistantPaused', !next)}
           />
         </div>
 
         <h3 className="mt-5 text-xs font-bold uppercase tracking-wide text-faint">
-          ContextLens öffnen
+          {PRODUCT_NAME} öffnen
         </h3>
         <ul className="mt-2 space-y-1.5">
           {SHORTCUTS.map(({ to, label, hint, icon: Icon }) => (
@@ -162,7 +165,7 @@ export function PluginOverlay() {
           So wäre es gedacht: Die Erweiterung liest nur, was gerade auf dem
           Bildschirm sichtbar ist, und wertet es lokal aus. In diesem Prototyp
           passiert auch das nicht – die Einschätzungen sind vorab geschrieben,
-          und {PLATFORM_NAME} ist eine erfundene App ohne Verbindung nach außen.
+          und dieser {platformMeta.name}-Mock hat keine Verbindung nach außen.
         </p>
       </Sheet>
     </>
@@ -202,7 +205,7 @@ export function PluginStatusStrip() {
 
         {/*
           Each fact is its own element with nothing but its own text in it.
-          That keeps the wording identical to the ContextLens status bar and
+          That keeps the wording identical to the ETHOS status bar and
           lets both be asserted on by exact text.
         */}
         <p className="flex min-w-0 flex-1 items-baseline gap-1 overflow-hidden text-xs">
@@ -251,7 +254,7 @@ export function PluginStatusStrip() {
 
       {/*
         The strip above is a summary; the full wording lives in the status bar
-        of the ContextLens app. Screen reader users get the same three facts
+        of the ETHOS app. Screen reader users get the same three facts
         spelled out here rather than as a truncated line.
       */}
       <p className="sr-only">

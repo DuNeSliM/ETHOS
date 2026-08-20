@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
-  ContextLens design tokens.
+  ETHOS design tokens.
 
   Three visual worlds live in this app and must stay distinguishable:
 
@@ -78,6 +78,8 @@
   */
   --cl-platform-accent: #1d4ed8;
   --cl-platform-like: #a4243d;
+  --cl-chart-angry: #8f1d34;
+  --cl-chart-uncomfortable: #7652a8;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -121,6 +123,8 @@
 
     --cl-focus: #8fe3f2;
     --cl-shadow: 0 0 0;
+    --cl-chart-angry: #ff9aae;
+    --cl-chart-uncomfortable: #c8a9f4;
   }
 }
 
@@ -164,6 +168,8 @@
 
   --cl-focus: #8fe3f2;
   --cl-shadow: 0 0 0;
+  --cl-chart-angry: #ff9aae;
+  --cl-chart-uncomfortable: #c8a9f4;
 }
 
 /*
@@ -174,7 +180,7 @@
   Scoped override of the *platform* half of the token set. Everything inside
   `.platform-skin` renders in the flat white/black, hairline-bordered style
   that photo-sharing feeds have converged on, while the assistance tokens
-  (`--cl-assist-*`, `--cl-sim-*`) stay untouched so the ContextLens layer
+  (`--cl-assist-*`, `--cl-sim-*`) stay untouched so the ETHOS layer
   keeps looking like a guest in someone else's app.
 
   Contrast, computed against the skin's own surfaces:
@@ -257,6 +263,51 @@
 
   --cl-alert: #ff6b78;
   --cl-alert-tint: #2b1114;
+}
+
+/* Reddit mock: compact discussion surfaces and a restrained orange action ink. */
+.reddit-skin {
+  --cl-canvas: #f3f4f6;
+  --cl-surface: #ffffff;
+  --cl-surface-2: #f6f7f8;
+  --cl-surface-3: #e8eaed;
+  --cl-border: #d5d9dd;
+  --cl-border-strong: #707980;
+  --cl-text: #1a1a1b;
+  --cl-text-muted: #4f565d;
+  --cl-text-faint: #626a72;
+  --cl-alert: #c23b00;
+  --cl-alert-tint: #fff0e8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .reddit-skin {
+    --cl-canvas: #0b1416;
+    --cl-surface: #121f23;
+    --cl-surface-2: #17262b;
+    --cl-surface-3: #223238;
+    --cl-border: #33454b;
+    --cl-border-strong: #819198;
+    --cl-text: #f1f5f6;
+    --cl-text-muted: #bac5c9;
+    --cl-text-faint: #9caaaf;
+    --cl-alert: #ff7a45;
+    --cl-alert-tint: #3a1b10;
+  }
+}
+
+[data-theme='dark'] .reddit-skin {
+  --cl-canvas: #0b1416;
+  --cl-surface: #121f23;
+  --cl-surface-2: #17262b;
+  --cl-surface-3: #223238;
+  --cl-border: #33454b;
+  --cl-border-strong: #819198;
+  --cl-text: #f1f5f6;
+  --cl-text-muted: #bac5c9;
+  --cl-text-faint: #9caaaf;
+  --cl-alert: #ff7a45;
+  --cl-alert-tint: #3a1b10;
 }
 
 @theme inline {

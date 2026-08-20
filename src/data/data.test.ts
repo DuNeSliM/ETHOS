@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ANALYSES, COMMENT_ANALYSES } from '@/data/analyses';
 import { COMMUNITY } from '@/data/community';
+import { INSTAGRAM_COMMENTS } from '@/data/instagramComments';
 import { POSTS } from '@/data/posts';
 import { TIMELINES } from '@/data/timelines';
 import { COMMUNITY_KEY_LABEL } from '@/lib/labels';
@@ -27,9 +28,41 @@ describe('posts', () => {
     expect(POSTS.length).toBeGreaterThanOrEqual(8);
   });
 
-  it('provides at least four posts in each feed mode', () => {
-    expect(POSTS.filter((p) => p.mode === 'visual').length).toBeGreaterThanOrEqual(4);
-    expect(POSTS.filter((p) => p.mode === 'discussion').length).toBeGreaterThanOrEqual(4);
+  it('provides at least four posts for each simulated social platform', () => {
+    expect(POSTS.filter((p) => p.platform === 'instagram').length).toBeGreaterThanOrEqual(4);
+    expect(POSTS.filter((p) => p.platform === 'reddit').length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('keeps the requested Reddit media posts in positions two and three', () => {
+    const redditPosts = POSTS.filter((post) => post.platform === 'reddit');
+    expect(redditPosts.slice(0, 3).map((post) => post.id)).toEqual([
+      'd-sarcasm',
+      'd-doom-video',
+      'd-kerle-meme',
+    ]);
+    expect(redditPosts[1].community).toBe('r/marvel');
+    expect(redditPosts[1].title).toBe('Doctor Doom Wins in Avengers: Doomsday');
+    expect(redditPosts[1].media).toMatchObject({
+      kind: 'video',
+      src: '/media/doom.mp4',
+    });
+    expect(redditPosts[2].community).toBe('r/de');
+    expect(redditPosts[2].media).toMatchObject({
+      kind: 'image',
+      src: '/media/kerle.jpg',
+    });
+  });
+
+  it('uses Reddit-style r/ community names for every Reddit post', () => {
+    POSTS.filter((post) => post.platform === 'reddit').forEach((post) => {
+      expect(post.community, post.id).toMatch(/^r\/[a-z0-9_]+$/i);
+    });
+  });
+
+  it('provides a native mock comment selection for every Instagram post', () => {
+    POSTS.filter((post) => post.platform === 'instagram').forEach((post) => {
+      expect(INSTAGRAM_COMMENTS[post.id]?.length, post.id).toBeGreaterThanOrEqual(3);
+    });
   });
 
   it('uses unique ids', () => {

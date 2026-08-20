@@ -1,11 +1,10 @@
 # Prompt-Register
 
-Alle für den ContextLens-Prototypen eingesetzten KI-Prompts. Der Wortlaut der
-Prompts steht in `AGENTS.md`, Abschnitt 2.
+Alle für den ETHOS-Prototypen (historisch ContextLens) eingesetzten KI-Prompts.
+Der verfügbare Wortlaut steht kanonisch in `prompt-catalog.md`.
 
-**Modell durchgängig:** Claude Opus 5 (`claude-opus-5`) über Claude Code (CLI).
-**Daten:** 30.07.2026 (P-001 bis P-007), 31.07.2026 (P-008), 03.08.2026 (P-009
-und P-010).
+**Werkzeuge/Modelle:** P-001 bis P-010: Claude Code / Claude Opus 5;
+P-011 bis P-013: OpenAI Codex / GPT-5. **Daten:** 30.07.2026 bis 20.08.2026.
 
 | Prompt-ID | Datum | Modell | Agent | Zweck | Kurzbeschreibung | Erzeugte Dateien / Ergebnisse | Manuelle Änderungen | Status | Chat-Export |
 |---|---|---|---|---|---|---|---|---|---|
@@ -19,6 +18,9 @@ und P-010).
 | **P-008** | 31.07.2026 | Claude Opus 5 | Main | Produktrahmung: simuliertes Telefon und Plattform-Optik | Demo soll weniger nach Demo und mehr nach Produkt aussehen: Telefon simulieren, darauf eine App, die die Erweiterung auslöst, Optik der bekannten Foto-App-Gattung übernehmen, telefonorientiertes Layout | `src/features/device/*`, `src/features/social-app/*`, `src/features/plugin/*`, `src/pages/PhoneHomePage.tsx`, `src/lib/viewport.ts`, Plattform-Skin in `src/styles/index.css`, zwei getrennte Shells; 7 neue Tests (99 gesamt); Nachzug in 8 Dokumenten | Abweichung vom Wortlaut: Gattung statt Marke — kein Markenname, kein Logo, keine übernommene Ikonografie; erfundene App `Momento`. Icon-only-Tab-Leiste und der übliche Sekundär-Grauton `#8e8e8e` (3,0:1) bewusst nicht übernommen | **übernommen** | `exports/P-008-produktrahmung.md` |
 | **P-009** | 03.08.2026 | Claude Opus 5 | Main | Kamerabild, Reaktions-Emoji und mehr Feed-Realismus | Feed soll die Foto-App-Gattung genauer nachbilden, bestehende Demo-Funktionen unangetastet lassen; das echte Kamerabild soll sichtbar sein; zusätzlicher Plugin-Knopf als Emoji der häufigsten Reaktion, dahinter Auswertung und Prozentwerte | `src/features/reactions/useCameraStream.ts`, `src/features/reactions/LiveSelfView.tsx`, `src/features/analytics/CommunityReactionButton.tsx`, `src/features/analytics/communitySummary.ts`, `REACTION_EMOJI` in `src/lib/labels.ts`; Anpassungen in `VisualPostCard`, `MediaPlaceholder`, `DiscussionPostCard`, `CommunityReactions`, `CameraPreview`, `PluginOverlay`, `SocialAppShell`, `styles/index.css`; 18 neue Tests (117 gesamt); `decisions.md` E-017/E-018, `privacy-review.md` 1.2 | Das Emoji zeigt die Selbstauskünfte statt der Kamera-Schätzungen; kein funktionsloses Kommentarfeld trotz Gattungskonvention; das echte Kamerabild ändert keine Analyse | **übernommen** | `exports/P-009-kamera-emoji.md` |
 | **P-010** | 03.08.2026 | Claude Opus 5 | Main | Gezeichnete Beispielinhalte und die Farbwelt der Vorlage | Echte Beispielinhalte statt beschrifteter Platzhalter; Design und Farbschema der Vorlage übernehmen, ausdrücklich für den Hochschulkontext | `src/features/feed/PostScene.tsx` (5 SVG-Szenen), `src/features/feed/Caption.tsx`, `public/media/README.md`, erweiterte `SimulatedMedia`-Typen, Plattform-Akzente und Szenen-Animationen in `styles/index.css`, Anpassungen in `MediaPlaceholder`, `VisualPostCard`, `data/posts.ts`; 4 neue Tests (121 gesamt); `decisions.md` E-019/E-020 | Keine fremden Memes heruntergeladen — eigene Zeichnungen plus dokumentierter Weg für eigenes Material; Name und Logo der Vorlage weiterhin nicht übernommen; Akzentblau nie für Fließtext (3,07:1); `v-emotional` ohne Meme-Untertitel | **übernommen** | `exports/P-010-inhalte-farbwelt.md` |
+| **P-011** | 20.08.2026 | OpenAI Codex / GPT-5 | Main | Drei-App-Smartphone: Instagram, Reddit und ETHOS | Repository verstehen; drei getrennte Apps; ETHOS-Rebranding; Reddit-Mock; sichtbare häufigste Selbstauskunft; persistente Interaktionen; getrenntes Demo-/Sitzungsprofil; zugängliche Diagramme; Dependencies, Tests und alle Dokumente aktualisieren | Drei kanonische App-Bereiche plus Legacy-Redirects; `SocialPlatform`/`PostEngagement`; Reddit-Shell; Demo- und Sitzungsanalytik; Donut, Emotionslandschaft und Plattformbalken; Recharts 3; 127 Tests; Build und Typprüfung grün; P-011-Katalog und Projektdokumentation | Geklärt: echte Plattformnamen ohne Logos/APIs; ETHOS über beiden Apps; Demo-Profil standardmäßig und strikt getrennte Sitzung; bei unter 50 % „am häufigsten“; Router 7, Playwright, Error Boundary und viewportgenaues Tracking bewusst zurückgestellt | **übernommen** | `exports/P-011-three-apps-ethos.md` |
+| **P-012** | 20.08.2026 | OpenAI Codex / GPT-5 | Main | Native Kommentare und Reddit-Medien | Instagram-Kommentarlinks von ETHOS-Analyse trennen; Reddit `r/`; Doom-Video als zweiter und Kerle-Meme als dritter Post; Video pausiert mit erstem Frame, bedienbar und hörbar | Eigene Instagram-Kommentar- und Reddit-Thread-Seiten; `/ethos`-Detailrouten; `RedditPostMedia`; zwei neue Posts samt Analyse/Community-Daten; 132 Tests; Dokumentationsnachzug | Keine inhaltliche Abweichung; lokales Kommentarfeld bleibt absichtlich nur im Speicher, Video nutzt native Browser-Controls ohne Autoplay/`muted` | **übernommen** | `exports/P-012-comments-reddit-media.md` |
+| **P-013** | 20.08.2026 | OpenAI Codex / GPT-5 | Main | Doom-Video und Handy-Vollbild | Schwarze Videoseiten entfernen/Video vergrößern; Demo-Erklärtext am Doom-Post entfernen; linke Desktop-Erklärung ausblendbar machen und Telefon groß zentrieren | 4:3-Video in voller Kartenbreite; optionaler Post-Body; zugänglicher `Handy-Vollbild`-Präsentationsmodus; 133 Tests und Browserprüfung | „Fullscreen“ als umkehrbarer In-Page-Präsentationsmodus ohne Browser-Berechtigung umgesetzt, entsprechend der gewünschten sichtbaren Wirkung | **übernommen** | `exports/P-013-video-phone-fullscreen.md` |
 
 ## Statuslegende
 
@@ -45,3 +47,11 @@ und P-010).
 5. Es wurde **keine KI zur Laufzeit** des Prototyps eingesetzt. Der ausgelieferte
    Code enthält kein Modell und keinen API-Aufruf; alle Analysen sind fest
    geschriebene Beispieldaten.
+6. **P-011 stammt aus einer OpenAI-Codex-Sitzung vom 20.08.2026.** Auftrag,
+   Klärungsentscheidungen und vollständiger Umsetzungsplan stehen in
+   `prompt-catalog.md`; der Oberfläche-Export bleibt ein manueller Abgabeschritt.
+7. **P-012 stammt aus derselben OpenAI-Codex-Sitzung vom 20.08.2026.** Der
+   vollständige Nutzerwortlaut und das Ergebnis stehen in `prompt-catalog.md`;
+   auch dieser Oberfläche-Export bleibt ein manueller Abgabeschritt.
+8. **P-013 stammt aus derselben OpenAI-Codex-Sitzung vom 20.08.2026.** Wortlaut,
+   Bildreferenzen, Umsetzung und Browserprüfung stehen in `prompt-catalog.md`.

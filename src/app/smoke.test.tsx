@@ -308,7 +308,9 @@ describe('visual feed', () => {
 
     // The feed is now photo-backed: five posts point at usable media files or
     // their poster/still frames, so the DOM must carry real picture nodes.
-    expect(container.querySelectorAll('img').length).toBe(5);
+    // Count images inside media figures, not decorative product/app icons in
+    // the surrounding device and assistance chrome.
+    expect(container.querySelectorAll('figure img').length).toBe(5);
     expect(container.querySelectorAll('.meme-caption').length).toBeGreaterThan(0);
     // Same words in the picture and in the caption below it, the way this
     // genre repeats its punchline.

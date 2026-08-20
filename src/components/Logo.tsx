@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
+import { EthosIcon } from '@/components/EthosIcon';
 import { PRODUCT_NAME } from '@/lib/identity';
 
 /**
  * Wordmark for the assistance layer.
  *
- * Drawn from tokens rather than an image file so it follows the colour scheme,
- * and paired with a permanent "Prototyp" tag - participants should never lose
- * track of the fact that they are looking at a research build.
+ * The canonical app icon is paired with a permanent "Prototyp" tag so
+ * participants never lose track of the fact that this is a research build.
  */
 export function Logo({
   asLink = true,
@@ -22,19 +22,7 @@ export function Logo({
 }) {
   const content = (
     <>
-      <span
-        aria-hidden="true"
-        className="
-          flex size-8 shrink-0 items-center justify-center rounded-lg
-          bg-assist text-assist-on
-        "
-      >
-        {/* A lens: outer ring plus focal dot. */}
-        <svg viewBox="0 0 24 24" className="size-5" fill="none">
-          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
-          <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-        </svg>
-      </span>
+      <EthosIcon className="size-8 rounded-lg" />
       <span className="min-w-0">
         <span className="block text-sm font-bold leading-tight tracking-tight text-ink">
           {PRODUCT_NAME}

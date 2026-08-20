@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAppState } from '@/app/AppStateProvider';
+import { EthosIcon } from '@/components/EthosIcon';
 import { Sheet } from '@/components/Sheet';
 import { Toggle } from '@/components/Toggle';
 import { Chip, SimulatedBadge } from '@/components/primitives';
@@ -80,18 +81,9 @@ export function PluginOverlay({ platform }: { platform: SocialPlatform }) {
           }
         `}
       >
-        <span
-          aria-hidden="true"
-          className={`
-            flex size-6 items-center justify-center rounded-full
-            ${paused ? 'bg-surface-3 text-muted' : 'bg-assist-on/20 text-assist-on'}
-          `}
-        >
-          <svg viewBox="0 0 24 24" className="size-4" fill="none">
-            <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2.5" />
-            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-          </svg>
-        </span>
+        <EthosIcon
+          className={`size-6 rounded-md ${paused ? 'grayscale opacity-60' : ''}`}
+        />
         <span className="max-[360px]:sr-only">{PRODUCT_NAME}</span>
       </button>
 
@@ -190,18 +182,9 @@ export function PluginStatusStrip() {
   return (
     <div className="border-b border-assist-line bg-assist-tint">
       <div className="mx-auto flex max-w-[30rem] items-center gap-2 px-3 py-1.5">
-        <span
-          aria-hidden="true"
-          className={`
-            flex size-5 shrink-0 items-center justify-center rounded-full
-            ${paused ? 'bg-surface-3 text-muted' : 'bg-assist text-assist-on'}
-          `}
-        >
-          <svg viewBox="0 0 24 24" className="size-3.5" fill="none">
-            <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="3" />
-            <circle cx="12" cy="12" r="3" fill="currentColor" />
-          </svg>
-        </span>
+        <EthosIcon
+          className={`size-5 rounded-md ${paused ? 'grayscale opacity-60' : ''}`}
+        />
 
         {/*
           Each fact is its own element with nothing but its own text in it.

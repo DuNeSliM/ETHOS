@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import { useSettings } from '@/app/AppStateProvider';
+import { EthosIcon } from '@/components/EthosIcon';
 
 /**
  * The operating system's status bar of the simulated phone.
  *
- * Scenery, with one functional exception: the small lens pill on the left is
+ * Scenery, with one functional exception: the small ETHOS pill on the left is
  * how a system-wide extension announces itself on a real phone, and it is what
  * makes ETHOS legible as a *plugin over* the platform rather than as a
  * feature of it. It mirrors the same state the assistance layer reports
@@ -23,7 +24,7 @@ export function DeviceStatusBar({ onWallpaper = false }: { onWallpaper?: boolean
     return () => window.clearInterval(timer);
   }, []);
 
-  const lensActive = settings.contentAnalysis && !settings.assistantPaused;
+  const ethosActive = settings.contentAnalysis && !settings.assistantPaused;
   const clock = now.toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
@@ -46,15 +47,12 @@ export function DeviceStatusBar({ onWallpaper = false }: { onWallpaper?: boolean
       />
 
       <span className="flex items-center gap-1.5">
-        {lensActive ? (
+        {ethosActive ? (
           <span
-            className="flex items-center gap-1 rounded-full bg-assist px-1.5 py-0.5 text-assist-on"
+            className="flex items-center gap-1 rounded-full bg-assist-tint-2 px-1.5 py-0.5"
             title="ETHOS ist als Systemerweiterung aktiv"
           >
-            <svg viewBox="0 0 24 24" className="size-3" fill="none" aria-hidden="true">
-              <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="3" />
-              <circle cx="12" cy="12" r="3" fill="currentColor" />
-            </svg>
+            <EthosIcon className="size-3 rounded-[0.2rem]" />
             <span className="sr-only">
               ETHOS ist als Systemerweiterung aktiv
             </span>

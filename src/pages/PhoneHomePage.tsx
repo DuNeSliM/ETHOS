@@ -13,6 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 
 import { useAppState } from '@/app/AppStateProvider';
+import { EthosIcon } from '@/components/EthosIcon';
 import { PRODUCT_NAME } from '@/lib/identity';
 
 /**
@@ -30,7 +31,7 @@ import { PRODUCT_NAME } from '@/lib/identity';
 export function PhoneHomePage() {
   const { settings } = useAppState();
 
-  const lensActive = settings.contentAnalysis && !settings.assistantPaused;
+  const ethosActive = settings.contentAnalysis && !settings.assistantPaused;
   const today = new Date().toLocaleDateString('de-DE', {
     weekday: 'long',
     day: 'numeric',
@@ -49,18 +50,13 @@ export function PhoneHomePage() {
 
       {/* ---- ETHOS status widget ------------------------------------- */}
       <section
-        aria-labelledby="lens-widget-heading"
+        aria-labelledby="ethos-widget-heading"
         className="mt-4 rounded-3xl border border-white/15 bg-black/35 p-4 backdrop-blur-md"
       >
         <div className="flex items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-assist text-assist-on"
-          >
-            <LensGlyph className="size-5" />
-          </span>
+          <EthosIcon className="size-8 rounded-xl" />
           <h2
-            id="lens-widget-heading"
+            id="ethos-widget-heading"
             className="text-sm font-bold leading-tight text-white"
           >
             {PRODUCT_NAME}
@@ -71,12 +67,12 @@ export function PhoneHomePage() {
         </div>
 
         <p className="mt-3 flex items-center gap-2 text-sm text-white">
-          {lensActive ? (
+          {ethosActive ? (
             <ScanText aria-hidden="true" className="size-4 shrink-0 text-white/70" />
           ) : (
             <Pause aria-hidden="true" className="size-4 shrink-0 text-white/70" />
           )}
-          {lensActive
+          {ethosActive
             ? 'Aktiv. Erklärt Beiträge auf Antippen.'
             : 'Pausiert. Es werden keine Hinweise angezeigt.'}
         </p>
@@ -119,8 +115,12 @@ export function PhoneHomePage() {
           <MessageCircle aria-hidden="true" className="size-7" />
         </AppIcon>
 
-        <AppIcon to="/ethos/overview" label={PRODUCT_NAME} className="bg-assist text-assist-on">
-          <LensGlyph className="size-7" />
+        <AppIcon
+          to="/ethos/overview"
+          label={PRODUCT_NAME}
+          className="overflow-hidden bg-assist"
+        >
+          <EthosIcon className="size-full" />
         </AppIcon>
 
         <DecorativeIcon label="Kamera" className="bg-[#3d4450] text-white">
@@ -180,16 +180,6 @@ export function PhoneHomePage() {
         </p>
       </div>
     </div>
-  );
-}
-
-/** A lens: outer ring plus focal dot. Matches the ETHOS wordmark. */
-function LensGlyph({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
-      <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-    </svg>
   );
 }
 

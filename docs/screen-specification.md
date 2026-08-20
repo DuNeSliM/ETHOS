@@ -46,7 +46,7 @@ Das ETHOS-Widget nennt Aktiv-/Pause-, Kamera- und Speicherstatus. Darunter stehe
 │ ETHOS-Widget              │
 │ Kontext · Kamera · Lokal  │
 ├───────────────────────────┤
-│ [Bild]    [Forum]  [Linse]│
+│ [Bild]    [Forum]  [ETHOS]│
 │ Instagram Reddit   ETHOS  │
 │                           │
 │ dekorative Kulisse        │

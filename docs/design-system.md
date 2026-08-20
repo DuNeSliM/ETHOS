@@ -9,7 +9,7 @@ Stand: 20.08.2026. Quelle der Token-Wahrheit ist `src/styles/index.css`; Icons s
 | Gerät | dunkler Rahmen, OS-Status, Wallpaper, Home-Indikator | Demo-Kulisse |
 | Instagram | Foto-Feed, Haarlinien, randlose Medien, Plattformakzente | inoffizieller Mock |
 | Reddit | Forumshell, Karten, Community-/Vote-Terminologie, Reddit-Skin | inoffizieller Mock |
-| ETHOS | Teal-Familie, Linse, Assistenzstreifen, ruhige Panels | Assistenz |
+| ETHOS | Teal-Familie, mechanisches Kameraauge, Assistenzstreifen, ruhige Panels | Assistenz |
 
 ETHOS sieht über beiden Social Apps gleich aus. Host-Skins überschreiben Oberflächen-/Texttokens, nicht `--cl-assist-*` oder `--cl-sim-*`. Der sichtbare Mock-Hinweis trennt reale Plattformnamen von einer behaupteten Integration.
 
@@ -47,7 +47,7 @@ Alle Text-/Flächenpaare des Basissystems bleiben auf WCAG-AA-Niveau. Das helle 
 
 | Komponente | Varianten/Zustände |
 |---|---|
-| `Logo` | ETHOS-Linse, mit/ohne Link nach `/phone` |
+| `Logo` | ETHOS-App-Icon (mechanisches Kameraauge), mit/ohne Link nach `/phone` |
 | `DeviceLayout` | rahmenlos mobil; Telefonrahmen ab `lg`; normaler und fokussierter Handy-Vollbild-Modus |
 | `SocialAppShell` | Instagram-Chrome und -Skin |
 | `RedditAppShell` | Forumshell und Reddit-Skin |

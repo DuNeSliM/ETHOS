@@ -10,7 +10,7 @@ Stand: 20.08.2026 · Drei-App-Smartphone mit Instagram-, Reddit- und ETHOS-Berei
 | TypeScript | 5.7, strict | Typverträge |
 | Vite | 6.4 | Entwicklung und Build |
 | Tailwind CSS | 4.x | Token-basierte Styles |
-| React Router | 6.30.6 | Routing und Legacy-Redirects |
+| React Router | 7.18.2 | deklaratives Routing und Legacy-Redirects |
 | Recharts | 3.10.1 | persönliche Visualisierungen |
 | React Is | 18.3.1 | passendes Recharts-Peer für React 18 |
 | Vitest / Testing Library | 3.2 / 16.x | Komponenten-, Daten- und Smoke-Tests |
@@ -120,9 +120,9 @@ src/test/         jsdom-Setup und Renderer
 
 ## Build, Tests und Abhängigkeiten
 
-`npm run typecheck` nutzt `tsc -b --noEmit`; dadurch entstehen keine JavaScript-Duplikate neben TypeScript-Dateien. Vite trennt React und Recharts in Vendor-Chunks. Router-Future-Flags sind aktiviert, `scrollTo` und Diagrammdimensionen werden in jsdom realistisch genug gemockt, und Research-Mode-Benachrichtigungen erfolgen nicht mehr in einem fremden Render-Zyklus.
+`npm run typecheck` nutzt `tsc -b --noEmit`; dadurch entstehen keine JavaScript-Duplikate neben TypeScript-Dateien. Vite trennt React und Recharts in Vendor-Chunks. React Router läuft im deklarativen v7-Modus mit `BrowserRouter`/`Routes`; die früheren v6-Future-Flags sind in v7 Standard und wurden entfernt. `scrollTo` und Diagrammdimensionen werden in jsdom realistisch genug gemockt, und Research-Mode-Benachrichtigungen erfolgen nicht mehr in einem fremden Render-Zyklus.
 
-Stand P-013: 133/133 Tests, Typprüfung und Produktionsbuild erfolgreich. `npm audit --audit-level=high` ist grün; zwei moderate Router-v6-Advisories benötigen Router 7 und bleiben bis zur geplanten Migration offen.
+Aktueller Stand: 133/133 Tests, Typprüfung und Produktionsbuild erfolgreich. Nach der Migration auf React Router 7.18.2 meldet `npm audit` null bekannte Schwachstellen.
 
 ## Erweiterungsrezepte
 
@@ -145,4 +145,4 @@ Das Doom-Video ist 4:3 kodiert und wird deshalb in einem 4:3-Element über die v
 
 ## Bewusste Vereinfachungen
 
-Ein React-Context, keine i18n-Schicht, keine Playwright-Suite, keine globale Error Boundary, kein viewportgenaues View-Tracking und noch keine Router-7-Migration. Siehe `known-limitations.md`.
+Ein React-Context, keine i18n-Schicht, keine Playwright-Suite, keine globale Error Boundary und kein viewportgenaues View-Tracking. Siehe `known-limitations.md`.

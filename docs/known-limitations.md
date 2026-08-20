@@ -24,7 +24,6 @@ Stand: 20.08.2026.
 | Legacy-Präfix | `contextlens.v1.*` bleibt intern sichtbar, damit frühere Studiendaten kompatibel bleiben |
 | Breakpoints am Browser | Telefon im Desktopfenster erbt `sm/md`; app-interne Raster bleiben daher einspaltig; Container Queries wären sauberer |
 | Recharts-Bundle | größter Vendor-Chunk; Route-Level Lazy Loading wäre eine spätere Optimierung |
-| Router 6 | zwei moderate Advisories bleiben; vollständiger Fix erfordert die bewusst zurückgestellte v7-Migration |
 | Fokusfilter in jsdom | Browserzweig von `offsetParent` ist nur manuell aussagekräftig |
 | Zwei Playermodelle | Instagram nutzt für feste Reaktionszeitachsen weiterhin einen simulierten Player ohne Ton/Buffering; nur der Reddit-Doom-Post nutzt natives Video mit Ton |
 | Große lokale Videodatei | `doom.mp4` vergrößert Build und erste Medienabfrage deutlich; für Verteilung später weboptimiert transkodieren |
@@ -50,4 +49,4 @@ Stand: 20.08.2026.
 
 ## Bewusst zurückgestellte Low-Risk-Folgeschritte
 
-React Router 7, Playwright, globale Error Boundary und viewportgenaues View-Tracking wurden für P-011 ausdrücklich nicht mit einer funktionsreichen UI-Änderung vermischt. Sie bleiben die nächsten technischen Empfehlungen.
+Die für P-011 bewusst getrennt gehaltene React-Router-7-Migration ist inzwischen separat abgeschlossen. Playwright, eine globale Error Boundary und viewportgenaues View-Tracking bleiben die nächsten technischen Empfehlungen.

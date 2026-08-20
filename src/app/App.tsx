@@ -92,7 +92,7 @@ function LegacyPostRedirect() {
 export function App() {
   return (
     <AppStateProvider>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
     </AppStateProvider>

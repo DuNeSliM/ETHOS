@@ -48,8 +48,8 @@ Stand: 20.08.2026 · Branch `feat/reddit-and-so`
 - Engagements in Persistenz, Export, Einzellöschung, Gesamtlöschung und Reset; Speicher-Opt-out bleibt in-memory nutzbar.
 - Fiktives Demo-Profil und strikt getrennte Sitzungsableitung.
 - Donut, 100-%-Emotionslandschaft und direkt beschriftete Plattformbalken mit Listen/Tabellen.
-- Recharts 3.10.1, React 18 `react-is`, React Router 6.30.6 und kompatible Security-Patches.
-- Saubere Tests durch Router-Future-Flags, Scroll-/Chart-Mocks und renderzeitfreie Research-Benachrichtigung.
+- Recharts 3.10.1, React 18 `react-is`, React Router 7.18.2 und kompatible Security-Patches.
+- Saubere Tests durch Router-7-Standardverhalten, Scroll-/Chart-Mocks und renderzeitfreie Research-Benachrichtigung.
 - Prompt-Katalog P-001 bis P-013 und alle Projektdokumente aktualisiert.
 
 ## Qualitätsstand
@@ -60,7 +60,7 @@ Stand: 20.08.2026 · Branch `feat/reddit-and-so`
 | `npm test` | 8 Dateien, 133 Tests, alle grün |
 | `npm run build` | erfolgreich |
 | Datenintegrität | Demo-Totale, Plattformmapping, Kategorien und Reaktionsquellen getestet |
-| Dependency-Audit | keine hohe/kritische Schwachstelle; zwei moderate Router-v6-Advisories dokumentiert |
+| Dependency-Audit | `npm audit`: null bekannte Schwachstellen |
 | Netzwerk-/Erkennungsgarantie | keine neue Netzwerk-/Backend-/Bildanalysefunktion |
 
 ## Bewusst offen
@@ -69,4 +69,3 @@ Stand: 20.08.2026 · Branch `feat/reddit-and-so`
 - Globale Error Boundary.
 - View-Tracking per IntersectionObserver statt Mount.
 - Container Queries für app-interne responsive Komponenten.
-- React Router 7 inklusive manueller Migrationsprüfung.

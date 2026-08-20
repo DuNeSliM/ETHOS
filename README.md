@@ -129,9 +129,9 @@ Die zentralen Dokumente sind:
 
 ## Verifikation und bewusste Grenzen
 
-Der Stand vom 20.08.2026 besteht `npm run typecheck`, 133/133 Tests und `npm run build`. `npm audit --audit-level=high` meldet keine hohe oder kritische Schwachstelle. Zwei moderate React-Router-6-Advisories bleiben dokumentiert, weil ihre vollständige Behebung eine bewusst zurückgestellte Migration auf Router 7 erfordert.
+Der Stand vom 20.08.2026 besteht `npm run typecheck`, 133/133 Tests und `npm run build`. Nach der separat geprüften Migration auf React Router 7.18.2 meldet `npm audit` keine bekannte Schwachstelle.
 
-Playwright-Tests, eine globale Error Boundary, viewportgenaues View-Tracking und die Router-7-Migration sind sinnvolle nächste Schritte, aber nicht Teil dieser risikoarmen Erweiterung. Weitere Grenzen stehen in [`docs/known-limitations.md`](docs/known-limitations.md).
+Playwright-Tests, eine globale Error Boundary und viewportgenaues View-Tracking sind sinnvolle nächste Schritte, aber nicht Teil dieser risikoarmen Erweiterung. Weitere Grenzen stehen in [`docs/known-limitations.md`](docs/known-limitations.md).
 
 ---
 

@@ -491,7 +491,8 @@ kompatible transitive Patches werden übernommen. Zwei moderate Router-v6-
 Advisories bleiben bis zur separat getesteten v7-Migration dokumentiert.
 
 **Konsequenz.** Keine hohe/kritische Schwachstelle; Router 7, Playwright, Error
-Boundary und viewportgenaues Tracking bleiben Folgemaßnahmen.
+Boundary und viewportgenaues Tracking bleiben Folgemaßnahmen. Die Router-
+Folgemaßnahme wurde später separat in E-029 abgeschlossen.
 
 ---
 
@@ -522,3 +523,20 @@ Boundary und viewportgenaues Tracking bleiben Folgemaßnahmen.
 **Entscheidung.** Ein Desktop-Schalter `Handy-Vollbild` blendet `DeviceCaption` aus und vergrößert/zentriert den Telefonrahmen innerhalb der Seite. Er nutzt keinen sicherheitsgeschützten Browser-Fullscreen und bleibt deshalb immer direkt umkehrbar. Das Doom-Video verwendet sein echtes 4:3-Seitenverhältnis; sein rein technischer Demo-Absatz entfällt.
 
 **Konsequenz.** Die Projektionsansicht konzentriert sich auf das Gerät, ohne Berechtigungsdialog oder verlorenen Ausgang. Das Video füllt die Karte ohne seitliche Letterbox, während native Controls, pausierter Start, Ton und Textalternative erhalten bleiben.
+
+---
+
+## E-029: Separat geprüfte Migration auf React Router 7
+
+**Kontext.** `react-router-dom` und `react-router` 6.30.6 lösten zwei moderate
+Advisories aus. Der vollständige Patch lag erst in der Major-Version 7 vor und
+war in E-025 bewusst von der Drei-App-Umstellung getrennt worden.
+
+**Entscheidung.** Die deklarative Router-Nutzung wird auf 7.18.2 aktualisiert.
+Die v6-Future-Flags an `BrowserRouter` und `MemoryRouter` entfallen, weil ihr
+Verhalten in v7 Standard ist. Routen, Redirects und Importstruktur bleiben
+ansonsten unverändert.
+
+**Konsequenz.** Typprüfung, 133/133 Tests und Produktionsbuild bleiben grün;
+`npm audit` meldet null bekannte Schwachstellen. Playwright, Error Boundary und
+viewportgenaues Tracking bleiben unabhängige Folgemaßnahmen.
